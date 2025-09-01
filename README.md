@@ -14,7 +14,9 @@ npm i
 
 Step 3: Update the embeddable.config to match your region
 
-E.g. region: US
+```bash
+region: US
+```
 
 Step 4: Test the remarkable pro components in embeddable
 
@@ -24,4 +26,6 @@ npm run embeddable:dev
 
 Step 5: Update the embeddable.theme to update the remarkable pro components (style, i18n, formatting, etc)
 
-E.g. {charts: {backgroundColors: ['red', 'blue']}}
+```bash
+{charts: {backgroundColors: ['red', 'blue']}}
+```
