@@ -1,5 +1,27 @@
 import { defineTheme } from "@embeddable.com/core";
-import { Theme } from "@embeddable.com/vanilla-components";
+import { Theme, DeepPartial } from "@embeddable.com/remarkable-ui";
+
+const colorSetBlue = [
+  "#0d1a26",
+  "#17375e",
+  "#205493",
+  "#2878c6",
+  "#3a99e5",
+  "#6bb7f5",
+  "#a3d4fa",
+  "#d2ecfd",
+];
+
+const colorSetGreen = [
+  "#0d261a",
+  "#176e3a",
+  "#209356",
+  "#28c678",
+  "#3ae59a",
+  "#6bf5b7",
+  "#a3fad4",
+  "#d2fde9",
+];
 
 const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
   /*
@@ -7,66 +29,41 @@ const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
    * builder based on presets/client-contexts.cc.yml. You can remove this
    * code if you don't want to do theme switching.
    */
-  if (clientContext?.theme === "default") {
-    return parentTheme;
-  }
+  // if (clientContext?.theme === "default") {
+  //   return parentTheme;
+  // }
 
   /*
    * This theme can be as simple or complex as you need it to be
    * Full list of theme options can be found in the Theme interface
    */
-  const theme = defineTheme(parentTheme, {
-    brand: {
-      primary: "#008348",
-      secondary: "#BA9653",
-    },
-    charts: {
-      colors: [
-        "#c7522a",
-        "#e5c185",
-        "#f0daa5",
-        "#fbf2c4",
-        "#b8cdab",
-        "#74a892",
-        "#008585",
-        "#004343",
-      ],
-      /* Custom overrides for certain charts */
-      bar: {
-        borderRadius: 10,
-        borderWidth: 0,
-        colors: [
-          "#555d8e",
-          "#566f94",
-          "#56819b",
-          "#5494a1",
-          "#62a4a7",
-          "#7db2ac",
-          "#97c0b0",
-          "#b1ceb5",
-        ],
-        font: {
-          size: 12,
+
+  const colorSet =
+    clientContext?.colorSet === "green" ? colorSetGreen : colorSetBlue;
+
+  const newTheme: DeepPartial<Theme> = {
+    i18n: {
+      language: clientContext?.language || "en",
+      translations: {
+        en: {
+          translation: {
+            welcomeToEmbeddable: "Welcome to Embeddable",
+          },
+        },
+        de: {
+          translation: {
+            welcomeToEmbeddable: "Willkommen bei Embeddable",
+          },
         },
       },
-      pie: {
-        colors: [
-          "#ffa600",
-          "#ff8531",
-          "#ff6361",
-          "#de5a79",
-          "#bc5090",
-          "#8a508f",
-          "#58508d",
-          "#003f5c",
-        ],
-      },
-      /* End custom chart overrides */
     },
-    font: {
-      family: "Noto Serif",
+    charts: {
+      backgroundColors: colorSet,
+      borderColors: colorSet,
     },
-  }) as Theme;
+  };
+
+  const theme = defineTheme(parentTheme, newTheme) as Theme;
   return theme;
 };
 

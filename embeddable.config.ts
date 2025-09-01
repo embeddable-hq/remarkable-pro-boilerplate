@@ -17,13 +17,13 @@ export default defineConfig({
   /*
    * Uncomment use ALL vanilla components.
    */
-  // componentLibraries: ['@embeddable.com/vanilla-components'],
+  componentLibraries: ["@embeddable.com/remarkable-ui"],
 
   //For internal use only (this helps us help you debug issues)
   //
-  previewBaseUrl: "https://app.dev.embeddable.com",
-  pushBaseUrl: "https://api.dev.embeddable.com",
-  audienceUrl: "https://api.dev.embeddable.com/",
-  authDomain: "embeddable-dev.eu.auth0.com",
-  authClientId: "xOKco5ztFCpWn54bJbFkAcT8mV4LLcpG",
+  // previewBaseUrl: "https://app.dev.embeddable.com",
+  // pushBaseUrl: "https://api.dev.embeddable.com",
+  // audienceUrl: "https://api.dev.embeddable.com/",
+  // authDomain: "embeddable-dev.eu.auth0.com",
+  // authClientId: "xOKco5ztFCpWn54bJbFkAcT8mV4LLcpG",
 });
