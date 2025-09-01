@@ -1,4 +1,4 @@
-# embeddable-remarkable-pro-boilerplate
+# remarkable-pro-boilerplate
 
 Step 1: Clone the repo to your machine
 
