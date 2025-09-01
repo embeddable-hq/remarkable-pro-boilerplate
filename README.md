@@ -3,7 +3,7 @@
 Step 1: Clone the repo to your machine
 
 ```bash
-git clone git@github.com:embeddable-hq/remarkable-ui.git
+git clone git@github.com:embeddable-hq/remarkable-pro-boilerplate.git
 ```
 
 Step 2: Install dependencies
