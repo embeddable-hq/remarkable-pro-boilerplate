@@ -1,0 +1,30 @@
+{
+  "name": "embeddable.com-boilerplate-repo",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "engines": {
+    "npm": ">=9.0.0",
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "ct": "tsconfig --noEmit",
+    "dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev",
+    "embeddable:build": "embeddable build",
+    "embeddable:dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev",
+    "embeddable:login": "embeddable login",
+    "embeddable:push": "embeddable push",
+    "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\""
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@embeddable.com/core": "^2.10.7",
+    "@embeddable.com/react": "^2.10.8",
+    "@embeddable.com/sdk-core": "^4.0.2",
+    "@embeddable.com/sdk-react": "^4.0.2",
+    "cross-env": "^7.0.3"
+  }
+}

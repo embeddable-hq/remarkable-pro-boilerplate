@@ -1,0 +1,6 @@
+node_modules
+.embeddable
+.embeddable-build
+.embeddable-dev-build
+embeddable-entry-point.jsx
+.DS_Store
