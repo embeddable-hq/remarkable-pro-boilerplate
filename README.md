@@ -1,0 +1,1 @@
+# embeddable-remarkable-pro-boilerplate
