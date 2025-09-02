@@ -40,7 +40,7 @@ const CustomPieChartExample = (props: CustomPieChartExampleProps) => {
     (d: { dimension: Dimension | null }) => void
   ];
 
-  // In the component configurator (in the builder), string values may be provided as i18n keys.
+  // In the builder, string values may be provided as i18n keys.
   // The resolveI18nProps helper resolves these keys to the current locale via i18n.t.
   // It iterates over each field: if the value is a string, we look up its translation.
   // This allows default props like title/description to be translatable.
