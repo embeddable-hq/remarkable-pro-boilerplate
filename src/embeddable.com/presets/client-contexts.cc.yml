@@ -4,6 +4,7 @@
 - name: English
   clientContext:
     language: "en"
+    locale: "en"
     colorSet: "green"
   canvas:
     background: "#fff"
@@ -11,6 +12,7 @@
 - name: German
   clientContext:
     language: "de"
+    locale: "de"
     colorSet: "blue"
   canvas:
     background: "#fff"

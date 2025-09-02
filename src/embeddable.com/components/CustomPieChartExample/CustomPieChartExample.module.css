@@ -1,0 +1,10 @@
+.subContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* Access the design system css variables */
+  gap: var(--em-padding-1000);
+  background-color: var(--em-background-color-neutral);
+  border-radius: var(--em-border-radius-300);
+  padding: var(--em-padding-500);
+}

@@ -57,6 +57,9 @@ const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
         },
       },
     },
+    formatter: {
+      locale: clientContext?.locale || "en",
+    },
     charts: {
       backgroundColors: colorSet,
       borderColors: colorSet,
