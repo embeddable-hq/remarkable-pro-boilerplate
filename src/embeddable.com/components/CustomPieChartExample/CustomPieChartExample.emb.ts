@@ -53,7 +53,7 @@ type EmbeddableState = {
 
 export default defineComponent(CustomPieChartExample, meta, {
   props: (inputs: Inputs<typeof meta>, [embState]) => {
-    // TODO: check this approach with harry
+    // Obtain the dimension from embeddable state
     const dimension: Dimension | undefined = (embState as EmbeddableState)
       ?.dimension;
 
