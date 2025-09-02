@@ -40,8 +40,11 @@ const CustomPieChartExample = (props: CustomPieChartExampleProps) => {
     (d: { dimension: Dimension | null }) => void
   ];
 
-  // Go over all the fields that are type string, and resolve i18n some exist.
-  // Useful for placeholders (E.g. to display the chart title we set on the builder configuration the field title to custom.pieChart.title|My Pie Chart)
+  // In the component configurator (in the builder), string values may be provided as i18n keys.
+  // The resolveI18nProps helper resolves these keys to the current locale via i18n.t.
+  // It iterates over each field: if the value is a string, we look up its translation.
+  // This allows default props like title/description to be translatable.
+  // Example: setting the title prop to "myComponent.defaultTitle" will be resolved to "My component title" using the theme's translations. (it needs to be included in the theme)
   const {
     description,
     dimensionOptions = [],
