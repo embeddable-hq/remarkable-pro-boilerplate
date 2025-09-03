@@ -3,16 +3,12 @@
 # used by the builder. See https://docs.embeddable.com/development/client-context
 - name: English
   clientContext:
-    language: "en"
-    locale: "en"
-    colorSet: "green"
+    theme: "english"
   canvas:
     background: "#fff"
 
 - name: German
   clientContext:
-    language: "de"
-    locale: "de"
-    colorSet: "blue"
+    theme: "german"
   canvas:
     background: "#fff"

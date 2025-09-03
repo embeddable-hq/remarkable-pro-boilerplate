@@ -1,7 +1,7 @@
 import { defineTheme } from "@embeddable.com/core";
 import { Theme, DeepPartial } from "@embeddable.com/remarkable-ui";
 
-const colorSetBlue = [
+const blueColors = [
   "#0d1a26",
   "#17375e",
   "#205493",
@@ -12,7 +12,7 @@ const colorSetBlue = [
   "#d2ecfd",
 ];
 
-const colorSetGreen = [
+const greenColors = [
   "#0d261a",
   "#176e3a",
   "#209356",
@@ -23,46 +23,88 @@ const colorSetGreen = [
   "#d2fde9",
 ];
 
+const englishTheme: DeepPartial<Theme> = {
+  id: "englishTheme", // Use id whenever you define a custom theme. This will handle the assign of colors to dimensions
+  i18n: {
+    language: "en",
+    translations: {
+      en: {
+        translation: {
+          welcomeToEmbeddable: "Welcome to Embeddable",
+        },
+      },
+    },
+  },
+  formatter: {
+    locale: "en",
+  },
+  charts: {
+    backgroundColors: greenColors,
+    borderColors: greenColors,
+  },
+};
+
+const germanTheme: DeepPartial<Theme> = {
+  id: "germanTheme", // Use id whenever you define a custom theme. This will handle the assign of colors to dimensions
+  i18n: {
+    language: "de",
+    translations: {
+      de: {
+        translation: {
+          welcomeToEmbeddable: "Willkommen bei Embeddable",
+        },
+      },
+    },
+  },
+  formatter: {
+    locale: "de",
+  },
+  charts: {
+    backgroundColors: blueColors,
+    borderColors: blueColors,
+  },
+};
+
 const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
-  /*
-   * This allows for switching between the default and custom theme in the
-   * builder based on presets/client-contexts.cc.yml. You can remove this
-   * code if you don't want to do theme switching.
-   */
+  // This allows for switching between the default and custom theme in the
+  // builder based on presets/client-contexts.cc.yml. You can remove this
+  // code if you don't want to do theme switching.
+
   // if (clientContext?.theme === "default") {
   //   return parentTheme;
   // }
 
-  /*
-   * This theme can be as simple or complex as you need it to be
-   * Full list of theme options can be found in the Theme interface
-   */
+  // There are 2 ways to style the theme:
+  // 1. Define different themes (as js objects) and switch between them as shown below using the clientContext params
+  const newTheme =
+    clientContext?.theme === "german" ? germanTheme : englishTheme;
 
-  const colorSet =
-    clientContext?.colorSet === "green" ? colorSetGreen : colorSetBlue;
-
-  const newTheme: DeepPartial<Theme> = {
+  // 2. Dynamically change parts of the theme
+  // 2.1. Define new theme properties based on the clientContext params
+  const newThemeBasedOnClientConter: DeepPartial<Theme> = {
+    formatter: { locale: clientContext?.locale || "fr" },
     i18n: {
-      language: clientContext?.language || "en",
+      language: clientContext?.language || "fr",
       translations: {
-        en: {
+        fr: {
           translation: {
-            welcomeToEmbeddable: "Welcome to Embeddable",
-          },
-        },
-        de: {
-          translation: {
-            welcomeToEmbeddable: "Willkommen bei Embeddable",
+            welcomeToEmbeddable: "Bienvenue chez Embeddable",
           },
         },
       },
     },
-    formatter: {
-      locale: clientContext?.locale || "en",
-    },
+  };
+
+  // 2.2. Define new theme properties based on the default parent theme
+  const newThemeBasedOnTheParentTheme: DeepPartial<Theme> = {
     charts: {
-      backgroundColors: colorSet,
-      borderColors: colorSet,
+      chartCardMenuPro: {
+        options: parentTheme.charts?.chartCardMenuPro?.options?.reverse() || [],
+      },
+      backgroundColors: [
+        ...(parentTheme.charts?.backgroundColors ?? []),
+        "red",
+      ],
     },
   };
 
