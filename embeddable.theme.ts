@@ -2,29 +2,39 @@ import { defineTheme } from "@embeddable.com/core";
 import { Theme, DeepPartial } from "@embeddable.com/remarkable-ui";
 
 const blueColors = [
-  "#0d1a26",
-  "#17375e",
-  "#205493",
-  "#2878c6",
-  "#3a99e5",
-  "#6bb7f5",
-  "#a3d4fa",
   "#d2ecfd",
+  "#a3d4fa",
+  "#6bb7f5",
+  "#3a99e5",
+  "#2878c6",
+  "#205493",
+  "#17375e",
+  "#0d1a26",
+];
+
+const redColors = [
+  "#fde2e2",
+  "#fab3b3",
+  "#f57a7a",
+  "#e53a3a",
+  "#c62828",
+  "#931f1f",
+  "#6e1515",
+  "#260a0a",
 ];
 
 const greenColors = [
-  "#0d261a",
-  "#176e3a",
-  "#209356",
-  "#28c678",
-  "#3ae59a",
-  "#6bf5b7",
-  "#a3fad4",
   "#d2fde9",
+  "#a3fad4",
+  "#6bf5b7",
+  "#3ae59a",
+  "#28c678",
+  "#209356",
+  "#176e3a",
+  "#0d261a",
 ];
 
 const englishTheme: DeepPartial<Theme> = {
-  id: "englishTheme", // Use id whenever you define a custom theme. This will handle the assign of colors to dimensions
   i18n: {
     language: "en",
     translations: {
@@ -45,7 +55,6 @@ const englishTheme: DeepPartial<Theme> = {
 };
 
 const germanTheme: DeepPartial<Theme> = {
-  id: "germanTheme", // Use id whenever you define a custom theme. This will handle the assign of colors to dimensions
   i18n: {
     language: "de",
     translations: {

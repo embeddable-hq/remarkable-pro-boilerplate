@@ -17,9 +17,9 @@
     "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\""
   },
   "dependencies": {
-    "@embeddable.com/remarkable-ui": "^0.0.17",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "@embeddable.com/remarkable-ui": "0.1.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@embeddable.com/core": "^2.10.7",
