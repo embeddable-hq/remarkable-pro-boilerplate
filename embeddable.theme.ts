@@ -41,6 +41,13 @@ const englishTheme: DeepPartial<Theme> = {
       en: {
         translation: {
           welcomeToEmbeddable: "Welcome to Embeddable",
+          // measure: {
+          //   "customers.count": "NEW customers count",
+          //   "orders.count": "NEW orders count",
+          // },
+          // dimension: {
+          //   "customers.country": "NEW customers country",
+          // },
         },
       },
     },
