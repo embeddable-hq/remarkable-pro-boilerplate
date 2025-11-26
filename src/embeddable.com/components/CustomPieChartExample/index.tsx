@@ -3,18 +3,17 @@ import { useEmbeddableState, useTheme } from "@embeddable.com/react";
 import {
   ChartCard,
   DefaultPieChartProps,
-  getPieChartData,
   PieChart,
   resolveI18nProps,
   SelectListOptionProps,
   SingleSelectField,
   Theme,
-  getDefaultPieChartOptions,
-  DefaultPieChartOptions,
   i18n,
   Typography,
   getThemeFormatter,
   i18nSetup,
+  getPieChartProData,
+  getPieChartProOptions,
 } from "@embeddable.com/remarkable-ui";
 import styles from "./CustomPieChartExample.module.css";
 
@@ -51,9 +50,6 @@ const CustomPieChartExample = (props: CustomPieChartExampleProps) => {
     maxLegendItems,
     measure,
     results,
-    showLegend,
-    showTooltips,
-    showValueLabels,
     title,
     onSegmentClick,
   } = resolveI18nProps(props);
@@ -72,7 +68,7 @@ const CustomPieChartExample = (props: CustomPieChartExampleProps) => {
 
   const dimensionValue = embState?.dimension?.name;
 
-  const data = getPieChartData(
+  const data = getPieChartProData(
     {
       data: results.data,
       dimension: getDimensionByValue(dimensionValue) as Dimension,
@@ -82,15 +78,7 @@ const CustomPieChartExample = (props: CustomPieChartExampleProps) => {
     theme
   );
 
-  const pieChartOptions = getDefaultPieChartOptions(
-    {
-      measure,
-      showTooltips,
-      showLegend,
-      showValueLabels,
-    } as DefaultPieChartOptions,
-    theme
-  );
+  const pieChartOptions = getPieChartProOptions(measure, theme);
 
   const handleDimensionChange = (value: string) => {
     const newDimension = dimensionOptions.find((d) => d.name === value) || null;

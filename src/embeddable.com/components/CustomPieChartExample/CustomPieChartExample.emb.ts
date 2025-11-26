@@ -59,6 +59,7 @@ export default defineComponent(CustomPieChartExample, meta, {
 
     return {
       ...inputs,
+      dimension,
       results: loadData({
         from: inputs.dataset,
         select: [inputs.measure, dimension].filter(Boolean),
