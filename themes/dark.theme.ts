@@ -1,0 +1,47 @@
+import type { ThemeStyles } from "@embeddable.com/remarkable-pro/dist/theme/styles/styles.types";
+
+// Type helper to allow custom CSS variables beyond the defined Styles type
+type PartialStyles = Partial<ThemeStyles>;
+
+export const darkThemeStyles: PartialStyles = {
+  // Core
+  "--em-core-shadow-color": "rgb(0 0 0 / 50%)",
+
+  // Semantic
+  "--em-sem-background": "var(--em-core-color-gray--0900)",
+  "--em-sem-background--inverted": "var(--em-core-color-gray--0000)",
+  "--em-sem-background--light": "var(--em-core-color-gray--0800)",
+  "--em-sem-background--muted": "var(--em-core-color-gray--0700)",
+  "--em-sem-background--neutral": "var(--em-core-color-gray--1000)",
+  "--em-sem-background--subtle": "var(--em-core-color-gray--0800)",
+
+  "--em-sem-chart-color--1": "rgb(255 84 0)",
+  "--em-sem-chart-color--10": "rgb(255 238 230)",
+  "--em-sem-chart-color--2": "rgb(255 102 26)",
+  "--em-sem-chart-color--3": "rgb(255 119 51)",
+  "--em-sem-chart-color--4": "rgb(255 136 77)",
+  "--em-sem-chart-color--5": "rgb(255 153 102)",
+  "--em-sem-chart-color--6": "rgb(255 170 128)",
+  "--em-sem-chart-color--7": "rgb(255 187 153)",
+  "--em-sem-chart-color--8": "rgb(255 204 179)",
+  "--em-sem-chart-color--9": "rgb(255 221 204)",
+
+  "--em-sem-status-error-background": "rgb(80 22 22)",
+  "--em-sem-status-error-text": "rgb(255 134 134)",
+  "--em-sem-status-success-background": "rgb(16 50 37)",
+  "--em-sem-status-success-text": "rgb(110 227 170)",
+
+  "--em-sem-text": "var(--em-core-color-gray--0000)",
+  "--em-sem-text--inverted": "var(--em-core-color-gray--0900)",
+  "--em-sem-text--muted": "var(--em-core-color-gray--0300)",
+  "--em-sem-text--neutral": "var(--em-core-color-gray--0000)",
+  "--em-sem-text--subtle": "var(--em-core-color-gray--0500)",
+
+  // Component
+  "--em-selectfield-content-background": "rgb(33 33 41)",
+  "--em-selectfield-item-background": "rgb(33 33 41)",
+  "--em-selectfield-item-background--hover": "rgb(46 46 57)",
+
+  "--em-tablechart-cell-background": "rgb(26 26 33)",
+  "--em-tablechart-header-background": "rgb(26 26 33)",
+};

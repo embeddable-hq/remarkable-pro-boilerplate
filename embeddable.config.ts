@@ -18,6 +18,7 @@ export default defineConfig({
    * Uncomment use ALL vanilla components.
    */
   componentLibraries: ["@embeddable.com/remarkable-pro"],
+  lifecycleHooksFile: "./embeddable.lifecycle.ts",
 
   //For internal use only (this helps us help you debug issues)
   //
