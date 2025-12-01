@@ -1,7 +1,7 @@
-import { ThemeStyles } from "@embeddable.com/remarkable-pro/dist/theme/styles/styles.types";
+import { DeepPartial, type Theme } from "@embeddable.com/remarkable-pro";
 
 // Type helper to allow custom CSS variables beyond the defined Styles type
-type PartialStyles = Partial<ThemeStyles>;
+type PartialStyles = DeepPartial<Theme["styles"]>;
 
 export const auroraThemeStyles: PartialStyles = {
   // Core
@@ -72,8 +72,10 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-button-background--primary--active": "var(--em-sem-text--neutral)",
   "--em-button-background--primary--hover": "var(--em-sem-text)",
   "--em-button-background--secondary": "var(--em-sem-background--light)",
-  "--em-button-background--secondary--active": "var(--em-sem-background--muted)",
-  "--em-button-background--secondary--hover": "var(--em-sem-background--subtle)",
+  "--em-button-background--secondary--active":
+    "var(--em-sem-background--muted)",
+  "--em-button-background--secondary--hover":
+    "var(--em-sem-background--subtle)",
   "--em-button-border-radius": "var(--em-core-border-radius--500)",
   "--em-button-color--disabled": "var(--em-sem-text--subtle)",
   "--em-button-color--primary": "var(--em-sem-text--inverted)",
@@ -96,12 +98,16 @@ export const auroraThemeStyles: PartialStyles = {
 
   "--em-buttonicon-background--primary": "var(--em-sem-text--muted)",
   "--em-buttonicon-background--primary--active": "var(--em-sem-text--neutral)",
-  "--em-buttonicon-background--primary--disabled": "var(--em-sem-background--light)",
+  "--em-buttonicon-background--primary--disabled":
+    "var(--em-sem-background--light)",
   "--em-buttonicon-background--primary--hover": "var(--em-sem-text)",
   "--em-buttonicon-background--secondary": "var(--em-sem-background--light)",
-  "--em-buttonicon-background--secondary--active": "var(--em-sem-background--muted)",
-  "--em-buttonicon-background--secondary--disabled": "var(--em-sem-background--light)",
-  "--em-buttonicon-background--secondary--hover": "var(--em-sem-background--subtle)",
+  "--em-buttonicon-background--secondary--active":
+    "var(--em-sem-background--muted)",
+  "--em-buttonicon-background--secondary--disabled":
+    "var(--em-sem-background--light)",
+  "--em-buttonicon-background--secondary--hover":
+    "var(--em-sem-background--subtle)",
   "--em-buttonicon-border-radius": "var(--em-core-border-radius--500)",
   "--em-buttonicon-color--disabled": "var(--em-sem-text--subtle)",
   "--em-buttonicon-color--primary": "var(--em-sem-text--inverted)",
@@ -123,7 +129,8 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-card-feedback-line-height": "var(--em-core-line-height--md)",
   "--em-card-feedback-padding-bottom": "var(--em-core-spacing--0800)",
   "--em-card-feedback-subtitle-color": "var(--em-sem-text--muted)",
-  "--em-card-feedback-subtitle-font-weight": "var(--em-core-font-weight--regular)",
+  "--em-card-feedback-subtitle-font-weight":
+    "var(--em-core-font-weight--regular)",
   "--em-card-feedback-title-color": "var(--em-sem-text)",
   "--em-card-feedback-title-font-weight": "var(--em-core-font-weight--medium)",
   "--em-card-font-family": "var(--em-core-font-family--base)",
@@ -149,19 +156,23 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-chart-category-font-size": "var(--em-core-font-size--xs)",
   "--em-chart-category-font-weight": "var(--em-core-font-weight--medium)",
   "--em-chart-category-gap": "var(--em-core-spacing--0200)",
-  "--em-chart-category-indicator-border-radius": "var(--em-core-border-radius--500)",
+  "--em-chart-category-indicator-border-radius":
+    "var(--em-core-border-radius--500)",
   "--em-chart-category-indicator-color": "var(--em-sem-chart-color--1)",
   "--em-chart-category-line-height": "var(--em-core-line-height--sm)",
   "--em-chart-category-list-gap": "var(--em-core-spacing--0400)",
   "--em-chart-category-size": "var(--em-core-size--0300)",
 
-  // "--em-chart-grid-color": "var(--em-sem-text)",
-  // "--em-chart-grid-color--light": "rgb(0 0 0 / 25%)",
-  // "--em-chart-grid-color--muted": "rgb(0 0 0)",
-  // "--em-chart-grid-color--subtle": "rgb(0 0 0 / 50%)",
   "--em-chart-grid-font-family": "var(--em-core-font-family--base)",
+  "--em-chart-grid-label-color": "var(--em-sem-text)",
+  "--em-chart-grid-label-color--light": "var(--em-sem-background--light)",
+  "--em-chart-grid-label-color--muted": "var(--em-sem-text--muted)",
+  "--em-chart-grid-label-color--subtle": "var(--em-sem-text--subtle)",
   "--em-chart-grid-label-font-size": "var(--em-core-font-size--xs)",
   "--em-chart-grid-label-font-weight": "var(--em-core-font-weight--regular)",
+  "--em-chart-grid-line-color": "var(--em-sem-text)",
+  "--em-chart-grid-line-color--light": "var(--em-sem-background--light)",
+  "--em-chart-grid-line-color--subtle": "var(--em-sem-text--subtle)",
   "--em-chart-grid-line-width--medium": "2px",
   "--em-chart-grid-line-width--thick": "4px",
   "--em-chart-grid-line-width--thin": "1px",
@@ -204,7 +215,8 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-field-header-color": "var(--em-sem-text)",
   "--em-field-header-padding-bottom": "var(--em-core-spacing--0200)",
   "--em-field-header-required-font-size": "var(--em-core-font-size--xs)",
-  "--em-field-header-required-font-weight": "var(--em-core-font-weight--regular)",
+  "--em-field-header-required-font-weight":
+    "var(--em-core-font-weight--regular)",
   "--em-field-header-required-line-height": "var(--em-core-line-height--sm)",
   "--em-field-header-title-font-size": "var(--em-core-font-size--sm)",
   "--em-field-header-title-font-weight": "var(--em-core-font-weight--medium)",
@@ -235,8 +247,10 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-kpichart-number-font-size": "var(--em-core-font-size--xxl)",
   "--em-kpichart-number-font-weight": "var(--em-core-font-weight--bold)",
   "--em-kpichart-number-line-height": "var(--em-core-line-height--xl)",
-  "--em-kpichart-trend-background--negative": "var(--em-sem-status-error-background)",
-  "--em-kpichart-trend-background--positive": "var(--em-sem-status-success-background)",
+  "--em-kpichart-trend-background--negative":
+    "var(--em-sem-status-error-background)",
+  "--em-kpichart-trend-background--positive":
+    "var(--em-sem-status-success-background)",
   "--em-kpichart-trend-border-radius": "var(--em-core-border-radius--150)",
   "--em-kpichart-trend-color--negative": "var(--em-sem-status-error-text)",
   "--em-kpichart-trend-color--positive": "var(--em-sem-status-success-text)",
@@ -265,11 +279,13 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-piechart-font-family": "var(--em-core-font-family--base)",
 
   "--em-selectfield-category-background": "var(--em-sem-background--light)",
-  "--em-selectfield-category-border-radius": "var(--em-core-border-radius--500)",
+  "--em-selectfield-category-border-radius":
+    "var(--em-core-border-radius--500)",
   "--em-selectfield-category-color": "var(--em-sem-text--neutral)",
   "--em-selectfield-category-font-family": "var(--em-core-font-family--base)",
   "--em-selectfield-category-font-size": "var(--em-core-font-size--xs)",
-  "--em-selectfield-category-font-weight": "var(--em-core-font-weight--regular)",
+  "--em-selectfield-category-font-weight":
+    "var(--em-core-font-weight--regular)",
   "--em-selectfield-category-line-height": "var(--em-core-line-height--sm)",
   "--em-selectfield-category-padding": "var(--em-core-spacing--0200)",
   "--em-selectfield-content-background": "var(--em-sem-background--neutral)",
@@ -281,13 +297,16 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-selectfield-content-padding": "var(--em-core-spacing--0300)",
   "--em-selectfield-content-shadow-blur": "var(--em-core-shadow-blur)",
   "--em-selectfield-content-shadow-color": "var(--em-core-shadow-color)",
-  "--em-selectfield-content-shadow-position-x": "var(--em-core-shadow-position-x)",
-  "--em-selectfield-content-shadow-position-y": "var(--em-core-shadow-position-y)",
+  "--em-selectfield-content-shadow-position-x":
+    "var(--em-core-shadow-position-x)",
+  "--em-selectfield-content-shadow-position-y":
+    "var(--em-core-shadow-position-y)",
   "--em-selectfield-content-shadow-spread": "var(--em-core-shadow-spread)",
   "--em-selectfield-item-background": "var(--em-sem-background--neutral)",
   "--em-selectfield-item-background--active": "var(--em-sem-background--light)",
   "--em-selectfield-item-background--hover": "var(--em-sem-background)",
-  "--em-selectfield-item-background--selected": "var(--em-sem-background--inverted)",
+  "--em-selectfield-item-background--selected":
+    "var(--em-sem-background--inverted)",
   "--em-selectfield-item-border-radius": "var(--em-core-border-radius--200)",
   "--em-selectfield-item-font-family": "var(--em-core-font-family--base)",
   "--em-selectfield-item-height": "var(--em-core-size--0900)",
@@ -296,28 +315,41 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-selectfield-item-icon-color--selected": "var(--em-sem-text--inverted)",
   "--em-selectfield-item-icon-size": "var(--em-core-size--0400)",
   "--em-selectfield-item-label-left-color": "var(--em-sem-text)",
-  "--em-selectfield-item-label-left-color--disabled": "var(--em-sem-text--subtle)",
-  "--em-selectfield-item-label-left-color--selected": "var(--em-sem-text--inverted)",
+  "--em-selectfield-item-label-left-color--disabled":
+    "var(--em-sem-text--subtle)",
+  "--em-selectfield-item-label-left-color--selected":
+    "var(--em-sem-text--inverted)",
   "--em-selectfield-item-label-left-font-size": "var(--em-core-font-size--xs)",
-  "--em-selectfield-item-label-left-font-weight": "var(--em-core-font-weight--medium)",
-  "--em-selectfield-item-label-left-line-height": "var(--em-core-line-height--sm)",
-  "--em-selectfield-item-label-padding-left-right": "var(--em-core-spacing--0200)",
+  "--em-selectfield-item-label-left-font-weight":
+    "var(--em-core-font-weight--medium)",
+  "--em-selectfield-item-label-left-line-height":
+    "var(--em-core-line-height--sm)",
+  "--em-selectfield-item-label-padding-left-right":
+    "var(--em-core-spacing--0200)",
   "--em-selectfield-item-label-right-color": "var(--em-sem-text--muted)",
-  "--em-selectfield-item-label-right-color--disabled": "var(--em-sem-text--subtle)",
-  "--em-selectfield-item-label-right-color--selected": "var(--em-sem-text--inverted)",
+  "--em-selectfield-item-label-right-color--disabled":
+    "var(--em-sem-text--subtle)",
+  "--em-selectfield-item-label-right-color--selected":
+    "var(--em-sem-text--inverted)",
   "--em-selectfield-item-label-right-font-size": "var(--em-core-font-size--xs)",
-  "--em-selectfield-item-label-right-font-weight": "var(--em-core-font-weight--regular)",
-  "--em-selectfield-item-label-right-line-height": "var(--em-core-line-height--sm)",
+  "--em-selectfield-item-label-right-font-weight":
+    "var(--em-core-font-weight--regular)",
+  "--em-selectfield-item-label-right-line-height":
+    "var(--em-core-line-height--sm)",
   "--em-selectfield-item-padding": "var(--em-core-spacing--0200)",
   "--em-selectfield-trigger-background": "var(--em-sem-background--neutral)",
-  "--em-selectfield-trigger-background--active": "var(--em-sem-background--light)",
-  "--em-selectfield-trigger-background--filled": "var(--em-sem-background--inverted)",
+  "--em-selectfield-trigger-background--active":
+    "var(--em-sem-background--light)",
+  "--em-selectfield-trigger-background--filled":
+    "var(--em-sem-background--inverted)",
   "--em-selectfield-trigger-background--hover": "var(--em-sem-background)",
   "--em-selectfield-trigger-border-color": "var(--em-sem-background--inverted)",
-  "--em-selectfield-trigger-border-color--error": "var(--em-sem-status-error-text)",
+  "--em-selectfield-trigger-border-color--error":
+    "var(--em-sem-status-error-text)",
   "--em-selectfield-trigger-border-radius": "var(--em-core-border-radius--300)",
   "--em-selectfield-trigger-border-width": "var(--em-core-border-width--050)",
-  "--em-selectfield-trigger-border-width--error": "var(--em-core-border-width--050)",
+  "--em-selectfield-trigger-border-width--error":
+    "var(--em-core-border-width--050)",
   "--em-selectfield-trigger-color": "var(--em-sem-text)",
   "--em-selectfield-trigger-color--disabled": "var(--em-sem-text--subtle)",
   "--em-selectfield-trigger-color--filled": "var(--em-sem-text--inverted)",
@@ -326,7 +358,8 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-selectfield-trigger-font-weight": "var(--em-core-font-weight--medium)",
   "--em-selectfield-trigger-height": "var(--em-core-size--1200)",
   "--em-selectfield-trigger-icon-size": "var(--em-core-size--0400)",
-  "--em-selectfield-trigger-label-padding-left-right": "var(--em-core-spacing--0200)",
+  "--em-selectfield-trigger-label-padding-left-right":
+    "var(--em-core-spacing--0200)",
   "--em-selectfield-trigger-line-height": "var(--em-core-line-height--sm)",
   "--em-selectfield-trigger-min-width": "64px",
   "--em-selectfield-trigger-padding": "var(--em-core-spacing--0300)",
@@ -360,8 +393,8 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-tablechart-border-color": "rgb(68 68 117)",
   "--em-tablechart-border-radius": "var(--em-core-border-radius--300)",
   "--em-tablechart-border-width": "1px",
-  "--em-tablechart-cell-background": "rgb(255 255 255 / 0%)",
-  "--em-tablechart-cell-background--hover": "rgb(68 68 117 / 10%)",
+  "--em-tablechart-cell-background": "rgb(194 246 247)",
+  "--em-tablechart-cell-background--hover": "rgb(181 228 234)",
   "--em-tablechart-cell-height": "var(--em-core-size--1000)",
   "--em-tablechart-cell-min-width": "var(--em-core-size--1200)",
   "--em-tablechart-cell-padding": "var(--em-core-spacing--0200)",
@@ -372,15 +405,16 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-tablechart-font-weight": "var(--em-core-font-weight--regular)",
   "--em-tablechart-font-weight--bold": "var(--em-core-font-weight--bold)",
   "--em-tablechart-font-weight--medium": "var(--em-core-font-weight--medium)",
-  "--em-tablechart-header-background": "rgb(255 255 255 / 0%)",
-  "--em-tablechart-header-background--hover": "rgb(68 68 117 / 10%)",
+  "--em-tablechart-header-background": "rgb(194 246 247)",
+  "--em-tablechart-header-background--hover": "rgb(181 228 234)",
   "--em-tablechart-heatmap-color": "var(--em-sem-chart-color--1)",
   "--em-tablechart-icon-size": "var(--em-core-size--0400)",
   "--em-tablechart-line-height": "var(--em-core-line-height--sm)",
   "--em-tablechart-padding-left-right": "var(--em-core-spacing--0100)",
   "--em-tablechart-pagination-button-gap": "var(--em-core-spacing--0200)",
   "--em-tablechart-pagination-height": "var(--em-core-size--1200)",
-  "--em-tablechart-pagination-label-padding-left-right": "var(--em-core-spacing--0400)",
+  "--em-tablechart-pagination-label-padding-left-right":
+    "var(--em-core-spacing--0400)",
 
   "--em-textfield-background": "rgb(255 255 255)",
   "--em-textfield-background--active": "var(--em-sem-background--light)",
@@ -399,7 +433,8 @@ export const auroraThemeStyles: PartialStyles = {
   "--em-textfield-feedback-font-family": "var(--em-core-font-family--base)",
   "--em-textfield-feedback-font-size": "var(--em-core-font-size--xs)",
   "--em-textfield-feedback-font-weight": "var(--em-core-font-weight--regular)",
-  "--em-textfield-feedback-font-weight--error": "var(--em-core-font-weight--medium)",
+  "--em-textfield-feedback-font-weight--error":
+    "var(--em-core-font-weight--medium)",
   "--em-textfield-feedback-line-height": "var(--em-core-line-height--md)",
   "--em-textfield-font-family": "var(--em-core-font-family--base)",
   "--em-textfield-font-size": "var(--em-core-font-size--xs)",

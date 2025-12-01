@@ -1,11 +1,8 @@
 import { defineTheme } from "@embeddable.com/core";
 import { Theme, DeepPartial } from "@embeddable.com/remarkable-pro";
-import { darkThemeStyles } from "./themes/dark.theme";
-import { auroraThemeStyles } from "./themes/aurora.theme";
+import { darkTheme } from "./dark-theme";
+import { auroraThemeStyles } from "./aurora-theme";
 
-const darkTheme: DeepPartial<Theme> = {
-  styles: darkThemeStyles,
-};
 
 const auroraTheme: DeepPartial<Theme> = {
   styles: auroraThemeStyles,
