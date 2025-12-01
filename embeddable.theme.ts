@@ -4,13 +4,7 @@ import { darkTheme } from "./dark-theme";
 
 const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
   const newTheme: DeepPartial<Theme> =
-    clientContext.theme === "dark"
-      ? darkTheme
-      : {
-          styles: {
-            "--em-sem-chart-color--1": "red",
-          },
-        };
+    clientContext.theme === "dark" ? darkTheme : {};
   const theme = defineTheme(parentTheme, newTheme) as Theme;
   return theme;
 };
