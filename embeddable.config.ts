@@ -5,17 +5,17 @@ export default defineConfig({
   plugins: [react],
 
   /*
-   * uncomment for EU deployments
+   * Uncomment for EU deployments
    */
   // region: 'EU',
 
   /*
-   * uncomment for US deployments
+   * Uncomment for US deployments
    */
   region: "US",
 
   /*
-   * Uncomment use ALL vanilla components.
+   * Uncomment to use ALL remarkable-pro components.
    */
   componentLibraries: ["@embeddable.com/remarkable-pro"],
   lifecycleHooksFile: "./embeddable.lifecycle.ts",
