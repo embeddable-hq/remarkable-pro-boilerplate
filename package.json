@@ -17,7 +17,7 @@
     "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\""
   },
   "dependencies": {
-    "@embeddable.com/remarkable-pro": "^0.0.12"
+    "@embeddable.com/remarkable-pro": "^0.0.16"
   },
   "devDependencies": {
     "@embeddable.com/core": "^2.10.7",
