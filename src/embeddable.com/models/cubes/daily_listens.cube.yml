@@ -1,0 +1,55 @@
+cubes:
+  - name: daily_listens
+    title: Daily Listeners Data
+    sql_table: daily_listens
+    
+    joins:
+      - name: tracks
+        sql: "{CUBE}.track_id = {tracks}.track_id"
+        relationship: many_to_one
+    
+    dimensions:
+      - name: listen_id
+        sql: listen_id
+        type: number
+        primary_key: true
+        
+      - name: listened_date
+        sql: listen_date
+        type: time
+        
+      - name: age_group
+        sql: age_group
+        type: string
+        
+      - name: gender
+        sql: gender
+        type: string
+        
+      - name: country
+        sql: country
+        type: string
+    
+    measures:
+        
+      - name: total_daily_listens
+        title: '# Total listens'
+        type: sum
+        sql: total_listens
+        description: Total number of plays across all demographics
+
+      - name: streaming_royalties
+        title: '$ Revenue from royalties'
+        type: sum
+        sql: total_listens * 0.005
+        description: Total USD earned for daily_listens
+        
+      - name: unique_listeners
+        type: sum
+        sql: unique_listeners
+        description: Total number of unique listeners across all demographics
+            
+      - name: total_listen_hours
+        type: sum
+        sql: "({total_daily_listens} * {tracks.duration_minutes}) / 60.0"
+        description: Total listening hours

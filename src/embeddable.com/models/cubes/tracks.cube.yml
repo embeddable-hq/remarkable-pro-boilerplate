@@ -1,0 +1,53 @@
+cubes:
+  - name: tracks
+    title: Tracks Data
+    sql_table: tracks
+    
+    joins:
+      - name: music_artists
+        sql: "{CUBE}.artist_id = {music_artists}.artist_id"
+        relationship: many_to_one
+        
+      - name: daily_listens
+        sql: "{CUBE}.track_id = {daily_listens}.track_id"
+        relationship: one_to_many
+    
+    dimensions:
+      - name: track_id
+        sql: track_id
+        type: string
+        primary_key: true
+        
+      - name: track_name
+        sql: track_name
+        type: string
+        
+      - name: album_name
+        sql: album_name
+        type: string
+        
+      - name: duration_minutes
+        sql: "ROUND(duration_ms::numeric / 60000.0, 2)"
+        type: number
+        description: Track duration in minutes
+        
+      - name: release_date
+        sql: release_date
+        type: time
+        
+      - name: explicit
+        sql: explicit
+        type: boolean
+    
+    measures:
+      - name: count
+        title: '# of Tracks'
+        type: count
+        
+      - name: avg_duration_minutes
+        sql: "{duration_minutes}"
+        type: avg
+
+      - name: total_duration_minutes
+        sql: "{duration_minutes}"
+        type: sum
