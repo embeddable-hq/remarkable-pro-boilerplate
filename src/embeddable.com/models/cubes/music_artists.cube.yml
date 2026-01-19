@@ -16,19 +16,6 @@ cubes:
       - name: genre
         sql: genre
         type: string
-        
-      - name: country
-        sql: country
-        type: string
-        
-      - name: verified
-        sql: verified
-        type: boolean
-    
-    measures:
-      - name: count
-        title: '# of Artists'
-        type: count
 
     joins:
       - name: tracks

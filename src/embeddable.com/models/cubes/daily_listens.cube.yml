@@ -15,6 +15,7 @@ cubes:
         primary_key: true
         
       - name: listened_date
+        title: Date listened
         sql: listen_date
         type: time
         
@@ -43,13 +44,12 @@ cubes:
         type: sum
         sql: total_listens * 0.005
         description: Total USD earned for daily_listens
+        meta:
+          currency: 'USD'
+          abbreviateLargeNumber: true
+          decimalPlaces: 2
         
       - name: unique_listeners
         type: sum
         sql: unique_listeners
         description: Total number of unique listeners across all demographics
-            
-      - name: total_listen_hours
-        type: sum
-        sql: "({total_daily_listens} * {tracks.duration_minutes}) / 60.0"
-        description: Total listening hours

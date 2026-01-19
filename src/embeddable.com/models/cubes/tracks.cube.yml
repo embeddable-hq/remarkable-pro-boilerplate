@@ -32,10 +32,12 @@ cubes:
         description: Track duration in minutes
         
       - name: release_date
+        title: Date Released
         sql: release_date
         type: time
         
       - name: explicit
+        title: Is Explicit
         sql: explicit
         type: boolean
     
@@ -43,10 +45,6 @@ cubes:
       - name: count
         title: '# of Tracks'
         type: count
-        
-      - name: avg_duration_minutes
-        sql: "{duration_minutes}"
-        type: avg
 
       - name: total_duration_minutes
         sql: "{duration_minutes}"
