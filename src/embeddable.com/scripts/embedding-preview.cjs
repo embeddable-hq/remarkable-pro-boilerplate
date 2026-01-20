@@ -181,6 +181,17 @@ const html = `<!DOCTYPE html>
       }
       return json;
     }
+    
+    // Helper function to validate JSON strings
+    function validateJSON(value, fieldName) {
+      if (!value) return null;
+      try {
+        JSON.parse(value);
+        return null;
+      } catch (err) {
+        return \`\${fieldName} must be valid JSON\`;
+      }
+    }
 
     // Stuff to do on form submit
     document.getElementById('embeddable-form').addEventListener('submit', async function(e) {
@@ -192,15 +203,23 @@ const html = `<!DOCTYPE html>
         formInputs[key] = value;
       }
       let clientContext = formInputs.clientContext;
-      // Validate that clientContext is valid JSON
-      if (clientContext) {
-        try {
-          JSON.parse(clientContext);
-        } catch (err) {
-          document.getElementById('form-error').textContent = 'Client Context must be valid JSON';
-          return;
-        }
-      } else {
+      let securityContext = formInputs.securityContext;
+      
+      // Validate JSON fields
+      const securityError = validateJSON(securityContext, 'Security Context');
+      if (securityError) {
+        document.getElementById('form-error').textContent = securityError;
+        return;
+      }
+      
+      const clientError = validateJSON(clientContext, 'Client Context');
+      if (clientError) {
+        document.getElementById('form-error').textContent = clientError;
+        return;
+      }
+      
+      // Set default for clientContext if empty
+      if (!clientContext) {
         clientContext = '{}';
       }
       
