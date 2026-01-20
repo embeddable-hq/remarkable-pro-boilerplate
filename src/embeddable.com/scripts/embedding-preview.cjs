@@ -182,6 +182,7 @@ const html = `<!DOCTYPE html>
       return json;
     }
 
+    // Stuff to do on form submit
     document.getElementById('embeddable-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const form = e.target;
@@ -191,7 +192,20 @@ const html = `<!DOCTYPE html>
         formInputs[key] = value;
       }
       let clientContext = formInputs.clientContext;
-
+      // Validate that clientContext is valid JSON
+      if (clientContext) {
+        try {
+          JSON.parse(clientContext);
+        } catch (err) {
+          document.getElementById('form-error').textContent = 'Client Context must be valid JSON';
+          return;
+        }
+      } else {
+        clientContext = '{}';
+      }
+      
+      // Save form values to localStorage
+      localStorage.setItem('embeddableFormValues', JSON.stringify(formInputs));
 
       // Handle optional boolean
       if ('customCanvasReadOnly' in formInputs && formInputs.customCanvasReadOnly === "") {
@@ -211,17 +225,6 @@ const html = `<!DOCTYPE html>
       } catch (err) {
         document.getElementById('form-error').textContent = err.message;
       }
-    });
-
-    // Save form values to localStorage on submit
-    document.getElementById('embeddable-form').addEventListener('submit', function(e) {
-      const form = e.target;
-      const formData = new FormData(form);
-      const formInputs = {};
-      for (const [key, value] of formData.entries()) {
-        formInputs[key] = value;
-      }
-      localStorage.setItem('embeddableFormValues', JSON.stringify(formInputs));
     });
 
     // Pre-populate form from localStorage on page load
