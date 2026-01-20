@@ -192,6 +192,18 @@ const html = `<!DOCTYPE html>
         formInputs[key] = value;
       }
       let clientContext = formInputs.clientContext;
+      let securityContext = formInputs.securityContext;
+      
+      // Validate that securityContext is valid JSON
+      if (securityContext) {
+        try {
+          JSON.parse(securityContext);
+        } catch (err) {
+          document.getElementById('form-error').textContent = 'Security Context must be valid JSON';
+          return;
+        }
+      }
+      
       // Validate that clientContext is valid JSON
       if (clientContext) {
         try {
