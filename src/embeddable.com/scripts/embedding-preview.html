@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <title>Embeddable Dashboard Embedding Test</title>
-    <script type="module" src="https://api.eu.embeddable.com/js/v1/"></script>
     <style>
       body {
         margin: 0;
@@ -266,6 +265,19 @@
             }
           }
 
+          // Change the script tag for embeddable API based on region
+          const existingScript = document.querySelector(
+            'script[src^="https://api."][src$="/js/v1/"]',
+          );
+          if (existingScript) {
+            existingScript.src = `https://api.${formInputs.region}.embeddable.com/js/v1/`;
+          } else {
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = `https://api.${formInputs.region}.embeddable.com/js/v1/`;
+            document.head.appendChild(script);
+          }
+
           // Set default for clientContext if empty
           formInputs.clientContext = formInputs.clientContext || '{}';
 
@@ -313,6 +325,14 @@
         const details = document.getElementById('optional-fields-header');
         const isVisible = localStorage.getItem('optionalFieldsVisible') === '1';
         details.open = isVisible;
+
+        // Add script tag for embeddable API
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = `https://api.${
+          document.getElementById('region').value || 'us'
+        }.embeddable.com/js/v1/`;
+        document.head.appendChild(script);
       });
 
       // Clear localStorage and reset form on button click
