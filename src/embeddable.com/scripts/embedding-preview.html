@@ -43,6 +43,9 @@
         padding: 8px 18px;
         font-size: 1rem;
         cursor: pointer;
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 3px;
       }
       .error {
         color: #b00;
@@ -59,11 +62,18 @@
       textarea {
         margin-bottom: 10px;
       }
-      .optional-fields {
-        display: none;
+      details {
+        margin-top: 10px;
+        margin-bottom: 10px;
       }
-      .optional-fields.visible {
-        display: block;
+      details summary {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 4px;
+        cursor: pointer;
+      }
+      details:open summary {
+        margin-bottom: 10px;
       }
     </style>
   </head>
@@ -98,11 +108,11 @@
           <label for="user">User</label>
           <input type="text" id="user" name="user" required />
 
-          <h4 id="optional-fields-header">
-            Optional <span class="tiny">(click to show/hide)</span>
-          </h4>
+          <details id="optional-fields-header">
+            <summary>
+              Optional <span class="tiny">(click to show/hide)</span>
+            </summary>
 
-          <div class="optional-fields" id="optional-fields-container">
             <label for="savedVersion">Saved Version</label>
             <input type="text" id="savedVersion" name="savedVersion" />
 
@@ -146,7 +156,7 @@
 
             <label for="dataProvider">Data Provider</label>
             <input type="text" id="dataProvider" name="dataProvider" />
-          </div>
+          </details>
 
           <button
             type="submit"
@@ -300,11 +310,9 @@
           }
         }
         // Restore optional fields visibility
-        const container = document.getElementById('optional-fields-container');
-        container.classList.toggle(
-          'visible',
-          localStorage.getItem('optionalFieldsVisible') === '1',
-        );
+        const details = document.getElementById('optional-fields-header');
+        const isVisible = localStorage.getItem('optionalFieldsVisible') === '1';
+        details.open = isVisible;
       });
 
       // Clear localStorage and reset form on button click
@@ -313,15 +321,11 @@
         document.getElementById('embeddable-form').reset();
       });
 
-      // Toggle optional fields visibility and save to localStorage
+      // Save optional fields visibility to localStorage on toggle
       document
         .getElementById('optional-fields-header')
-        .addEventListener('click', () => {
-          const container = document.getElementById(
-            'optional-fields-container',
-          );
-          const isVisible = container.classList.toggle('visible');
-          localStorage.setItem('optionalFieldsVisible', isVisible ? '1' : '0');
+        .addEventListener('toggle', function () {
+          localStorage.setItem('optionalFieldsVisible', this.open ? '1' : '0');
         });
     </script>
   </body>
