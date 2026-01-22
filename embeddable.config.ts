@@ -15,7 +15,7 @@ export default defineConfig({
   // region: 'EU',
 
   /*
-   * Uncomment to use ALL remarkable-pro components.
+   * Adds the remarkable-pro components to your workspace.
    */
   componentLibraries: ["@embeddable.com/remarkable-pro"],
 
@@ -27,6 +27,9 @@ export default defineConfig({
   // authDomain: "embeddable-dev.eu.auth0.com",
   // authClientId: "xOKco5ztFCpWn54bJbFkAcT8mV4LLcpG",
 
+  /**
+   * This gives you some example dashboards to play with
+   */
   starterEmbeddables: {
     'US': [
       'ad3d57d7-2335-4fbd-a3b4-09fa18145f5d',
