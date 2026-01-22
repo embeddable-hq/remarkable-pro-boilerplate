@@ -24,7 +24,12 @@ cubes:
         type: string
         
       - name: gender
-        sql: gender
+        sql: >
+          case 
+            when gender = 'm' then 'Male' 
+            when gender = 'f' then 'Female'
+            else 'Unknown'
+          end
         type: string
         
       - name: country
@@ -46,7 +51,6 @@ cubes:
         description: Total USD earned for daily_listens
         meta:
           currency: 'USD'
-          abbreviateLargeNumber: true
           decimalPlaces: 2
         
       - name: unique_listeners
