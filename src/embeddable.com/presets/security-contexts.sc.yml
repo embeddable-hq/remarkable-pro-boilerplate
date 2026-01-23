@@ -2,26 +2,34 @@
 # This context is only accessible within Cube models and enables row-level security. Note
 # that this file is only used by the builder.
 # See https://docs.embeddable.com/data-modeling/row-level-security
-- name: Example customer 1
+- name: All artists
   securityContext:
-    country: United States
+    artists: 
+      - ART_00001
+      - ART_00002
+      - ART_00003
     language: English
   environment: default
 
-- name: Example customer 2
+- name: Jake Sterling
   securityContext:
-    country: Germany
+    artists: 
+      - ART_00002
+    language: English
+  environment: default
+
+- name: The Crimson Wolves
+  securityContext:
+    artists: 
+      - ART_00001
     language: German
   environment: default
 
-- name: Example customer 3
+- name: Luna Starlight
   securityContext:
-    country: United Kingdom
-    language: English
+    artists: 
+      - ART_00003
+    language: Spanish
   environment: default
 
-- name: Example customer 4
-  securityContext:
-    country: France
-    language: French
-  environment: default
+

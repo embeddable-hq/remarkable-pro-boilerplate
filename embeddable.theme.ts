@@ -3,10 +3,13 @@ import { Theme, DeepPartial } from "@embeddable.com/remarkable-pro";
 import { darkTheme } from "./dark-theme";
 
 const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
-  const newTheme: DeepPartial<Theme> =
-    clientContext.theme === "dark" ? darkTheme : {};
-  const theme = defineTheme(parentTheme, newTheme) as Theme;
-  return theme;
+  return defineTheme(parentTheme, 
+    clientContext.theme === "dark" 
+      ? darkTheme 
+      : {
+        // learn more here: https://docs.embeddable.com/component-libraries/remarkable-pro/theming
+      }
+  );
 };
 
 export default themeProvider;
