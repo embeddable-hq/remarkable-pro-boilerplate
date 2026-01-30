@@ -61,7 +61,7 @@ async function handler(req, res) {
     res.end(`<!doctype html>
       <html>
         <head>
-          <title>Embedabble</title>
+          <title>Embeddable</title>
           <meta charset="utf-8" />
           <script
             type="module"
