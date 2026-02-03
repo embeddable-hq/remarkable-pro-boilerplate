@@ -1,0 +1,23 @@
+cubes:
+  - name: music_artists
+    title: Music Artists
+    sql_table: spotify.artists
+    
+    dimensions:
+      - name: artist_id
+        sql: artist_id
+        type: string
+        primary_key: true
+        
+      - name: artist_name
+        sql: artist_name
+        type: string
+        
+      - name: genre
+        sql: genre
+        type: string
+
+    joins:
+      - name: tracks
+        sql: "{CUBE}.artist_id = {tracks}.artist_id"
+        relationship: one_to_many
