@@ -17,13 +17,13 @@
     "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\""
   },
   "dependencies": {
-    "@embeddable.com/remarkable-pro": "^0.1.1"
+    "@embeddable.com/remarkable-pro": "^0.1.2"
   },
   "devDependencies": {
-    "@embeddable.com/core": "^2.13.4",
-    "@embeddable.com/react": "^2.13.1",
-    "@embeddable.com/sdk-core": "^4.1.8",
-    "@embeddable.com/sdk-react": "^4.2.0",
+    "@embeddable.com/core": "^2.13.5",
+    "@embeddable.com/react": "^2.13.2",
+    "@embeddable.com/sdk-core": "^4.1.9",
+    "@embeddable.com/sdk-react": "^4.2.1",
     "@swc/core": "1.13.5",
     "@types/react": "^19.1.13",
     "cross-env": "^7.0.3",
