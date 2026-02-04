@@ -14,10 +14,11 @@
     "embeddable:dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev",
     "embeddable:login": "embeddable login",
     "embeddable:push": "embeddable push",
-    "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\""
+    "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\"",
+    "reinstall": "rm -rf node_modules package-lock.json && npm install"
   },
   "dependencies": {
-    "@embeddable.com/remarkable-pro": "^0.1.2"
+    "@embeddable.com/remarkable-pro": "^0.1.3"
   },
   "devDependencies": {
     "@embeddable.com/core": "^2.13.5",
