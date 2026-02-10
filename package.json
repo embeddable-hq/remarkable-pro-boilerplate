@@ -18,7 +18,7 @@
     "reinstall": "rm -rf node_modules package-lock.json && npm install"
   },
   "dependencies": {
-    "@embeddable.com/remarkable-pro": "^0.1.5"
+    "@embeddable.com/remarkable-pro": "^0.1.7"
   },
   "devDependencies": {
     "@embeddable.com/core": "^2.13.6",
