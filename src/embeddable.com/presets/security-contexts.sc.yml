@@ -3,33 +3,31 @@
 # that this file is only used by the builder.
 # See https://docs.embeddable.com/data-modeling/row-level-security
 - name: All artists
-  securityContext:
-    artists: 
-      - ART_00001
-      - ART_00002
-      - ART_00003
-    language: English
+  securityContext: {}
   environment: default
 
 - name: Jake Sterling
-  securityContext:
-    artists: 
-      - ART_00002
-    language: English
+  securityContext: {}
+  filters: 
+    - member: 'music_artists.artist_id'
+      operator: 'equals'
+      values: ['ART_00002']
   environment: default
 
 - name: The Crimson Wolves
-  securityContext:
-    artists: 
-      - ART_00001
-    language: German
+  securityContext: {}
+  filters: 
+    - member: 'music_artists.artist_id'
+      operator: 'equals'
+      values: ['ART_00001']
   environment: default
 
 - name: Luna Starlight
-  securityContext:
-    artists: 
-      - ART_00003
-    language: Spanish
+  securityContext: {}
+  filters: 
+    - member: 'music_artists.artist_id'
+      operator: 'equals'
+      values: ['ART_00003']
   environment: default
 
 
