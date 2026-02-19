@@ -22,9 +22,9 @@
   },
   "devDependencies": {
     "@embeddable.com/core": "^2.13.6",
-    "@embeddable.com/react": "^2.13.3",
-    "@embeddable.com/sdk-core": "^4.1.10",
-    "@embeddable.com/sdk-react": "^4.2.2",
+    "@embeddable.com/react": "^2.13.4",
+    "@embeddable.com/sdk-core": "^4.1.12",
+    "@embeddable.com/sdk-react": "^4.2.4",
     "@swc/core": "1.13.5",
     "@types/react": "^19.1.13",
     "cross-env": "^7.0.3",
