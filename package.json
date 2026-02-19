@@ -32,7 +32,6 @@
     "react-dom": "^19.1.1"
   },
   "overrides": {
-    "glob": "^13.0.0",
-    "@microsoft/api-extractor": "~7.56.3"
+    "glob": "^13.0.0"
   }
 }
