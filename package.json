@@ -32,7 +32,6 @@
     "react-dom": "^19.1.1"
   },
   "overrides": {
-    "glob": "^13.0.0",
-    "@stencil/core": "4.43.0"
+    "glob": "^13.0.0"
   }
 }
