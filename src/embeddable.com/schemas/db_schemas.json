@@ -1,0 +1,14 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "schemaName": {
+        "type": "string",
+        "description": "Database schema name"
+      }
+    },
+    "required": ["schemaName"]
+  }
+}

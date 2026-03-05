@@ -7,7 +7,7 @@ export default defineConfig({
   /*
    * Uncomment for US deployments
    */
-  region: "US",
+  region: "EU",
 
   /*
    * Uncomment for EU deployments

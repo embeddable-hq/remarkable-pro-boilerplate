@@ -1,0 +1,56 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "schemaName": {
+        "type": "string"
+      },
+      "tableName": {
+        "type": "string"
+      },
+      "columnName": {
+        "type": "string"
+      },
+      "dataType": {
+        "type": "string",
+        "description": "SQL data type"
+      },
+      "attributes": {
+        "description": "Column attributes such as primaryKey",
+        "type": ["array", "null"],
+        "items": {
+          "type": "string"
+        }
+      },
+      "foreignKeys": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "targetTable": {
+              "type": "string"
+            },
+            "targetColumn": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "targetTable",
+            "targetColumn"
+          ]
+        }
+      }
+    },
+    "required": [
+      "schemaName",
+      "tableName",
+      "columnName",
+      "dataType",
+      "attributes",
+      "foreignKeys"
+    ]
+  }
+}

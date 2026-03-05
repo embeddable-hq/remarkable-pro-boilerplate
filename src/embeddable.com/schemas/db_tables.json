@@ -1,0 +1,21 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "schemaName": {
+        "type": "string",
+        "description": "Schema containing the table"
+      },
+      "tableName": {
+        "type": "string",
+        "description": "Table name"
+      }
+    },
+    "required": [
+      "schemaName",
+      "tableName"
+    ]
+  }
+}
