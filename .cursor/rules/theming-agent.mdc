@@ -19,12 +19,13 @@ Read `.cursor/theming-reference.md` for the complete theming model, token lists,
 1. **Semantic tokens (`--em-sem-*`)** = your primary tool. These control global visual appearance.
 2. **`theme.charts.backgroundColors`** = chart palette as an array of color strings.
 3. **`theme.charts.borderColors`** = chart stroke colors (optional, slightly darker than background).
-4. **Core tokens (`--em-core-*`)** = only touch when redefining foundations (font family, spacing scale). Never change the gray scale unless building a fully custom design system.
+4. **Core tokens (`--em-core-*`)** = only touch when redefining foundations (spacing scale, shadow). Never change the gray scale unless building a fully custom design system. **Do NOT set font tokens** (`--em-core-font-family--*`) — custom fonts are not currently supported through theming.
 5. **Component tokens (`--em-{component}-*`)** = only for isolated per-component tweaks.
 
 ### What NOT to do
 
 - Do NOT set raw color values on `--em-core-color-gray--*` tokens unless explicitly asked.
+- Do NOT set font tokens (`--em-core-font-family--*`, `--em-*-font-family`) — custom fonts are not supported through theming. Font extraction from Figma should be ignored.
 - Do NOT duplicate chart colors in both `theme.styles['--em-sem-chart-color--N']` AND `theme.charts.backgroundColors` — use one approach, prefer `charts.backgroundColors`.
 - Do NOT change the `themeProvider` function signature or its export.
 - Do NOT modify `embeddable.config.ts`.
@@ -66,7 +67,7 @@ const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
 When the user provides a `figma-tokens.json` file (from the extraction script), map the tokens:
 
 1. **Color styles** → semantic background/text tokens + `charts.backgroundColors`
-2. **Text styles** → `--em-core-font-family--base`, and component font overrides if multiple fonts
+2. **Text styles** → IGNORE font families (not supported). Only note them in summary for reference.
 3. **Effect styles** → shadow core tokens if specified
 4. **Spacing/sizing** → core spacing tokens only if the design redefines the scale
 

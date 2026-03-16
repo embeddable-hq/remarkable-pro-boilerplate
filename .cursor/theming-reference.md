@@ -166,24 +166,11 @@ charts: {
 
 ## Fonts
 
-Fonts are controlled via core tokens in `theme.styles`:
+**Custom fonts are NOT currently supported through theming.**
 
-```ts
-styles: {
-  '--em-core-font-family--base': 'YourFont, sans-serif',
-  '--em-core-font-family--code': 'monospace',
-}
-```
+While core tokens like `--em-core-font-family--base` exist in the type system, there is no mechanism to load custom font files through the theme. The embedded components render inside an iframe/web component where the host page's fonts are not automatically available. The default font is Inter.
 
-Many component tokens reference `--em-core-font-family--base`. Changing the core token cascades everywhere automatically.
-
-Individual component fonts can be overridden:
-- `--em-card-font-family`
-- `--em-chart-grid-font-family`
-- `--em-kpichart-font-family`
-- `--em-tablechart-font-family`
-- `--em-selectfield-trigger-font-family`
-- etc.
+Do NOT include font-family overrides in generated themes. If a Figma file uses a custom font, note it in the summary but do not attempt to apply it.
 
 ---
 
@@ -202,7 +189,7 @@ When extracting design tokens from a Figma file, map them as follows:
 | Disabled text | `styles['--em-sem-text--subtle']` | Lightest text |
 | Error color | `styles['--em-sem-status-error-text']` | Red tones |
 | Success color | `styles['--em-sem-status-success-text']` | Green tones |
-| Font family | `styles['--em-core-font-family--base']` | Primary font |
+| Font family | NOT SUPPORTED | Custom fonts cannot be loaded through theming |
 | Border radius (global) | `styles['--em-core-border-radius--200']` | Adjust the 200 scale step |
 | Card border radius | `styles['--em-card-border-radius']` | Component-level override |
 | Card padding | `styles['--em-card-padding']` | Component-level override |
@@ -216,7 +203,7 @@ When extracting design tokens from a Figma file, map them as follows:
 2. **Never modify core tokens** (`--em-core-*`) unless the user explicitly asks to redefine design foundations (spacing scale, typography scale, gray palette).
 3. **Use component tokens** (`--em-{component}-*`) only for targeted per-component tweaks.
 4. **Chart colors go in `theme.charts`**, not in `theme.styles` (except `--em-sem-chart-color--N` which are CSS variable equivalents).
-5. **Font family goes in `styles['--em-core-font-family--base']`** to cascade globally.
+5. **Do NOT set font tokens** — custom fonts are not supported through theming.
 6. **Always produce valid TypeScript** that matches `DeepPartial<Theme>`.
 7. **Preserve the themeProvider function signature** — don't change the exports or imports.
 8. **Values can be**: hex (`#fff`), rgb (`rgb(255 255 255)`), rgba, hsl, hsla, or `var(--em-core-*)` references.
@@ -243,7 +230,6 @@ const brandTheme: DeepPartial<Theme> = {
     ],
   },
   styles: {
-    '--em-core-font-family--base': 'Inter, sans-serif',
     '--em-sem-text': '#1a1a2e',
     '--em-sem-text--muted': '#6b7280',
     '--em-sem-text--subtle': '#9ca3af',
