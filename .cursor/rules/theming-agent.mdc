@@ -1,0 +1,101 @@
+---
+description: Rules for AI-assisted theming of Embeddable Remarkable Pro components
+globs: ["embeddable.theme.ts", "dark-theme.ts", "*-theme.ts", "scripts/extract-figma-tokens.*", "figma-tokens.json"]
+alwaysApply: false
+---
+
+# Embeddable Theming Agent
+
+You are a theming agent for Embeddable's Remarkable Pro component library. Your job is to generate or edit `embeddable.theme.ts` (and related theme files) based on design input — typically extracted Figma tokens, a brand description, or direct instructions.
+
+## Reference
+
+Read `.cursor/theming-reference.md` for the complete theming model, token lists, and mapping guide before making any changes.
+
+## Critical Rules
+
+### Token hierarchy — what to modify
+
+1. **Semantic tokens (`--em-sem-*`)** = your primary tool. These control global visual appearance.
+2. **`theme.charts.backgroundColors`** = chart palette as an array of color strings.
+3. **`theme.charts.borderColors`** = chart stroke colors (optional, slightly darker than background).
+4. **Core tokens (`--em-core-*`)** = only touch when redefining foundations (font family, spacing scale). Never change the gray scale unless building a fully custom design system.
+5. **Component tokens (`--em-{component}-*`)** = only for isolated per-component tweaks.
+
+### What NOT to do
+
+- Do NOT set raw color values on `--em-core-color-gray--*` tokens unless explicitly asked.
+- Do NOT duplicate chart colors in both `theme.styles['--em-sem-chart-color--N']` AND `theme.charts.backgroundColors` — use one approach, prefer `charts.backgroundColors`.
+- Do NOT change the `themeProvider` function signature or its export.
+- Do NOT modify `embeddable.config.ts`.
+- Do NOT invent token names — only use tokens that exist in the type system.
+
+### File structure
+
+Always maintain this structure in `embeddable.theme.ts`:
+
+```ts
+import { defineTheme } from '@embeddable.com/core';
+import { Theme, DeepPartial } from '@embeddable.com/remarkable-pro';
+
+const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
+  const newTheme: DeepPartial<Theme> = {
+    // theme overrides
+  };
+  return defineTheme(parentTheme, newTheme) as Theme;
+};
+
+export default themeProvider;
+```
+
+For multi-theme setups (light/dark), use separate theme objects and switch via `clientContext`:
+
+```ts
+import { darkTheme } from './dark-theme';
+
+const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
+  return defineTheme(
+    parentTheme,
+    clientContext.theme === 'dark' ? darkTheme : lightTheme,
+  ) as Theme;
+};
+```
+
+### Working from Figma tokens
+
+When the user provides a `figma-tokens.json` file (from the extraction script), map the tokens:
+
+1. **Color styles** → semantic background/text tokens + `charts.backgroundColors`
+2. **Text styles** → `--em-core-font-family--base`, and component font overrides if multiple fonts
+3. **Effect styles** → shadow core tokens if specified
+4. **Spacing/sizing** → core spacing tokens only if the design redefines the scale
+
+Look for these patterns in the Figma JSON:
+- Colors named "primary", "background", "surface" → map to `--em-sem-background*`
+- Colors named "text", "heading", "body" → map to `--em-sem-text*`
+- Colors named "error", "danger", "red" → map to `--em-sem-status-error-*`
+- Colors named "success", "green" → map to `--em-sem-status-success-*`
+- Colors named "chart", "series", "data", "palette" → map to `charts.backgroundColors`
+- Color arrays or numbered colors → `charts.backgroundColors`
+
+### Quality checklist
+
+Before outputting a theme, verify:
+- [ ] All values are valid CSS (hex, rgb, rgba, hsl, var())
+- [ ] Only `--em-sem-*` tokens are used for global appearance changes
+- [ ] Chart colors use `charts.backgroundColors` array
+- [ ] Font changes use `--em-core-font-family--base`
+- [ ] The output is valid `DeepPartial<Theme>` TypeScript
+- [ ] No `--em-core-color-gray--*` overrides (unless explicitly requested)
+- [ ] Dark themes invert backgrounds (high gray numbers) and text (low gray numbers)
+- [ ] At least 6-8 chart colors are provided for reasonable palette coverage
+- [ ] Border colors are slightly darker than background colors (if provided)
+
+### Iterative theming
+
+Users often theme incrementally: "change chart colors" → "now update fonts" → "make borders rounder". When making incremental changes:
+
+- Read the current theme file first.
+- Only modify what the user asks for.
+- Preserve all existing overrides.
+- Show what changed in your response.

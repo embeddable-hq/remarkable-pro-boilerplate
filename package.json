@@ -15,7 +15,8 @@
     "embeddable:login": "embeddable login",
     "embeddable:push": "embeddable push",
     "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\"",
-    "reinstall": "rm -rf node_modules package-lock.json && npm install"
+    "reinstall": "rm -rf node_modules package-lock.json && npm install",
+    "extract-figma-tokens": "tsx scripts/extract-figma-tokens.ts"
   },
   "dependencies": {
     "@embeddable.com/remarkable-pro": "^0.1.19"
@@ -29,7 +30,8 @@
     "@types/react": "^19.1.13",
     "cross-env": "^7.0.3",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "tsx": "^4.21.0"
   },
   "overrides": {
     "glob": "^13.0.0"
