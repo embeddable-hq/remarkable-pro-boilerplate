@@ -16,7 +16,9 @@
     "embeddable:push": "embeddable push",
     "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\"",
     "reinstall": "rm -rf node_modules package-lock.json && npm install",
-    "extract-figma-tokens": "tsx scripts/extract-figma-tokens.ts"
+    "extract-figma-tokens": "tsx scripts/extract-figma-tokens.ts",
+    "parse-theme": "tsx scripts/parse-theme.ts",
+    "score-theme": "tsx scripts/score-theme.ts"
   },
   "dependencies": {
     "@embeddable.com/remarkable-pro": "^0.1.19"

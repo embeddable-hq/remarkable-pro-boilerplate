@@ -120,21 +120,3 @@ npx tsx scripts/extract-figma-tokens.ts <URL> --output my-tokens.json
 # Using a file key directly
 npx tsx scripts/extract-figma-tokens.ts abc123def456
 ```
-
-## Measuring Quality
-
-### Token correctness
-The agent should only use `--em-sem-*` tokens for global appearance. Check the output:
-```bash
-# Should find semantic tokens (good)
-grep -c "em-sem-" embeddable.theme.ts
-
-# Should NOT find core color overrides (bad, unless intentional)
-grep -c "em-core-color" embeddable.theme.ts
-```
-
-### Variation stability
-Run the same prompt 5 times and compare outputs. Lower variance = more reliable.
-
-### Expected output tests
-Compare against known-good themes in `scripts/figma-tokens.example.json`.
