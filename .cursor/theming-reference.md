@@ -78,24 +78,24 @@ Raw design primitives. Most teams do NOT override these.
 
 These describe **what a value is used for**, not what color it is. This is where most theming work happens.
 
-#### Backgrounds
+#### Backgrounds (ordered lightest → darkest)
 | Token | Role | Components affected |
 |-------|------|-------------------|
-| `--em-sem-background` | Primary interactive/hover surfaces | Card background, TextField, hover states |
-| `--em-sem-background--inverted` | Dark/inverted surfaces | Tooltips, filled selects, switch off state |
-| `--em-sem-background--light` | Light emphasis, secondary | Filled inputs, date range bg, grid lines, disabled buttons |
-| `--em-sem-background--muted` | Pressed/low-emphasis | Select border, active buttons |
-| `--em-sem-background--neutral` | Default container surfaces | Table headers/cells, select triggers/dropdowns, loaders |
-| `--em-sem-background--subtle` | Hover/soft emphasis | Active inputs, switch on, hover buttons |
+| `--em-sem-background--neutral` | Page / outermost container (often pure white) | Table headers/cells, select triggers/dropdowns, loaders |
+| `--em-sem-background` | Card / widget surface (may be slightly off-white) | Card background, TextField, hover states |
+| `--em-sem-background--light` | Secondary surfaces | Filled inputs, date range bg, grid lines, disabled buttons |
+| `--em-sem-background--subtle` | Hover / soft emphasis | Active inputs, switch on, hover buttons |
+| `--em-sem-background--muted` | Pressed / low-emphasis | Select border, active buttons |
+| `--em-sem-background--inverted` | Dark / inverted surfaces (default: #000000) | Tooltips, filled selects, switch off state |
 
-#### Text
+#### Text (ordered darkest → lightest)
 | Token | Role | Components affected |
 |-------|------|-------------------|
-| `--em-sem-text` | Primary text | Titles, labels, values, icons, all primary content |
-| `--em-sem-text--inverted` | Text on dark backgrounds | Selected items, tooltip titles, primary buttons |
-| `--em-sem-text--muted` | Secondary/supporting text | Subtitles, descriptions, axes, legends, secondary buttons bg |
-| `--em-sem-text--neutral` | Neutral emphasis | Loading indicators, category labels, active primary buttons |
-| `--em-sem-text--subtle` | Disabled/low-contrast | Disabled states, subtle grid lines |
+| `--em-sem-text` | Primary text (darkest) | Titles, labels, values, icons, all primary content |
+| `--em-sem-text--neutral` | Near-primary emphasis | Loading indicators, category labels, active primary buttons |
+| `--em-sem-text--subtle` | Mid-emphasis (medium gray) | Disabled states, placeholders, subtle grid lines |
+| `--em-sem-text--muted` | Lowest emphasis (lightest gray) | Subtitles, descriptions, axes, legends, secondary buttons bg |
+| `--em-sem-text--inverted` | Text on dark backgrounds (white) | Selected items, tooltip titles, primary buttons |
 
 #### Status
 | Token | Role |
@@ -182,13 +182,15 @@ When extracting design tokens from a Figma file, map them as follows:
 |---------------|---------------|-------|
 | Brand/chart colors (palette) | `charts.backgroundColors` | Array of hex/rgb colors |
 | Chart stroke colors | `charts.borderColors` | Slightly darker variants of background |
-| Primary background | `styles['--em-sem-background']` | Usually the card/widget bg |
-| Page/canvas background | `styles['--em-sem-background--neutral']` | The container/page surface |
+| Card/widget background | `styles['--em-sem-background']` | Card surface (may be off-white) |
+| Page/canvas background | `styles['--em-sem-background--neutral']` | Outermost container (often pure white) |
 | Primary text color | `styles['--em-sem-text']` | Darkest text |
-| Secondary text color | `styles['--em-sem-text--muted']` | Lighter text for subtitles |
-| Disabled text | `styles['--em-sem-text--subtle']` | Lightest text |
-| Error color | `styles['--em-sem-status-error-text']` | Red tones |
-| Success color | `styles['--em-sem-status-success-text']` | Green tones |
+| Near-primary text | `styles['--em-sem-text--neutral']` | Nearly as dark as primary |
+| Mid-emphasis text | `styles['--em-sem-text--subtle']` | Medium gray for placeholders |
+| Low-emphasis text | `styles['--em-sem-text--muted']` | Lightest gray for descriptions, legends |
+| Dark/inverted surface | `styles['--em-sem-background--inverted']` | Default `#000000` for tooltips |
+| Error color | `styles['--em-sem-status-error-text']` | Default `#d92d20` if absent |
+| Success color | `styles['--em-sem-status-success-text']` | Default from brand green or `#16a34a` |
 | Font family | NOT SUPPORTED | Custom fonts cannot be loaded through theming |
 | Border radius (global) | `styles['--em-core-border-radius--200']` | Adjust the 200 scale step |
 | Card border radius | `styles['--em-card-border-radius']` | Component-level override |
@@ -230,15 +232,19 @@ const brandTheme: DeepPartial<Theme> = {
     ],
   },
   styles: {
-    '--em-sem-text': '#1a1a2e',
-    '--em-sem-text--muted': '#6b7280',
-    '--em-sem-text--subtle': '#9ca3af',
-    '--em-sem-background': '#ffffff',
-    '--em-sem-background--neutral': '#f9fafb',
+    '--em-sem-background--neutral': '#ffffff',
+    '--em-sem-background': '#f9fafb',
     '--em-sem-background--light': '#f3f4f6',
-    '--em-sem-background--muted': '#e5e7eb',
-    '--em-sem-background--subtle': '#f3f4f6',
-    '--em-sem-background--inverted': '#1f2937',
+    '--em-sem-background--subtle': '#e5e7eb',
+    '--em-sem-background--muted': '#d1d5db',
+    '--em-sem-background--inverted': '#000000',
+
+    '--em-sem-text': '#1a1a2e',
+    '--em-sem-text--neutral': '#374151',
+    '--em-sem-text--subtle': '#6b7280',
+    '--em-sem-text--muted': '#9ca3af',
+    '--em-sem-text--inverted': '#ffffff',
+
     '--em-sem-status-error-text': '#dc2626',
     '--em-sem-status-error-background': '#fef2f2',
     '--em-sem-status-success-text': '#16a34a',

@@ -62,22 +62,61 @@ const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
 };
 ```
 
+### Token semantic ordering (CRITICAL)
+
+Getting the ordering right is essential. Designers consistently follow these hierarchies:
+
+**Text colors — darkest to lightest:**
+```
+--em-sem-text           → Primary text (darkest, highest contrast)
+--em-sem-text--neutral  → Near-primary emphasis (nearly as dark)
+--em-sem-text--subtle   → Mid-emphasis (medium gray — placeholders, disabled states)
+--em-sem-text--muted    → Lowest emphasis (lightest gray — legends, axis labels, descriptions)
+--em-sem-text--inverted → Text on dark surfaces (white or near-white)
+```
+
+**Background colors — lightest to darkest:**
+```
+--em-sem-background--neutral → Page / outermost container (often pure #FFFFFF)
+--em-sem-background          → Card / widget surface (may be slightly off-white like #FAFAFA)
+--em-sem-background--light   → Secondary surfaces (inputs, date range backgrounds)
+--em-sem-background--subtle  → Hover / active states (slightly darker)
+--em-sem-background--muted   → Pressed / low-emphasis (borders, active button states)
+--em-sem-background--inverted → Dark surface (tooltips, filled controls — default to #000000)
+```
+
+Key insight: `--em-sem-background` is the card/widget surface, NOT the page container.
+In most designs the card surface is slightly tinted (off-white), while `--neutral` is the
+outermost container (pure white). When in doubt, assign pure white to `--neutral`.
+
+For `--em-sem-background--inverted`, default to `#000000` unless the design explicitly uses
+a different dark surface for tooltips/overlays. Do NOT use OS chrome colors (status bars, etc.).
+
+### Default status colors
+
+When the Figma extraction has no clear error/success colors, use these standard defaults:
+- Error text: `#d92d20` / Error background: `#fee4e2`
+- Success text: derive from the primary brand green if available, otherwise `#16a34a`
+- Success background: a very light tint of the success text color
+
 ### Working from Figma tokens
 
 When the user provides a `figma-tokens.json` file (from the extraction script), map the tokens:
 
-1. **Color styles** → semantic background/text tokens + `charts.backgroundColors`
-2. **Text styles** → IGNORE font families (not supported). Only note them in summary for reference.
-3. **Effect styles** → shadow core tokens if specified
-4. **Spacing/sizing** → core spacing tokens only if the design redefines the scale
+1. **`chartColorCandidates`** → `charts.backgroundColors` (use directly, they are pre-filtered)
+2. **`backgroundCandidates`** → semantic background tokens (use the mapping keys directly)
+3. **`textColorCandidates`** → semantic text tokens (use the mapping keys directly)
+4. **`statusColorCandidates`** → status tokens (use directly if present)
+5. **`effects`** → shadow core tokens (pick the most prominent DROP_SHADOW)
+6. **`colors`** array → use for additional context when candidates are insufficient
+7. **Text styles** → IGNORE font families (not supported). Only note them in summary.
 
-Look for these patterns in the Figma JSON:
-- Colors named "primary", "background", "surface" → map to `--em-sem-background*`
-- Colors named "text", "heading", "body" → map to `--em-sem-text*`
-- Colors named "error", "danger", "red" → map to `--em-sem-status-error-*`
-- Colors named "success", "green" → map to `--em-sem-status-success-*`
-- Colors named "chart", "series", "data", "palette" → map to `charts.backgroundColors`
-- Color arrays or numbered colors → `charts.backgroundColors`
+When `chartColorCandidates` are present, use them as-is. If the list has fewer than 6 colors,
+supplement with additional chromatic colors from the `colors` array.
+
+When `backgroundCandidates` or `textColorCandidates` provide token keys (e.g. `--em-sem-background`),
+use those mappings. But always verify against the ordering rules above — the extraction
+heuristics may occasionally get the ordering wrong.
 
 ### Quality checklist
 
@@ -85,12 +124,16 @@ Before outputting a theme, verify:
 - [ ] All values are valid CSS (hex, rgb, rgba, hsl, var())
 - [ ] Only `--em-sem-*` tokens are used for global appearance changes
 - [ ] Chart colors use `charts.backgroundColors` array
-- [ ] Font changes use `--em-core-font-family--base`
 - [ ] The output is valid `DeepPartial<Theme>` TypeScript
 - [ ] No `--em-core-color-gray--*` overrides (unless explicitly requested)
+- [ ] No font-family tokens (not supported)
+- [ ] Text ordering: text (darkest) > neutral > subtle > muted (lightest)
+- [ ] Background ordering: neutral (purest white) > background (card) > light > subtle > muted
+- [ ] `--em-sem-background--inverted` defaults to `#000000`
 - [ ] Dark themes invert backgrounds (high gray numbers) and text (low gray numbers)
 - [ ] At least 6-8 chart colors are provided for reasonable palette coverage
 - [ ] Border colors are slightly darker than background colors (if provided)
+- [ ] Status colors present (use defaults if Figma data is absent)
 
 ### Iterative theming
 

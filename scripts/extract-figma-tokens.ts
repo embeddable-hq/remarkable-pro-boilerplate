@@ -4,6 +4,9 @@
  * Extracts design tokens (colors, text styles, effects) from a Figma file
  * by traversing the document tree AND checking local/published styles.
  *
+ * Smart node selection: if the URL's node-id yields sparse data (cover/overview
+ * page), the script automatically retries with the full document.
+ *
  * Usage:
  *   npx tsx scripts/extract-figma-tokens.ts <FIGMA_FILE_URL_OR_KEY> [--output figma-tokens.json]
  *
@@ -13,6 +16,9 @@
  */
 
 const FIGMA_API_BASE = 'https://api.figma.com/v1';
+
+const SPARSE_COLOR_THRESHOLD = 10;
+const SPARSE_NODE_THRESHOLD = 100;
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -58,6 +64,7 @@ interface ExtractedTokens {
     extractedAt: string;
     nodeId?: string;
     totalNodesScanned: number;
+    retried: boolean;
   };
   colors: ExtractedColor[];
   textStyles: ExtractedTextStyle[];
@@ -94,16 +101,37 @@ function figmaColorToRgba(color: FigmaColor): string {
   return `rgb(${r} ${g} ${b} / ${a * 100}%)`;
 }
 
+function hexToRgb(hex: string): [number, number, number] {
+  return [
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16),
+  ];
+}
+
 function hexToLuminance(hex: string): number {
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const [r, g, b] = hexToRgb(hex).map(v => v / 255);
   const toLinear = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 
+function hexToHsl(hex: string): [number, number, number] {
+  const [r, g, b] = hexToRgb(hex).map(v => v / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+  else if (max === g) h = ((b - r) / d + 2) / 6;
+  else h = ((r - g) / d + 4) / 6;
+  return [h * 360, s, l];
+}
+
 function isNearWhite(hex: string): boolean {
-  return hexToLuminance(hex) > 0.9;
+  return hexToLuminance(hex) > 0.85;
 }
 
 function isNearBlack(hex: string): boolean {
@@ -111,12 +139,29 @@ function isNearBlack(hex: string): boolean {
 }
 
 function isGrayish(hex: string): boolean {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  return (max - min) < 30;
+  const [, s] = hexToHsl(hex);
+  return s < 0.15;
+}
+
+function isChromatic(hex: string): boolean {
+  return !isGrayish(hex) && !isNearWhite(hex) && !isNearBlack(hex);
+}
+
+function hueDistance(h1: number, h2: number): number {
+  const d = Math.abs(h1 - h2);
+  return Math.min(d, 360 - d);
+}
+
+function countDistinctHues(hexColors: string[], minHueGap = 30): number {
+  const hues = hexColors.filter(isChromatic).map(h => hexToHsl(h)[0]);
+  if (hues.length === 0) return 0;
+  const distinct: number[] = [hues[0]];
+  for (let i = 1; i < hues.length; i++) {
+    if (distinct.every(dh => hueDistance(dh, hues[i]) >= minHueGap)) {
+      distinct.push(hues[i]);
+    }
+  }
+  return distinct.length;
 }
 
 // ─── Figma API ───────────────────────────────────────────────────────
@@ -140,6 +185,27 @@ async function figmaFetch<T>(endpoint: string, token: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function fetchFileData(fileKey: string, nodeId: string | null, token: string): Promise<any> {
+  if (nodeId) {
+    const formattedNodeId = nodeId.replace('-', ':');
+    console.log(`  Fetching node: ${formattedNodeId}`);
+    const nodesResponse = await figmaFetch<any>(
+      `/files/${fileKey}/nodes?ids=${formattedNodeId}&depth=100`,
+      token,
+    );
+    const nodeData = nodesResponse.nodes?.[formattedNodeId];
+    if (nodeData?.document) {
+      return {
+        name: nodesResponse.name || 'Unknown',
+        document: nodeData.document,
+        styles: nodesResponse.styles || {},
+      };
+    }
+    console.log('  Node not found, falling back to full document');
+  }
+  return figmaFetch<any>(`/files/${fileKey}`, token);
+}
+
 // ─── Node Traversal ──────────────────────────────────────────────────
 
 interface TraversalState {
@@ -158,7 +224,6 @@ function traverseNode(node: any, state: TraversalState, path: string): void {
   state.nodeCount++;
   const nodePath = getNodePath(node, path);
 
-  // Extract fills
   if (node.fills && Array.isArray(node.fills)) {
     for (const fill of node.fills) {
       if (fill.type === 'SOLID' && fill.visible !== false && fill.color) {
@@ -180,7 +245,6 @@ function traverseNode(node: any, state: TraversalState, path: string): void {
     }
   }
 
-  // Extract strokes
   if (node.strokes && Array.isArray(node.strokes)) {
     for (const stroke of node.strokes) {
       if (stroke.type === 'SOLID' && stroke.visible !== false && stroke.color) {
@@ -200,7 +264,6 @@ function traverseNode(node: any, state: TraversalState, path: string): void {
     }
   }
 
-  // Extract text styles
   if (node.type === 'TEXT' && node.style) {
     const ts = node.style;
     const fontFamily = ts.fontFamily || 'unknown';
@@ -230,7 +293,6 @@ function traverseNode(node: any, state: TraversalState, path: string): void {
     }
   }
 
-  // Extract effects
   if (node.effects && Array.isArray(node.effects)) {
     for (const effect of node.effects) {
       if ((effect.type === 'DROP_SHADOW' || effect.type === 'INNER_SHADOW') && effect.visible !== false) {
@@ -249,7 +311,6 @@ function traverseNode(node: any, state: TraversalState, path: string): void {
     }
   }
 
-  // Recurse into children
   if (node.children && Array.isArray(node.children)) {
     for (const child of node.children) {
       traverseNode(child, state, nodePath);
@@ -257,20 +318,38 @@ function traverseNode(node: any, state: TraversalState, path: string): void {
   }
 }
 
+function traverseDocument(document: any): TraversalState {
+  const state: TraversalState = {
+    colors: new Map(),
+    textStyles: new Map(),
+    effects: new Map(),
+    nodeCount: 0,
+  };
+  if (document) {
+    traverseNode(document, state, '');
+  }
+  return state;
+}
+
+function isSparse(state: TraversalState): boolean {
+  return state.colors.size < SPARSE_COLOR_THRESHOLD || state.nodeCount < SPARSE_NODE_THRESHOLD;
+}
+
 // ─── Classification ──────────────────────────────────────────────────
 
-function classifyColorByName(name: string): {
+function classifyColorByName(name: string, nodePath: string): {
   category: 'chart' | 'background' | 'text' | 'status' | 'unknown';
   semanticKey: string | null;
 } {
   const lower = name.toLowerCase();
+  const pathLower = nodePath.toLowerCase();
 
   if (/error|danger|red|destructive|negative/i.test(lower)) {
     if (/background|bg|surface|fill/i.test(lower))
       return { category: 'status', semanticKey: '--em-sem-status-error-background' };
     return { category: 'status', semanticKey: '--em-sem-status-error-text' };
   }
-  if (/success|green|positive/i.test(lower)) {
+  if (/success|green|positive/i.test(lower) && !/chart|series|data/i.test(pathLower)) {
     if (/background|bg|surface|fill/i.test(lower))
       return { category: 'status', semanticKey: '--em-sem-status-success-background' };
     return { category: 'status', semanticKey: '--em-sem-status-success-text' };
@@ -307,6 +386,14 @@ function classifyColorByName(name: string): {
   return { category: 'unknown', semanticKey: null };
 }
 
+/**
+ * Improved luminance-based classification:
+ * - Separates chromatic colors into chart candidates
+ * - Sorts grays by luminance for background/text assignment
+ * - Uses proper ordering: background=card surface (may be off-white),
+ *   neutral=page container (often pure white)
+ * - Text ordering: text (darkest), neutral, subtle, muted (lightest)
+ */
 function classifyByLuminance(colors: ExtractedColor[]): {
   chartColors: string[];
   backgrounds: Record<string, string>;
@@ -316,45 +403,93 @@ function classifyByLuminance(colors: ExtractedColor[]): {
   const backgrounds: Record<string, string> = {};
   const textColors: Record<string, string> = {};
 
-  const chromatic = colors.filter(c => !isGrayish(c.hex) && !isNearWhite(c.hex) && !isNearBlack(c.hex));
+  const chromatic = colors.filter(c => isChromatic(c.hex));
   const uniqueChromatic = [...new Set(chromatic.map(c => c.hex))];
-
-  // Chromatic colors are chart color candidates
   for (const hex of uniqueChromatic) {
     chartColors.push(hex);
   }
 
-  // Sort grays by luminance for background/text assignment
   const grays = colors.filter(c => isGrayish(c.hex));
   const uniqueGrays = [...new Set(grays.map(c => c.hex))];
-  const sortedGrays = uniqueGrays.sort((a, b) => hexToLuminance(b) - hexToLuminance(a));
+  const sortedByLum = uniqueGrays.sort((a, b) => hexToLuminance(b) - hexToLuminance(a));
 
-  if (sortedGrays.length >= 1) {
-    const lightest = sortedGrays[0]!;
-    if (hexToLuminance(lightest) > 0.8) {
-      backgrounds['--em-sem-background'] = lightest;
-    }
+  const lightGrays = sortedByLum.filter(h => hexToLuminance(h) > 0.7);
+  const darkGrays = sortedByLum.filter(h => hexToLuminance(h) < 0.25);
+  const midGrays = sortedByLum.filter(h => {
+    const l = hexToLuminance(h);
+    return l >= 0.25 && l <= 0.7;
+  });
+
+  // Backgrounds: neutral = purest white (page), background = second lightest (card surface)
+  if (lightGrays.length >= 2) {
+    backgrounds['--em-sem-background--neutral'] = lightGrays[0]!;
+    backgrounds['--em-sem-background'] = lightGrays[1]!;
+  } else if (lightGrays.length === 1) {
+    backgrounds['--em-sem-background'] = lightGrays[0]!;
+    backgrounds['--em-sem-background--neutral'] = lightGrays[0]!;
   }
-  if (sortedGrays.length >= 2) {
-    const secondLightest = sortedGrays[1]!;
-    if (hexToLuminance(secondLightest) > 0.7) {
-      backgrounds['--em-sem-background--neutral'] = secondLightest;
-    }
+
+  // Text: darkest = primary, then neutral, subtle, muted (lightest)
+  if (darkGrays.length >= 1) {
+    textColors['--em-sem-text'] = darkGrays[darkGrays.length - 1]!;
   }
-  if (sortedGrays.length >= 1) {
-    const darkest = sortedGrays[sortedGrays.length - 1]!;
-    if (hexToLuminance(darkest) < 0.2) {
-      textColors['--em-sem-text'] = darkest;
-    }
+  if (darkGrays.length >= 2) {
+    textColors['--em-sem-text--neutral'] = darkGrays[darkGrays.length - 2]!;
   }
-  if (sortedGrays.length >= 2) {
-    const secondDarkest = sortedGrays[sortedGrays.length - 2]!;
-    if (hexToLuminance(secondDarkest) < 0.4) {
-      textColors['--em-sem-text--muted'] = secondDarkest;
-    }
+
+  // Mid-grays become subtle and muted text
+  if (midGrays.length >= 1) {
+    textColors['--em-sem-text--subtle'] = midGrays[midGrays.length - 1]!;
+  }
+  if (midGrays.length >= 2) {
+    textColors['--em-sem-text--muted'] = midGrays[0]!;
+  } else if (midGrays.length === 1) {
+    textColors['--em-sem-text--muted'] = midGrays[0]!;
   }
 
   return { chartColors, backgrounds, textColors };
+}
+
+/**
+ * Filter chart color candidates:
+ * - Remove colors that are too light (backgrounds masquerading as chart colors)
+ * - Remove near-duplicates (same hue within 15°)
+ * - Ensure at least 3 distinct hues for a valid chart palette
+ */
+function filterChartCandidates(
+  candidates: string[],
+  allBackgrounds: Record<string, string>,
+): string[] {
+  const bgValues = new Set(Object.values(allBackgrounds).map(v => v.toLowerCase()));
+
+  const filtered = candidates.filter(hex => {
+    if (bgValues.has(hex.toLowerCase())) return false;
+    if (isNearWhite(hex)) return false;
+    if (isNearBlack(hex)) return false;
+    const [, s] = hexToHsl(hex);
+    if (s < 0.2) return false;
+    return true;
+  });
+
+  // Deduplicate near-identical hues, keeping the most saturated variant
+  const deduped: string[] = [];
+  for (const hex of filtered) {
+    const [h, s] = hexToHsl(hex);
+    const existing = deduped.findIndex(d => {
+      const [dh, ds] = hexToHsl(d);
+      return hueDistance(h, dh) < 15 && Math.abs(s - ds) < 0.3;
+    });
+    if (existing === -1) {
+      deduped.push(hex);
+    } else {
+      const [, existingS] = hexToHsl(deduped[existing]);
+      if (s > existingS) {
+        deduped[existing] = hex;
+      }
+    }
+  }
+
+  return deduped;
 }
 
 // ─── Style extraction (local styles from file metadata) ──────────────
@@ -434,39 +569,29 @@ function extractLocalStyles(
 async function extractTokens(fileKey: string, nodeId: string | null, token: string): Promise<ExtractedTokens> {
   console.log(`Fetching Figma file: ${fileKey}${nodeId ? ` (node: ${nodeId})` : ''}...`);
 
-  // Fetch the full file (or specific node branch)
-  let fileData: any;
-  if (nodeId) {
-    const formattedNodeId = nodeId.replace('-', ':');
-    console.log(`Fetching specific node: ${formattedNodeId}`);
-    const nodesResponse = await figmaFetch<any>(
-      `/files/${fileKey}/nodes?ids=${formattedNodeId}&depth=100`,
-      token,
-    );
-    const nodeData = nodesResponse.nodes?.[formattedNodeId];
-    if (!nodeData?.document) {
-      console.log('Node not found with formatted ID, fetching full file instead...');
-      fileData = await figmaFetch<any>(`/files/${fileKey}`, token);
-    } else {
-      fileData = {
-        name: nodesResponse.name || 'Unknown',
-        document: nodeData.document,
-        styles: nodesResponse.styles || {},
-      };
-    }
-  } else {
-    fileData = await figmaFetch<any>(`/files/${fileKey}`, token);
-  }
-
+  let fileData = await fetchFileData(fileKey, nodeId, token);
   const fileName = fileData.name || 'Unknown';
   console.log(`File: "${fileName}"`);
 
-  // Step 1: Try local styles from file metadata
+  // Traverse the requested node
+  let state = traverseDocument(fileData.document);
+  let retried = false;
+
+  // If the extraction is sparse, retry with the full document
+  if (nodeId && isSparse(state)) {
+    console.log(`\n⚠  Sparse extraction (${state.colors.size} colors, ${state.nodeCount} nodes) — the specified node may be a cover/overview page.`);
+    console.log(`  Retrying with the full document...`);
+    fileData = await figmaFetch<any>(`/files/${fileKey}`, token);
+    state = traverseDocument(fileData.document);
+    retried = true;
+    console.log(`  Full document: ${state.colors.size} colors, ${state.nodeCount} nodes\n`);
+  }
+
+  // Step 1: Local styles from file metadata
   const localStyles = fileData.styles || {};
   const localStyleCount = Object.keys(localStyles).length;
   console.log(`Found ${localStyleCount} local styles in file metadata`);
 
-  // Fetch style node details if styles exist
   let styleNodeDetails: Record<string, any> = {};
   if (localStyleCount > 0) {
     const styleIds = Object.keys(localStyles);
@@ -490,7 +615,7 @@ async function extractTokens(fileKey: string, nodeId: string | null, token: stri
   const localExtracted = extractLocalStyles(localStyles, styleNodeDetails);
   console.log(`  From local styles: ${localExtracted.colors.length} colors, ${localExtracted.textStyles.length} text styles, ${localExtracted.effects.length} effects`);
 
-  // Step 2: Also try published styles endpoint
+  // Step 2: Published styles endpoint
   let publishedColors: ExtractedColor[] = [];
   let publishedText: ExtractedTextStyle[] = [];
   let publishedEffects: ExtractedEffect[] = [];
@@ -522,26 +647,12 @@ async function extractTokens(fileKey: string, nodeId: string | null, token: stri
     console.log('Published styles endpoint not available or empty');
   }
 
-  // Step 3: Traverse the document tree for fills/text/effects on actual nodes
-  console.log('Traversing document tree for design tokens...');
-  const state: TraversalState = {
-    colors: new Map(),
-    textStyles: new Map(),
-    effects: new Map(),
-    nodeCount: 0,
-  };
-
-  const rootNode = fileData.document;
-  if (rootNode) {
-    traverseNode(rootNode, state, '');
-  }
-
+  // Merge traversal + style sources
   const treeColors = Array.from(state.colors.values());
   const treeText = Array.from(state.textStyles.values());
   const treeEffects = Array.from(state.effects.values());
-  console.log(`  From node traversal: ${treeColors.length} unique colors, ${treeText.length} text styles, ${treeEffects.length} effects (scanned ${state.nodeCount} nodes)`);
+  console.log(`From node traversal: ${treeColors.length} unique colors, ${treeText.length} text styles, ${treeEffects.length} effects (scanned ${state.nodeCount} nodes)`);
 
-  // Merge all sources (styles take priority for naming)
   const allColors = [...localExtracted.colors, ...publishedColors, ...treeColors];
   const allText = [...localExtracted.textStyles, ...publishedText, ...treeText];
   const allEffects = [...localExtracted.effects, ...publishedEffects, ...treeEffects];
@@ -556,7 +667,7 @@ async function extractTokens(fileKey: string, nodeId: string | null, token: stri
   }
   const uniqueColors = Array.from(colorMap.values());
 
-  // Deduplicate text styles by key
+  // Deduplicate text styles
   const textMap = new Map<string, ExtractedTextStyle>();
   for (const t of allText) {
     const key = `${t.fontFamily}:${t.fontWeight}:${t.fontSize}`;
@@ -574,15 +685,16 @@ async function extractTokens(fileKey: string, nodeId: string | null, token: stri
   }
   const uniqueEffects = Array.from(effectMap.values());
 
-  // Classify colors
+  // ── Classification ──
+
   const chartColorCandidates: string[] = [];
   const backgroundCandidates: Record<string, string> = {};
   const textColorCandidates: Record<string, string> = {};
   const statusColorCandidates: Record<string, string> = {};
 
-  // First pass: classify by name (higher confidence)
+  // First pass: classify by name
   for (const color of uniqueColors) {
-    const classification = classifyColorByName(color.name);
+    const classification = classifyColorByName(color.name, color.nodePath);
     if (classification.category === 'chart') {
       chartColorCandidates.push(color.hex);
     } else if (classification.semanticKey) {
@@ -596,35 +708,49 @@ async function extractTokens(fileKey: string, nodeId: string | null, token: stri
     }
   }
 
-  // Second pass: if we got very few name-based matches, classify by luminance
+  // Second pass: luminance-based fallback
+  // Always run for chart colors if none were found by name
+  // Run for backgrounds/text if overall name matches are sparse
   const totalNameMatches = chartColorCandidates.length +
     Object.keys(backgroundCandidates).length +
     Object.keys(textColorCandidates).length +
     Object.keys(statusColorCandidates).length;
 
-  if (totalNameMatches < 3 && uniqueColors.length > 0) {
-    console.log('Few name-based matches found, using luminance-based classification...');
+  const needsLuminanceFallback = totalNameMatches < 3 || chartColorCandidates.length === 0;
+
+  if (needsLuminanceFallback && uniqueColors.length > 0) {
+    console.log('Using luminance-based classification for missing categories...');
     const lumResult = classifyByLuminance(uniqueColors);
     if (chartColorCandidates.length === 0) {
       chartColorCandidates.push(...lumResult.chartColors);
     }
-    for (const [key, val] of Object.entries(lumResult.backgrounds)) {
-      if (!backgroundCandidates[key]) backgroundCandidates[key] = val;
+    if (totalNameMatches < 3) {
+      for (const [key, val] of Object.entries(lumResult.backgrounds)) {
+        if (!backgroundCandidates[key]) backgroundCandidates[key] = val;
+      }
+      for (const [key, val] of Object.entries(lumResult.textColors)) {
+        if (!textColorCandidates[key]) textColorCandidates[key] = val;
+      }
     }
-    for (const [key, val] of Object.entries(lumResult.textColors)) {
-      if (!textColorCandidates[key]) textColorCandidates[key] = val;
-    }
+  }
+
+  // Filter chart candidates for quality
+  const filteredChartColors = filterChartCandidates(chartColorCandidates, backgroundCandidates);
+  const distinctHues = countDistinctHues(filteredChartColors);
+
+  if (distinctHues < 3 && filteredChartColors.length > 0) {
+    console.log(`⚠  Only ${distinctHues} distinct hue(s) in chart candidates — palette may lack variety`);
   }
 
   // Extract unique font families
   const fontFamilies = [...new Set(uniqueText.map(t => t.fontFamily))].filter(f => f !== 'unknown');
 
   const summary = [
-    `Extracted from "${fileName}":`,
+    `Extracted from "${fileName}"${retried ? ' (full document — URL node was sparse)' : ''}:`,
     `  ${uniqueColors.length} unique colors (${allColors.filter(c => c.source === 'style').length} from styles, ${allColors.filter(c => c.source !== 'style').length} from nodes)`,
     `  ${uniqueText.length} text styles (fonts: ${fontFamilies.join(', ') || 'none detected'})`,
     `  ${uniqueEffects.length} effects`,
-    `  ${chartColorCandidates.length} chart color candidates`,
+    `  ${filteredChartColors.length} chart color candidates (${distinctHues} distinct hues)`,
     `  ${Object.keys(backgroundCandidates).length} background token candidates`,
     `  ${Object.keys(textColorCandidates).length} text token candidates`,
     `  ${Object.keys(statusColorCandidates).length} status token candidates`,
@@ -635,13 +761,14 @@ async function extractTokens(fileKey: string, nodeId: string | null, token: stri
       fileName,
       fileKey,
       extractedAt: new Date().toISOString(),
-      nodeId: nodeId || undefined,
+      nodeId: retried ? undefined : (nodeId || undefined),
       totalNodesScanned: state.nodeCount,
+      retried,
     },
     colors: uniqueColors,
     textStyles: uniqueText,
     effects: uniqueEffects,
-    chartColorCandidates,
+    chartColorCandidates: filteredChartColors,
     backgroundCandidates,
     textColorCandidates,
     statusColorCandidates,
