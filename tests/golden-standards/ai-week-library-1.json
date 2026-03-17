@@ -1,0 +1,57 @@
+{
+    "meta": {
+      "name": "AI Week Library 1",
+      "figmaUrl": "https://www.figma.com/design/WOjKOg4kuRNddqJLI1rlS1/AI-Week-Library---1?node-id=0-1&t=mZ8NE1XwxArK9H0w-1",
+      "description": "Lightweight green theme"
+    },
+    "expected": {
+      "chartColors": {
+        "_description": "The branded data/chart palette in order of priority. Use hex values (e.g. '#2563EB'). Include 6-10 colors for good coverage. borderColors are optional (slightly darker variants of backgroundColors for chart strokes).",
+        "backgroundColors": [
+          "#5db075"
+        ],
+        "borderColors": []
+      },
+      "backgrounds": {
+        "_description": "Surface and container colors. Only include the ones your design explicitly defines. Remove any tokens you don't need.",
+        "--em-sem-background":          { "value": "#fafafa",  "label": "Card / widget surface — the primary background for chart cards and interactive hover surfaces" },
+        "--em-sem-background--neutral":  { "value": "#ffffff",  "label": "Page / container surface — default surface for table headers, select dropdowns, loaders" },
+        "--em-sem-background--light":    { "value": "#f6f6f6",  "label": "Secondary surface — used for filled inputs, date range backgrounds, disabled buttons" },
+        "--em-sem-background--muted":    { "value": "#f6f6f6",  "label": "Pressed / low-emphasis — select field borders, active button states" },
+        "--em-sem-background--subtle":   { "value": "#e8e8e8",  "label": "Hover / soft emphasis — active inputs, toggle-on state, hover buttons" },
+        "--em-sem-background--inverted": { "value": "#000000",  "label": "Dark / inverted surface — tooltips, filled select triggers, switch off state" }
+      },
+      "textColors": {
+        "_description": "Text colors used across the UI. Only include the ones your design explicitly defines. Remove any tokens you don't need.",
+        "--em-sem-text":           { "value": "#000000", "label": "Primary text — titles, labels, values, icons, all primary content" },
+        "--em-sem-text--muted":    { "value": "#bdbdbd", "label": "Secondary text — subtitles, descriptions, axis labels, legends" },
+        "--em-sem-text--subtle":   { "value": "#666666", "label": "Disabled / low-contrast — disabled states, placeholder text, subtle grid lines" },
+        "--em-sem-text--neutral":  { "value": "#000000", "label": "Neutral emphasis — loading indicators, category labels" },
+        "--em-sem-text--inverted": { "value": "#ffffff", "label": "Text on dark surfaces — tooltip titles, selected dropdown items, primary buttons" }
+      },
+      "statusColors": {
+        "_description": "Error and success indicator colors. This entire section is optional — remove it if your design does not define status colors.",
+        "--em-sem-status-error-text":         { "value": "#d92d20", "label": "Error text / icon — error messages, negative KPI trend indicators" },
+        "--em-sem-status-error-background":   { "value": "#fee4e2", "label": "Error surface — background behind error indicators" },
+        "--em-sem-status-success-text":       { "value": "#5db075", "label": "Success text / icon — positive KPI trend indicators" },
+        "--em-sem-status-success-background": { "value": "#eaf6ef", "label": "Success surface — background behind success indicators" }
+      },
+      "shadows": {
+        "_description": "Shadow styling for elevated surfaces (cards, dropdowns). This entire section is optional — remove it if your design does not define custom shadows.",
+        "--em-core-shadow-color":      { "value": "rgb(38 36 131 / 25%)", "label": "Shadow color — e.g. 'rgb(0 0 0 / 25%)'" },
+        "--em-core-shadow-blur":       { "value": "20px",                 "label": "Shadow blur radius — e.g. '20px'" },
+        "--em-core-shadow-position-y": { "value": "2px",                  "label": "Shadow vertical offset — e.g. '2px'" }
+      }
+    },
+    "scoring": {
+      "_description": "Weights control how much each category contributes to the overall score (should sum to 100). colorTolerance is the max deltaE for a 'close match' — 0 means exact only, 15 means perceptually similar colors are accepted.",
+      "weights": {
+        "chartColors": 30,
+        "backgrounds": 25,
+        "textColors": 25,
+        "statusColors": 10,
+        "shadows": 10
+      },
+      "colorTolerance": 15
+    }
+  }

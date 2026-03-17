@@ -1,0 +1,66 @@
+{
+    "meta": {
+      "name": "AI Week Library - 2",
+      "figmaUrl": "https://www.figma.com/design/MP1OupV4ok6EOQfSeQAShs/AI-Week-Library---2?node-id=103-52141&t=QUAOlPRpnzyB80nl-1",
+      "description": "Clean all-white UI with a vivid blue brand accent (#37A3FF) and a five-color analytics palette (blue, amber, green, yellow, red-coral). Pure white card and container surfaces throughout, a deep navy (#043873) inverted surface for tooltips and selected states, and near-black (#212529) text across all roles. Designed for data-heavy dashboards with strong contrast and clear status signaling."
+    },
+    "expected": {
+      "chartColors": {
+        "_description": "Five-color analytics palette extracted from the design. Blue leads as the brand accent, followed by amber, green, yellow, and red-coral for maximum differentiation across chart series.",
+        "backgroundColors": [
+          "#37A3FF",
+          "#FFBF60",
+          "#00CA75",
+          "#FFDC4D",
+          "#FF5758"
+        ],
+        "borderColors": [
+          "#2B8BD9",
+          "#D9A251",
+          "#00AD63",
+          "#D9BC41",
+          "#D94849"
+        ]
+      },
+      "backgrounds": {
+        "_description": "All-white surface system with a deep navy inverted surface. Every interactive and container layer uses pure white; the dark navy anchors tooltips and filled trigger elements.",
+        "--em-sem-background":          { "value": "#FFFFFF", "label": "Card / widget surface — primary background for chart cards and interactive hover surfaces" },
+        "--em-sem-background--neutral":  { "value": "#FFFFFF", "label": "Page / container surface — default surface for table headers, select dropdowns, loaders" },
+        "--em-sem-background--light":    { "value": "#FFFFFF", "label": "Secondary surface — filled inputs, date range backgrounds, disabled buttons" },
+        "--em-sem-background--muted":    { "value": "#FFFFFF", "label": "Pressed / low-emphasis — select field borders, active button states" },
+        "--em-sem-background--subtle":   { "value": "#FFFFFF", "label": "Hover / soft emphasis — active inputs, toggle-on state, hover buttons" },
+        "--em-sem-background--inverted": { "value": "#043873", "label": "Dark / inverted surface — tooltips, filled select triggers, switch off state" }
+      },
+      "textColors": {
+        "_description": "Near-black text on white backgrounds. A single dark tone (#212529) covers all primary, muted, subtle, and neutral roles; white is reserved for text on the navy inverted surface.",
+        "--em-sem-text":           { "value": "#212529", "label": "Primary text — titles, labels, values, icons, all primary content" },
+        "--em-sem-text--muted":    { "value": "#212529", "label": "Secondary text — subtitles, descriptions, axis labels, legends" },
+        "--em-sem-text--subtle":   { "value": "#212529", "label": "Disabled / low-contrast — disabled states, placeholder text, subtle grid lines" },
+        "--em-sem-text--neutral":  { "value": "#212529", "label": "Neutral emphasis — loading indicators, category labels" },
+        "--em-sem-text--inverted": { "value": "#FFFFFF",  "label": "Text on dark surfaces — tooltip titles, selected dropdown items, primary buttons" }
+      },
+      "statusColors": {
+        "_description": "Red-coral for errors (matching the chart's fifth color), brand green for success. Both sit on pure white backgrounds.",
+        "--em-sem-status-error-text":         { "value": "#FF5758", "label": "Error text / icon — error messages, negative KPI trend indicators" },
+        "--em-sem-status-error-background":   { "value": "#FFFFFF", "label": "Error surface — background behind error indicators" },
+        "--em-sem-status-success-text":       { "value": "#00CA75", "label": "Success text / icon — positive KPI trend indicators" },
+        "--em-sem-status-success-background": { "value": "#FFFFFF", "label": "Success surface — background behind success indicators" }
+      },
+      "shadows": {
+        "_description": "Soft black shadow with a large blur for elevated card and dropdown surfaces.",
+        "--em-core-shadow-color":      { "value": "rgb(0 0 0 / 20%)", "label": "Shadow color — neutral black at 20% opacity" },
+        "--em-core-shadow-blur":       { "value": "50px",             "label": "Shadow blur radius" },
+        "--em-core-shadow-position-y": { "value": "4px",              "label": "Shadow vertical offset" }
+      }
+    },
+    "scoring": {
+      "weights": {
+        "chartColors": 30,
+        "backgrounds": 25,
+        "textColors": 25,
+        "statusColors": 10,
+        "shadows": 10
+      },
+      "colorTolerance": 15
+    }
+  }
