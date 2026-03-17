@@ -2,13 +2,6 @@
 
 Apply your brand's look and feel to Embeddable Remarkable Pro using AI — no need to manually dig through CSS variables.
 
-## Overview
-
-This workflow lets you:
-1. Extract design tokens from a Figma file
-2. Feed them to an AI agent in Cursor
-3. Get a correctly structured `embeddable.theme.ts` that matches your design
-
 ## Prerequisites
 
 - [Cursor IDE](https://cursor.sh) installed
@@ -18,36 +11,34 @@ This workflow lets you:
 
 ## Quick Start
 
-### Step 1: Set your Figma token
+Open Cursor chat and paste this (replacing the placeholders with your own values):
 
-```bash
-export FIGMA_ACCESS_TOKEN="your-figma-token-here"
-```
+> Apply my Figma design to this project.
+> Here is the Figma file: `https://www.figma.com/design/YOUR_FILE_KEY/Your-Design`
+> My Figma API token is: `your-figma-token-here`
 
-### Step 2: Extract tokens from your Figma file
+That's it. The agent will:
+1. Extract design tokens from your Figma file automatically
+2. Generate and apply a theme to `embeddable.theme.ts`
+3. Show you a summary of what was applied
 
-```bash
-npx tsx scripts/extract-figma-tokens.ts "https://www.figma.com/design/YOUR_FILE_KEY/Your-Design"
-```
+## Refining your theme
 
-This creates `figma-tokens.json` in the repo root with structured design tokens.
+After the initial theme is applied, the agent will ask if you'd like any adjustments. You can make as many changes as you want:
 
-### Step 3: Ask the agent to apply the theme
-
-Open Cursor chat and type:
-
-> Based on the tokens in figma-tokens.json, update embeddable.theme.ts to match this design.
-
-The agent will read the tokens, understand the Embeddable theming model, and generate the correct overrides.
-
-### Step 4: Iterate
-
-You can refine the theme incrementally:
+> "Set all border radiuses to 4px"
 
 > "Make the chart colors more vibrant"
-> "Change the font to Poppins"
-> "Set all border radiuses to 4px"
+
 > "Create a dark mode version"
+
+> "Use a darker background for the cards"
+
+Each change is applied immediately, and the agent shows you what changed.
+
+## Previewing your theme
+
+When you're happy with the result, just say something like **"done"**, **"looks good"**, or **"let's preview"** and the agent will start the dev server for you so you can see your themed app in the browser.
 
 ## How It Works
 

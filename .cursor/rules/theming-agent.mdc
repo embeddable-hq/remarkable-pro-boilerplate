@@ -1,7 +1,7 @@
 ---
 description: Rules for AI-assisted theming of Embeddable Remarkable Pro components
 globs: ["embeddable.theme.ts", "dark-theme.ts", "*-theme.ts", "scripts/extract-figma-tokens.*", "figma-tokens.json"]
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Embeddable Theming Agent
