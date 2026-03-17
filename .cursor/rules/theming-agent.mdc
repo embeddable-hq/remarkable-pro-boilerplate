@@ -175,6 +175,56 @@ When `statusColorCandidates` is empty, derive status colors that harmonize:
 4. Target 8 colors total
 5. Generate `borderColors` as each background color darkened by ~15%
 
+### Design quality rules
+
+These rules come from designer evaluations of AI-generated themes. See
+`DESIGN-UNIVERSAL-RULES.md` for the full list. The most critical are codified below.
+
+#### Brand tinting guard
+
+After setting all background tokens, verify that `background--neutral`, `background`,
+and `background--light` are **achromatic** (saturation < 5% in HSL). Only `subtle` and
+`muted` may carry a faint brand tint. Brand/accent colors must NEVER bleed into table,
+dropdown, card, or modal surfaces.
+
+If a `backgroundCandidate` from the extraction is chromatic (saturation > 10%), discard
+it and derive a neutral value instead — it was likely a misclassified brand color.
+
+#### Warm hue vigilance
+
+When the primary brand color has hue 20–60 (yellow, amber, gold):
+- Double-check every background token for yellowish tint
+- Verify table and select menu surfaces are pure white or neutral gray
+- Warm tints are the single most common "yellowish table" defect
+
+#### Neutral surface audit
+
+After generating the theme, run this mental audit:
+1. `background--neutral` must be `#FFFFFF` or near-white (luminance > 0.95)
+2. `background` (card surface) must be white or very light gray (luminance > 0.93)
+3. `background--light` must be achromatic or near-achromatic (saturation < 5%)
+4. If any of these have saturation > 10%, replace with the nearest achromatic equivalent
+5. `background--inverted` is exempt — it is the dark surface for tooltips/controls
+
+#### Contrast requirements (WCAG AA)
+
+Verify these text-on-background pairs have >= 4.5:1 contrast ratio:
+- `text` on `background` (primary content readability)
+- `text--muted` on `background--light` (secondary content readability)
+- `text--inverted` on `background--inverted` (tooltip/button readability)
+
+Contrast ratio formula: `(L_lighter + 0.05) / (L_darker + 0.05)` where L is relative
+luminance. `L = 0.2126*R + 0.7152*G + 0.0722*B` (linearized sRGB).
+
+#### Chart color fidelity
+
+When the Figma design defines explicit chart/series colors, use them directly. Do NOT
+generate derivative palettes when originals exist. Only expand via hue rotation when
+the extraction provides fewer than 6 chart colors.
+
+Chart colors must be distinguishable from each other AND from the background at both
+full and reduced opacity.
+
 ### Quality checklist
 
 Before outputting a theme, verify:
@@ -193,6 +243,10 @@ Before outputting a theme, verify:
 - [ ] Status backgrounds are light tints of their text colors, not arbitrary pastels
 - [ ] Dark themes invert backgrounds and text
 - [ ] The output is valid `DeepPartial<Theme>` TypeScript
+- [ ] **Neutral surface audit passed** — background/neutral/light have saturation < 5%
+- [ ] **No brand tint bleed** — tables, dropdowns, cards use white or neutral surfaces
+- [ ] **Contrast check** — text-on-background pairs meet 4.5:1 WCAG AA ratio
+- [ ] **Chart colors from Figma used directly** — no unnecessary derivative generation
 
 ### Iterative theming
 

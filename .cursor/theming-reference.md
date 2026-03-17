@@ -340,6 +340,75 @@ Border colors: each darkened 15%.
 
 ---
 
+## Design Quality Guidelines
+
+These guidelines are derived from designer evaluations of AI-generated themes. The full
+list lives in `DESIGN-UNIVERSAL-RULES.md`. Key points are summarized here for quick reference.
+
+### Brand tinting and neutral surfaces
+
+The most common defect in AI-generated themes is **brand color bleeding into neutral
+surfaces** — tables, dropdowns, cards, and modals that should be white/gray end up
+tinted with the brand color.
+
+**Rule:** `background--neutral`, `background`, and `background--light` must be achromatic
+(HSL saturation < 5%). Only `background--subtle` and `background--muted` may carry a
+faint brand tint. `background--inverted` is exempt (dark surface).
+
+**Warm hue danger zone:** When the brand color has hue 20–60 (yellow, amber, gold), the
+risk of yellowish tables and menus is highest. After generating the theme, explicitly
+verify all neutral surfaces are not tinted.
+
+### Neutral surface audit recipe
+
+After setting all background tokens, check each one:
+
+```
+For each bg in [neutral, background, light]:
+  Convert to HSL
+  If saturation > 5%:
+    → FAIL: replace with nearest achromatic (set S=0, keep L)
+```
+
+For `subtle` and `muted`: saturation up to ~15% is acceptable if it matches the design.
+For `inverted`: no saturation check needed (it's the dark surface).
+
+### Contrast ratio check (WCAG AA)
+
+All text-on-background pairs must meet a **4.5:1 contrast ratio**.
+
+**Formula:**
+
+```
+relative_luminance(color) =
+  R_lin = (R/255 <= 0.04045) ? R/255/12.92 : ((R/255 + 0.055)/1.055)^2.4
+  G_lin = (same for G)
+  B_lin = (same for B)
+  L = 0.2126 * R_lin + 0.7152 * G_lin + 0.0722 * B_lin
+
+contrast_ratio = (L_lighter + 0.05) / (L_darker + 0.05)
+```
+
+**Key pairs to verify:**
+
+| Text token | Background token | Min ratio |
+|-----------|-----------------|-----------|
+| `text` | `background` | 4.5:1 |
+| `text--muted` | `background--light` | 4.5:1 |
+| `text--inverted` | `background--inverted` | 4.5:1 |
+| `text--subtle` | `background` | 3:1 (large text acceptable) |
+
+If a pair fails, darken the text token or lighten the background token until it passes.
+
+### Chart color rules
+
+- When Figma defines explicit chart colors, use them directly — do not regenerate
+- Chart colors must be distinguishable from each other (>= 30° hue separation)
+- Chart colors must be distinguishable from the background at full and reduced opacity
+- Only expand via hue rotation when extraction provides fewer than 6 colors
+
+---
+
 ## Rules for the Agent
 
 1. **Always use semantic tokens** (`--em-sem-*`) as the primary theming layer.
