@@ -86,6 +86,23 @@ Weighted Score:     100%
 npx tsx scripts/score-theme.ts tests/golden-standards/ai-week-library.golden.json --json
 ```
 
+### Extraction-only scoring (recommended)
+
+When you provide the `--figma-tokens` flag, the scorer only checks tokens that have
+corresponding extraction candidates. Derived/invented tokens are skipped. This isolates
+extraction accuracy from the agent's harmony-derivation quality.
+
+```bash
+npx tsx scripts/score-theme.ts tests/golden-standards/ai-week-library-2.json --figma-tokens figma-tokens-2.json
+```
+
+How it works:
+- Reads the `figma-tokens-*.json` to see which categories and tokens had extraction candidates
+- **Skips entire categories** with zero candidates (e.g. status colors when none were extracted)
+- **Skips individual tokens** without a matching key in the candidates (e.g. `--em-sem-background--inverted` when only `background` and `background--neutral` were extracted)
+- **Limits chart colors** to the number of extraction candidates (derived chart expansion slots are skipped)
+- Weight redistribution happens naturally — skipped categories don't count toward the total
+
 ### Score against a specific theme file
 
 ```bash

@@ -199,6 +199,147 @@ When extracting design tokens from a Figma file, map them as follows:
 
 ---
 
+## Palette Derivation (ONLY for missing tokens)
+
+**Extraction candidates are the primary source of truth.** Use them as-is first. Only after
+mapping all available candidates, check which of the 15 semantic color tokens are still
+unset. Apply these derivation formulas ONLY to those genuinely missing tokens.
+
+**Do NOT re-derive tokens that already have extraction values.** The extraction saw the
+actual Figma file — trust its values over computed interpolations.
+
+### Inputs
+
+Before deriving, identify these anchor colors from the extraction (used only for gaps):
+
+| Anchor | Source | Fallback |
+|--------|--------|----------|
+| **Primary text** | Darkest `textColorCandidate`, or darkest color with luminance < 0.05 | `#000000` |
+| **Card background** | `backgroundCandidates['--em-sem-background']` or lightest neutral | `#FAFAFA` |
+| **Page background** | `backgroundCandidates['--em-sem-background--neutral']` or pure white | `#FFFFFF` |
+| **Brand chromatics** | `chartColorCandidates` (the palette's vivid accent colors) | — |
+
+### Formulas
+
+All interpolation uses **linear interpolation in sRGB space** on each channel independently.
+`mix(a, b, t)` means `a + (b − a) × t` per channel, where `t = 0` returns `a` and `t = 1` returns `b`.
+
+#### Text hierarchy (derive only tokens missing from extraction)
+
+Starting anchors: `textColor` (primary text) and `cardBg` (card background).
+**Skip any token that already has an extraction value.**
+
+```
+--em-sem-text           = textColor                      (use extraction value)
+--em-sem-text--neutral  = mix(cardBg, textColor, 0.90)   (90% toward text)
+--em-sem-text--subtle   = mix(cardBg, textColor, 0.55)   (55% toward text)
+--em-sem-text--muted    = mix(cardBg, textColor, 0.30)   (30% toward text)
+--em-sem-text--inverted = pageBg or #FFFFFF               (lightest surface)
+```
+
+Example: if extraction provides `text`, `neutral`, and `subtle` — use those three as-is
+and only derive `muted` and `inverted`.
+
+This preserves the hue/warmth of `textColor` through derived values.
+
+#### Background hierarchy (derive only tokens missing from extraction)
+
+Starting anchors: `pageBg` (page background) and `cardBg` (card background).
+**Skip any token that already has an extraction value.**
+
+The "step color" is the darker direction — derived from the primary text at low opacity.
+
+```
+stepColor = mix(cardBg, textColor, 0.08)  — a hint of text darkness
+
+--em-sem-background--neutral  = pageBg                           (purest surface)
+--em-sem-background           = cardBg                           (card surface)
+--em-sem-background--light    = mix(cardBg, stepColor, 0.40)     (~3-5% darker)
+--em-sem-background--subtle   = mix(cardBg, stepColor, 1.0)      (~8% darker)
+--em-sem-background--muted    = mix(cardBg, stepColor, 2.0*)     (~15% darker)
+--em-sem-background--inverted = darkest design element or #000000
+```
+
+*For `--muted`, clamp the result so it stays darker than `--subtle` but not too heavy.
+In practice: take `--subtle` and mix it 50% further toward the text color.
+
+#### Status colors (only when `statusColorCandidates` is empty)
+
+1. **Classify palette warmth**: compute the average hue of all chromatic `chartColorCandidates` (saturation > 20%).
+   - Warm (hue 0–60 or 300–360): error red = `#D92D20`
+   - Cool (hue 120–270): error red = `#DC2626`
+   - Neutral / mixed: error red = `#D92D20`
+2. **Success text**: reuse the greenest chart color (hue 90–170). If none, pick `#16A34A` for vivid palettes or `#5DB075` for muted palettes.
+3. **Status backgrounds**: blend the status text color at 8% over the card background:
+   ```
+   statusBg = mix(cardBg, statusTextColor, 0.08)
+   ```
+
+#### Chart palette expansion (only when fewer than 6 extracted chart colors)
+
+1. Convert existing colors to HSL.
+2. Compute the average saturation (`S_avg`) and lightness (`L_avg`).
+3. Identify hue gaps by sorting existing hues and finding the largest gaps.
+4. Fill gaps by placing new colors at the midpoints, using `S_avg` and `L_avg`.
+5. Ensure every pair of colors has ≥ 30° hue separation.
+6. Target 8 total colors.
+7. `borderColors[i]` = `backgroundColors[i]` with lightness reduced by 15%.
+
+### Worked Example
+
+**Input**: Warm green palette from Figma extraction:
+- Chart candidates: `#5DB075`, `#FFB84E`, `#5162FA`
+- Extracted backgrounds: `neutral` → `#FFFFFF`, `background` → `#FAFAFA` (only 2 of 6)
+- Extracted text: `text` → `#000000`, `subtle` → `#666666` (only 2 of 5)
+- Status candidates: empty
+- Card background anchor: `#FAFAFA`
+- Page background anchor: `#FFFFFF`
+
+**Step 1 — Text tokens (use extraction, derive only gaps):**
+```
+text           = #000000                            (EXTRACTED — keep as-is)
+text--neutral  = mix(#FAFAFA, #000000, 0.90)  ≈ #191919   (DERIVED — missing)
+text--subtle   = #666666                            (EXTRACTED — keep as-is)
+text--muted    = mix(#FAFAFA, #000000, 0.30)  ≈ #B2B2B2   (DERIVED — missing)
+text--inverted = #FFFFFF                             (DERIVED — missing)
+```
+
+**Step 2 — Background tokens (use extraction, derive only gaps):**
+```
+stepColor = mix(#FAFAFA, #000000, 0.08) ≈ #E7E7E7
+
+background--neutral  = #FFFFFF          (EXTRACTED — keep as-is)
+background           = #FAFAFA          (EXTRACTED — keep as-is)
+background--light    = mix(#FAFAFA, #E7E7E7, 0.40) ≈ #F3F3F3   (DERIVED — missing)
+background--subtle   = mix(#FAFAFA, #E7E7E7, 1.0)  ≈ #E7E7E7   (DERIVED — missing)
+background--muted    = mix(#E7E7E7, #000000, 0.08)  ≈ #D5D5D5   (DERIVED — missing)
+background--inverted = #000000                                    (DERIVED — missing)
+```
+
+**Step 3 — Status colors (all derived — no extraction candidates):**
+Palette hues: `#5DB075` → ~140° (green), `#FFB84E` → ~37° (amber), `#5162FA` → ~235° (blue).
+Average hue ≈ 137° — mixed/slightly cool.
+- Error text: `#D92D20` (standard warm red)
+- Error background: `mix(#FAFAFA, #D92D20, 0.08)` ≈ `#FDE8E5`
+- Success text: `#5DB075` (greenest chart color, hue 140°)
+- Success background: `mix(#FAFAFA, #5DB075, 0.08)` ≈ `#EEF7F1`
+
+**Step 4 — Chart expansion (3 → 8):**
+Existing hues: 140°, 37°, 235°. Gaps: 37→140 (103°), 140→235 (95°), 235→37 (162°).
+Fill the largest gaps:
+- Gap 235→37: insert at ~316° (magenta) and ~358° (red)
+- Gap 37→140: insert at ~88° (lime-green)
+- Gap 140→235: insert at ~188° (teal)
+- Add one more at ~270° (purple)
+
+Result (8 colors, all ≥30° apart):
+```
+#5DB075, #FFB84E, #5162FA, #E84E8A, #F76C5E, #8CC63F, #2BBCB3, #A35FE0
+```
+Border colors: each darkened 15%.
+
+---
+
 ## Rules for the Agent
 
 1. **Always use semantic tokens** (`--em-sem-*`) as the primary theming layer.

@@ -92,48 +92,107 @@ outermost container (pure white). When in doubt, assign pure white to `--neutral
 For `--em-sem-background--inverted`, default to `#000000` unless the design explicitly uses
 a different dark surface for tooltips/overlays. Do NOT use OS chrome colors (status bars, etc.).
 
-### Default status colors
+### Working from Figma tokens (PRIMARY WORKFLOW)
 
-When the Figma extraction has no clear error/success colors, use these standard defaults:
-- Error text: `#d92d20` / Error background: `#fee4e2`
-- Success text: derive from the primary brand green if available, otherwise `#16a34a`
-- Success background: a very light tint of the success text color
+When the user provides a `figma-tokens.json` file (from the extraction script):
 
-### Working from Figma tokens
-
-When the user provides a `figma-tokens.json` file (from the extraction script), map the tokens:
-
-1. **`chartColorCandidates`** → `charts.backgroundColors` (use directly, they are pre-filtered)
-2. **`backgroundCandidates`** → semantic background tokens (use the mapping keys directly)
-3. **`textColorCandidates`** → semantic text tokens (use the mapping keys directly)
-4. **`statusColorCandidates`** → status tokens (use directly if present)
+1. **`chartColorCandidates`** → `charts.backgroundColors` (use directly, they are pre-filtered).
+   If fewer than 6, expand the palette using the chart derivation rules below.
+2. **`backgroundCandidates`** → semantic background tokens. **Use extraction values as-is.**
+3. **`textColorCandidates`** → semantic text tokens. **Use extraction values as-is.**
+4. **`statusColorCandidates`** → status tokens. **Use extraction values as-is.**
 5. **`effects`** → shadow core tokens (pick the most prominent DROP_SHADOW)
 6. **`colors`** array → use for additional context when candidates are insufficient
 7. **Text styles** → IGNORE font families (not supported). Only note them in summary.
 
-When `chartColorCandidates` are present, use them as-is. If the list has fewer than 6 colors,
-supplement with additional chromatic colors from the `colors` array.
+**Extraction candidates are the primary source of truth.** Only after mapping all available
+candidates, check which of the 15 semantic color tokens are still missing. Apply derivation
+(see below) ONLY to those genuinely missing tokens.
 
-When `backgroundCandidates` or `textColorCandidates` provide token keys (e.g. `--em-sem-background`),
-use those mappings. But always verify against the ordering rules above — the extraction
-heuristics may occasionally get the ordering wrong.
+Always verify that extraction values satisfy the ordering rules in "Token semantic ordering"
+above — the extraction heuristics may occasionally get the ordering wrong. If a candidate
+clearly violates ordering (e.g. a chromatic color classified as background), discard it
+and treat that token as missing.
+
+### Deriving missing tokens (ONLY for gaps)
+
+After mapping all extraction candidates, some tokens may still be unset. Derive those
+from the design's existing colors so every value harmonizes with the palette.
+
+**Do NOT re-derive tokens that already have extraction values.** The extraction saw the
+actual Figma file — trust its values. Derivation is only a fallback for gaps.
+
+See `.cursor/theming-reference.md` → "Palette Derivation" for detailed formulas and
+a worked example.
+
+#### Text hierarchy (for missing text tokens only)
+
+Given the extracted text tokens and the card background, fill gaps by interpolating:
+
+```
+--em-sem-text           = primary text (from extraction, typically near-black)
+--em-sem-text--neutral  = 90% from background toward text
+--em-sem-text--subtle   = 55% from background toward text
+--em-sem-text--muted    = 30% from background toward text
+--em-sem-text--inverted = #FFFFFF (or lightest surface color)
+```
+
+Only derive the tokens NOT present in extraction. If extraction provides `text`, `neutral`,
+and `subtle` but not `muted`, derive only `muted`.
+
+Preserve hue/warmth of the primary text through all derived values.
+
+#### Background hierarchy (for missing background tokens only)
+
+Given the extracted backgrounds, fill gaps by stepping through lightness:
+
+```
+--em-sem-background--neutral  = purest / lightest surface (often #FFFFFF)
+--em-sem-background           = card / widget surface
+--em-sem-background--light    = ~3-5% darker than background
+--em-sem-background--subtle   = ~8-12% darker than background
+--em-sem-background--muted    = ~15-20% darker than background
+--em-sem-background--inverted = #000000
+```
+
+Only derive the tokens NOT present in extraction. Keep the same tint/warmth as the
+extracted backgrounds.
+
+#### Status colors (when no status candidates exist)
+
+When `statusColorCandidates` is empty, derive status colors that harmonize:
+
+1. **Error text**: Warm palettes → `#D92D20`; cool palettes → `#DC2626`
+2. **Success text**: Reuse the greenest chart color, or pick a green matching the
+   palette's saturation level
+3. **Status backgrounds**: Status text at ~8% opacity over the card background
+
+#### Chart palette expansion (when fewer than 6 chart colors)
+
+1. Start from the existing extracted colors
+2. Rotate hue in even steps, maintaining similar saturation and lightness
+3. Ensure at least 30° hue separation between all colors
+4. Target 8 colors total
+5. Generate `borderColors` as each background color darkened by ~15%
 
 ### Quality checklist
 
 Before outputting a theme, verify:
+- [ ] **All extraction candidates used** — no candidate was dropped without reason
+- [ ] **All 15 semantic color tokens are set** (6 backgrounds + 5 text + 4 status)
+- [ ] Only genuinely missing tokens were derived (not overriding extraction values)
+- [ ] All 3 shadow tokens are set
+- [ ] At least 6-8 chart colors with `borderColors`
 - [ ] All values are valid CSS (hex, rgb, rgba, hsl, var())
-- [ ] Only `--em-sem-*` tokens are used for global appearance changes
-- [ ] Chart colors use `charts.backgroundColors` array
-- [ ] The output is valid `DeepPartial<Theme>` TypeScript
+- [ ] Only `--em-sem-*` tokens used for global appearance
 - [ ] No `--em-core-color-gray--*` overrides (unless explicitly requested)
 - [ ] No font-family tokens (not supported)
 - [ ] Text ordering: text (darkest) > neutral > subtle > muted (lightest)
-- [ ] Background ordering: neutral (purest white) > background (card) > light > subtle > muted
-- [ ] `--em-sem-background--inverted` defaults to `#000000`
-- [ ] Dark themes invert backgrounds (high gray numbers) and text (low gray numbers)
-- [ ] At least 6-8 chart colors are provided for reasonable palette coverage
-- [ ] Border colors are slightly darker than background colors (if provided)
-- [ ] Status colors present (use defaults if Figma data is absent)
+- [ ] Background ordering: neutral (lightest) > background (card) > light > subtle > muted
+- [ ] Derived tokens harmonize with the extracted palette (same warmth/coolness)
+- [ ] Status backgrounds are light tints of their text colors, not arbitrary pastels
+- [ ] Dark themes invert backgrounds and text
+- [ ] The output is valid `DeepPartial<Theme>` TypeScript
 
 ### Iterative theming
 

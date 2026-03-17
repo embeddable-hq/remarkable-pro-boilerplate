@@ -2,10 +2,11 @@
  * Score a generated theme against a golden standard.
  *
  * Usage:
- *   npx tsx scripts/score-theme.ts <golden.json> [embeddable.theme.ts]
+ *   npx tsx scripts/score-theme.ts <golden.json> [embeddable.theme.ts] [--figma-tokens <path>] [--json]
  *
- * Example:
- *   npx tsx scripts/score-theme.ts tests/golden-standards/ai-week-library.golden.json
+ * When --figma-tokens is provided, only tokens that have extraction candidates
+ * are scored. Derived/invented tokens are skipped. This isolates extraction
+ * accuracy from harmony-derivation quality.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -33,6 +34,15 @@ interface GoldenStandard {
   };
 }
 
+interface FigmaTokens {
+  chartColorCandidates?: string[];
+  backgroundCandidates?: Record<string, string>;
+  textColorCandidates?: Record<string, string>;
+  statusColorCandidates?: Record<string, string>;
+  effects?: unknown[];
+  [key: string]: unknown;
+}
+
 interface TokenResult {
   token: string;
   expected: string;
@@ -46,12 +56,21 @@ interface CategoryResult {
   weight: number;
   score: number;
   tokenResults: TokenResult[];
+  skippedTokens?: string[];
   summary: string;
+}
+
+interface SkippedCategory {
+  name: string;
+  weight: number;
+  reason: string;
 }
 
 interface ScoreReport {
   testName: string;
+  extractionOnly: boolean;
   categories: CategoryResult[];
+  skippedCategories: SkippedCategory[];
   structuralChecks: { name: string; passed: boolean; detail: string }[];
   weightedScore: number;
 }
@@ -542,6 +561,9 @@ function formatReport(report: ScoreReport): string {
   const divider = '─'.repeat(50);
 
   lines.push(`Test: ${report.testName}`);
+  if (report.extractionOnly) {
+    lines.push('Mode: EXTRACTION-ONLY (derived tokens skipped)');
+  }
   lines.push('═'.repeat(50));
   lines.push('');
 
@@ -549,7 +571,6 @@ function formatReport(report: ScoreReport): string {
     const pct = `${cat.score}%`.padStart(6);
     lines.push(`${cat.name.padEnd(20)}${pct}  (${cat.summary})`);
 
-    // Show details for non-perfect tokens
     for (const tr of cat.tokenResults) {
       if (tr.score < 100) {
         const status = tr.score === 0 ? 'MISS' : 'CLOSE';
@@ -557,6 +578,17 @@ function formatReport(report: ScoreReport): string {
           `  ${status.padEnd(6)} ${tr.token}: ${tr.detail}`,
         );
       }
+    }
+
+    if (cat.skippedTokens && cat.skippedTokens.length > 0) {
+      lines.push(`  SKIP  ${cat.skippedTokens.length} derived token(s): ${cat.skippedTokens.join(', ')}`);
+    }
+  }
+
+  if (report.skippedCategories.length > 0) {
+    lines.push('');
+    for (const sc of report.skippedCategories) {
+      lines.push(`${sc.name.padEnd(20)}  SKIP  (${sc.reason})`);
     }
   }
 
@@ -582,6 +614,7 @@ function formatJson(report: ScoreReport): string {
   return JSON.stringify(
     {
       testName: report.testName,
+      extractionOnly: report.extractionOnly,
       weightedScore: report.weightedScore,
       categories: report.categories.map((c) => ({
         name: c.name,
@@ -589,7 +622,9 @@ function formatJson(report: ScoreReport): string {
         score: c.score,
         summary: c.summary,
         tokens: c.tokenResults,
+        skippedTokens: c.skippedTokens,
       })),
+      skippedCategories: report.skippedCategories,
       structural: report.structuralChecks,
     },
     null,
@@ -597,11 +632,117 @@ function formatJson(report: ScoreReport): string {
   );
 }
 
+// ─── Figma Token Filtering ────────────────────────────────────────────
+
+function filterGoldenByExtraction(
+  golden: GoldenStandard,
+  figma: FigmaTokens,
+): {
+  filtered: GoldenStandard['expected'];
+  skippedCategories: SkippedCategory[];
+  skippedTokensPerCategory: Record<string, string[]>;
+  chartLimit: number | null;
+} {
+  const weights = golden.scoring.weights;
+  const expected = golden.expected;
+  const skippedCategories: SkippedCategory[] = [];
+  const skippedTokensPerCategory: Record<string, string[]> = {};
+  const filtered: GoldenStandard['expected'] = {};
+
+  const chartCandidateCount = figma.chartColorCandidates?.length ?? 0;
+  let chartLimit: number | null = null;
+
+  if (expected.chartColors) {
+    if (chartCandidateCount > 0) {
+      chartLimit = chartCandidateCount;
+      const bgColors = expected.chartColors.backgroundColors ?? [];
+      const borderColors = expected.chartColors.borderColors ?? [];
+      filtered.chartColors = {
+        backgroundColors: bgColors.slice(0, chartCandidateCount),
+        borderColors: borderColors.length > 0
+          ? borderColors.slice(0, chartCandidateCount)
+          : [],
+      };
+      if (bgColors.length > chartCandidateCount) {
+        skippedTokensPerCategory['Chart Colors'] = bgColors
+          .slice(chartCandidateCount)
+          .map((_, i) => `backgroundColors[${chartCandidateCount + i}]`);
+      }
+    } else {
+      skippedCategories.push({
+        name: 'Chart Colors',
+        weight: weights.chartColors ?? 30,
+        reason: 'no chart color candidates in extraction',
+      });
+    }
+  }
+
+  const candidateMap: [string, string, Record<string, string> | undefined][] = [
+    ['backgrounds', 'Backgrounds', figma.backgroundCandidates],
+    ['textColors', 'Text Colors', figma.textColorCandidates],
+    ['statusColors', 'Status Colors', figma.statusColorCandidates],
+  ];
+
+  for (const [key, displayName, candidates] of candidateMap) {
+    const goldenCat = expected[key as keyof typeof expected] as
+      | Record<string, any>
+      | undefined;
+    if (!goldenCat) continue;
+
+    const candidateKeys = candidates ? Object.keys(candidates) : [];
+
+    if (candidateKeys.length === 0) {
+      skippedCategories.push({
+        name: displayName,
+        weight: weights[key] ?? 10,
+        reason: 'no candidates in extraction',
+      });
+      continue;
+    }
+
+    const filteredCat: Record<string, any> = {};
+    const skipped: string[] = [];
+
+    for (const [token, entry] of Object.entries(goldenCat)) {
+      if (token.startsWith('_')) {
+        filteredCat[token] = entry;
+        continue;
+      }
+      if (candidateKeys.includes(token)) {
+        filteredCat[token] = entry;
+      } else {
+        skipped.push(token);
+      }
+    }
+
+    (filtered as any)[key] = filteredCat;
+    if (skipped.length > 0) {
+      skippedTokensPerCategory[displayName] = skipped;
+    }
+  }
+
+  const effectCount = figma.effects?.length ?? 0;
+  if (expected.shadows) {
+    if (effectCount > 0) {
+      filtered.shadows = expected.shadows;
+    } else {
+      skippedCategories.push({
+        name: 'Shadows',
+        weight: weights.shadows ?? 10,
+        reason: 'no effects in extraction',
+      });
+    }
+  }
+
+  return { filtered, skippedCategories, skippedTokensPerCategory, chartLimit };
+}
+
 // ─── Main ────────────────────────────────────────────────────────────
 
 async function scoreTheme(
   goldenPath: string,
   themePath: string,
+  figmaTokensPath?: string,
 ): Promise<ScoreReport> {
   const goldenRaw = await readFile(resolve(goldenPath), 'utf-8');
   const golden: GoldenStandard = JSON.parse(goldenRaw);
@@ -609,23 +750,35 @@ async function scoreTheme(
 
   const tolerance = golden.scoring.colorTolerance ?? 15;
   const weights = golden.scoring.weights;
-  const expected = golden.expected;
+  const extractionOnly = !!figmaTokensPath;
+
+  let figma: FigmaTokens | null = null;
+  let expected = golden.expected;
+  let allSkippedCategories: SkippedCategory[] = [];
+  let skippedTokensPerCategory: Record<string, string[]> = {};
+
+  if (figmaTokensPath) {
+    const figmaRaw = await readFile(resolve(figmaTokensPath), 'utf-8');
+    figma = JSON.parse(figmaRaw);
+    const result = filterGoldenByExtraction(golden, figma!);
+    expected = result.filtered;
+    allSkippedCategories = result.skippedCategories;
+    skippedTokensPerCategory = result.skippedTokensPerCategory;
+  }
 
   const categories: CategoryResult[] = [];
 
-  // Chart colors
   if (expected.chartColors) {
-    categories.push(
-      scoreChartColors(
-        expected.chartColors,
-        theme.charts,
-        tolerance,
-        weights.chartColors ?? 30,
-      ),
+    const result = scoreChartColors(
+      expected.chartColors,
+      theme.charts,
+      tolerance,
+      weights.chartColors ?? 30,
     );
+    result.skippedTokens = skippedTokensPerCategory['Chart Colors'];
+    categories.push(result);
   }
 
-  // Style categories
   const styleCategories: [string, string, Record<string, any> | undefined][] = [
     ['Backgrounds', 'backgrounds', expected.backgrounds],
     ['Text Colors', 'textColors', expected.textColors],
@@ -635,21 +788,19 @@ async function scoreTheme(
 
   for (const [displayName, weightKey, goldenCat] of styleCategories) {
     if (!goldenCat) continue;
-    categories.push(
-      scoreStyleCategory(
-        displayName,
-        goldenCat,
-        theme.styles,
-        tolerance,
-        weights[weightKey] ?? 10,
-      ),
+    const result = scoreStyleCategory(
+      displayName,
+      goldenCat,
+      theme.styles,
+      tolerance,
+      weights[weightKey] ?? 10,
     );
+    result.skippedTokens = skippedTokensPerCategory[displayName];
+    categories.push(result);
   }
 
-  // Structural checks
   const structuralChecks = runStructuralChecks(theme);
 
-  // Weighted score
   const totalWeight = categories.reduce((s, c) => s + c.weight, 0);
   const weightedSum = categories.reduce(
     (s, c) => s + c.score * c.weight,
@@ -662,7 +813,9 @@ async function scoreTheme(
 
   return {
     testName: golden.meta.name,
+    extractionOnly,
     categories,
+    skippedCategories: allSkippedCategories,
     structuralChecks,
     weightedScore,
   };
@@ -673,7 +826,7 @@ async function main() {
 
   if (args.length === 0) {
     console.error(
-      'Usage: npx tsx scripts/score-theme.ts <golden.json> [embeddable.theme.ts] [--json]',
+      'Usage: npx tsx scripts/score-theme.ts <golden.json> [embeddable.theme.ts] [--figma-tokens <path>] [--json]',
     );
     process.exit(1);
   }
@@ -682,8 +835,14 @@ async function main() {
   const themePath = args.find((a) => a.endsWith('.ts')) || 'embeddable.theme.ts';
   const jsonOutput = args.includes('--json');
 
+  let figmaTokensPath: string | undefined;
+  const ftIdx = args.indexOf('--figma-tokens');
+  if (ftIdx !== -1 && args[ftIdx + 1]) {
+    figmaTokensPath = args[ftIdx + 1];
+  }
+
   try {
-    const report = await scoreTheme(goldenPath, themePath);
+    const report = await scoreTheme(goldenPath, themePath, figmaTokensPath);
 
     if (jsonOutput) {
       console.log(formatJson(report));

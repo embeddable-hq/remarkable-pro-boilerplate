@@ -6,12 +6,12 @@
   },
   "expected": {
     "chartColors": {
-      "_description": "The branded data/chart palette in order of priority. Use hex values (e.g. '#2563EB'). Include 6-10 colors for good coverage. borderColors are optional (slightly darker variants of backgroundColors for chart strokes).",
+      "_description": "The branded data/chart palette in order of priority. Use hex values (e.g. '#2563EB'). Include 6-10 colors for good coverage. borderColors are optional (slightly darker variants of backgroundColors for chart strokes). Include colors the agent should derive if fewer than 6 are in the Figma — the scorer will check them.",
       "backgroundColors": [],
       "borderColors": []
     },
     "backgrounds": {
-      "_description": "Surface and container colors. Only include the ones your design explicitly defines. Remove any tokens you don't need.",
+      "_description": "Surface and container colors. Include tokens from the Figma design AND any tokens you expect the agent to derive from the palette. If you omit a token, the scorer won't check it.",
       "--em-sem-background":          { "value": "", "label": "Card / widget surface — the primary background for chart cards and interactive hover surfaces" },
       "--em-sem-background--neutral":  { "value": "", "label": "Page / container surface — default surface for table headers, select dropdowns, loaders" },
       "--em-sem-background--light":    { "value": "", "label": "Secondary surface — used for filled inputs, date range backgrounds, disabled buttons" },
@@ -20,7 +20,7 @@
       "--em-sem-background--inverted": { "value": "", "label": "Dark / inverted surface — tooltips, filled select triggers, switch off state" }
     },
     "textColors": {
-      "_description": "Text colors used across the UI. Only include the ones your design explicitly defines. Remove any tokens you don't need.",
+      "_description": "Text colors used across the UI. Include tokens from the Figma design AND any tokens you expect the agent to derive from the palette. If you omit a token, the scorer won't check it.",
       "--em-sem-text":           { "value": "", "label": "Primary text — titles, labels, values, icons, all primary content" },
       "--em-sem-text--muted":    { "value": "", "label": "Secondary text — subtitles, descriptions, axis labels, legends" },
       "--em-sem-text--subtle":   { "value": "", "label": "Disabled / low-contrast — disabled states, placeholder text, subtle grid lines" },
@@ -28,7 +28,8 @@
       "--em-sem-text--inverted": { "value": "", "label": "Text on dark surfaces — tooltip titles, selected dropdown items, primary buttons" }
     },
     "statusColors": {
-      "_description": "Error and success indicator colors. This entire section is optional — remove it if your design does not define status colors.",
+      "_description": "Error and success indicator colors. Even if your design doesn't define explicit status colors, include the values you'd expect the agent to derive from the overall palette. If you omit this section entirely, the scorer won't check status colors.",
+      "_note": "The agent derives status colors from the palette's warmth and any brand greens. Include your expected values here so the scorer can verify the derivation is harmonious.",
       "--em-sem-status-error-text":         { "value": "", "label": "Error text / icon — error messages, negative KPI trend indicators" },
       "--em-sem-status-error-background":   { "value": "", "label": "Error surface — background behind error indicators" },
       "--em-sem-status-success-text":       { "value": "", "label": "Success text / icon — positive KPI trend indicators" },
