@@ -59,7 +59,7 @@ After applying the theme, ask the user:
 > - *Create a dark mode version*
 > - *Use a darker background for cards*
 >
-> When you're happy with the result, just let me know and I'll give you the command to start the dev server so you can preview it."
+> When you're happy with the result, just let me know and I'll start the dev server so you can preview it."
 
 Stay in this loop:
 1. User requests a change → apply it to `embeddable.theme.ts` (or related files)
@@ -68,13 +68,14 @@ Stay in this loop:
 
 ## Phase 4: Launch
 
-When the user signals they're done — any natural finish phrase like "done", "that's all", "looks good", "I'm happy with it", "let's preview", "start the server" — tell them to start the dev server from their terminal:
+When the user signals they're done — any natural finish phrase like "done", "that's all", "looks good", "I'm happy with it", "let's preview", "start the server":
 
-```bash
-npm run embeddable:dev
-```
-
-This command requires interactive workspace selection (arrow-key menu) that cannot be handled by the agent. Instruct the user to run it directly in their terminal. Confirm that the theme is fully applied and ready to preview once the server starts.
+1. Ask the user for their **Embeddable workspace ID**. They can find it in their Embeddable dashboard URL (it looks like a UUID, e.g. `3bdc145b-6518-4e29-91a4-b3d8c9051143`).
+2. Once they provide the workspace ID, run:
+   ```bash
+   npm run embeddable:dev -- --w <workspace-id>
+   ```
+3. Confirm the dev server is running and tell the user where to preview their themed app.
 
 ## Important notes
 

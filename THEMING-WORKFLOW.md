@@ -38,7 +38,7 @@ Each change is applied immediately, and the agent shows you what changed.
 
 ## Previewing your theme
 
-When you're happy with the result, just say something like **"done"**, **"looks good"**, or **"let's preview"** and the agent will start the dev server for you so you can see your themed app in the browser.
+When you're happy with the result, just say something like **"done"**, **"looks good"**, or **"let's preview"**. The agent will ask for your **Embeddable workspace ID** (the UUID from your dashboard URL) and then start the dev server for you so you can see your themed app in the browser.
 
 ## How It Works
 
