@@ -1,0 +1,1019 @@
+<!-- AUTO-GENERATED — do not edit manually -->
+<!-- Run: npx tsx scripts/generate-theming-tokens.ts -->
+<!-- Generated: 2026-03-18T12:34:18.181Z -->
+<!-- remarkable-ui: 2.0.45, remarkable-pro: 0.1.24 -->
+
+# Embeddable Theming Tokens Reference
+
+This file is auto-generated from the installed `@embeddable.com/remarkable-ui@2.0.45` and `@embeddable.com/remarkable-pro@0.1.24` packages. **Do not edit manually** — run `npx tsx scripts/generate-theming-tokens.ts` to regenerate.
+
+**Total tokens:** 612 (75 core, 25 semantic, 512 component)
+
+For design guidelines, derivation formulas, and quality rules, see `.cursor/theming-reference.md` and `DESIGN-UNIVERSAL-RULES.md`.
+
+---
+
+## Core Tokens (`--em-core-*`)
+
+Raw CSS primitives. Override only when redefining foundations (spacing scale, shadow). **Do not set font tokens** — custom fonts are not supported through theming.
+
+| Token | Default |
+|-------|---------|
+| `--em-core-border-radius--000` | `0px` |
+| `--em-core-border-radius--050` | `2px` |
+| `--em-core-border-radius--100` | `4px` |
+| `--em-core-border-radius--150` | `6px` |
+| `--em-core-border-radius--200` | `8px` |
+| `--em-core-border-radius--300` | `12px` |
+| `--em-core-border-radius--400` | `32px` |
+| `--em-core-border-radius--500` | `9999px` |
+| `--em-core-border-width--000` | `0px` |
+| `--em-core-border-width--025` | `1px` |
+| `--em-core-border-width--050` | `2px` |
+| `--em-core-border-width--100` | `4px` |
+| `--em-core-color-gray--0000` | `rgb(255 255 255)` |
+| `--em-core-color-gray--0050` | `rgb(247 247 248)` |
+| `--em-core-color-gray--0100` | `rgb(237 237 241)` |
+| `--em-core-color-gray--0200` | `rgb(228 228 234)` |
+| `--em-core-color-gray--0300` | `rgb(210 210 213)` |
+| `--em-core-color-gray--0400` | `rgb(184 184 189)` |
+| `--em-core-color-gray--0500` | `rgb(144 144 152)` |
+| `--em-core-color-gray--0600` | `rgb(114 114 121)` |
+| `--em-core-color-gray--0700` | `rgb(92 92 102)` |
+| `--em-core-color-gray--0800` | `rgb(49 49 61)` |
+| `--em-core-color-gray--0900` | `rgb(33 33 41)` |
+| `--em-core-color-gray--1000` | `rgb(0 0 0)` |
+| `--em-core-font-family--base` | `inter` |
+| `--em-core-font-family--code` | `monospace` |
+| `--em-core-font-size--md` | `16px` |
+| `--em-core-font-size--sm` | `14px` |
+| `--em-core-font-size--xl` | `20px` |
+| `--em-core-font-size--xs` | `12px` |
+| `--em-core-font-size--xxl` | `32px` |
+| `--em-core-font-weight--bold` | `700` |
+| `--em-core-font-weight--medium` | `500` |
+| `--em-core-font-weight--regular` | `400` |
+| `--em-core-line-height--l` | `19px` |
+| `--em-core-line-height--md` | `16px` |
+| `--em-core-line-height--sm` | `14px` |
+| `--em-core-line-height--xl` | `38px` |
+| `--em-core-shadow-blur` | `40px` |
+| `--em-core-shadow-color` | `rgb(33 33 41 / 25%)` |
+| `--em-core-shadow-position-x` | `0px` |
+| `--em-core-shadow-position-y` | `1px` |
+| `--em-core-shadow-spread` | `0px` |
+| `--em-core-size--0000` | `0px` |
+| `--em-core-size--0050` | `2px` |
+| `--em-core-size--0100` | `4px` |
+| `--em-core-size--0150` | `6px` |
+| `--em-core-size--0200` | `8px` |
+| `--em-core-size--0300` | `12px` |
+| `--em-core-size--0400` | `16px` |
+| `--em-core-size--0500` | `20px` |
+| `--em-core-size--0600` | `24px` |
+| `--em-core-size--0700` | `28px` |
+| `--em-core-size--0800` | `32px` |
+| `--em-core-size--0900` | `36px` |
+| `--em-core-size--1000` | `40px` |
+| `--em-core-size--1200` | `48px` |
+| `--em-core-size--1600` | `64px` |
+| `--em-core-size--2000` | `80px` |
+| `--em-core-spacing--0000` | `0px` |
+| `--em-core-spacing--0050` | `2px` |
+| `--em-core-spacing--0100` | `4px` |
+| `--em-core-spacing--0150` | `6px` |
+| `--em-core-spacing--0200` | `8px` |
+| `--em-core-spacing--0300` | `12px` |
+| `--em-core-spacing--0400` | `16px` |
+| `--em-core-spacing--0500` | `20px` |
+| `--em-core-spacing--0600` | `24px` |
+| `--em-core-spacing--0700` | `28px` |
+| `--em-core-spacing--0800` | `32px` |
+| `--em-core-spacing--0900` | `36px` |
+| `--em-core-spacing--1000` | `40px` |
+| `--em-core-spacing--1200` | `48px` |
+| `--em-core-spacing--1600` | `64px` |
+| `--em-core-spacing--2000` | `80px` |
+
+---
+
+## Semantic Tokens (`--em-sem-*`)
+
+Primary tool for theming. These control global visual appearance — backgrounds, text colors, status indicators, and chart palette.
+
+| Token | Default |
+|-------|---------|
+| `--em-sem-background` | `var(--em-core-color-gray--0050)` |
+| `--em-sem-background--inverted` | `var(--em-core-color-gray--0900)` |
+| `--em-sem-background--light` | `var(--em-core-color-gray--0100)` |
+| `--em-sem-background--muted` | `var(--em-core-color-gray--0300)` |
+| `--em-sem-background--neutral` | `var(--em-core-color-gray--0000)` |
+| `--em-sem-background--subtle` | `var(--em-core-color-gray--0200)` |
+| `--em-sem-chart-color--1` | `rgb(255 84 0)` |
+| `--em-sem-chart-color--10` | `rgb(141 153 174)` |
+| `--em-sem-chart-color--2` | `rgb(58 134 255)` |
+| `--em-sem-chart-color--3` | `rgb(255 138 0)` |
+| `--em-sem-chart-color--4` | `rgb(255 47 109)` |
+| `--em-sem-chart-color--5` | `rgb(46 196 182)` |
+| `--em-sem-chart-color--6` | `rgb(106 76 255)` |
+| `--em-sem-chart-color--7` | `rgb(131 56 236)` |
+| `--em-sem-chart-color--8` | `rgb(0 180 216)` |
+| `--em-sem-chart-color--9` | `rgb(76 175 80)` |
+| `--em-sem-status-error-background` | `rgb(246 226 226)` |
+| `--em-sem-status-error-text` | `rgb(188 16 16)` |
+| `--em-sem-status-success-background` | `rgb(225 240 233)` |
+| `--em-sem-status-success-text` | `rgb(15 149 90)` |
+| `--em-sem-text` | `var(--em-core-color-gray--0900)` |
+| `--em-sem-text--inverted` | `var(--em-core-color-gray--0000)` |
+| `--em-sem-text--muted` | `var(--em-core-color-gray--0700)` |
+| `--em-sem-text--neutral` | `var(--em-core-color-gray--1000)` |
+| `--em-sem-text--subtle` | `var(--em-core-color-gray--0400)` |
+
+---
+
+## Component Tokens (`--em-{component}-*`)
+
+Per-component overrides. Only use for isolated tweaks — most theming should happen at the semantic level.
+
+**512 tokens** across **23 components**: `actionicon`, `barchart`, `button`, `buttonicon`, `card`, `chart`, `daterangepicker`, `divider`, `field`, `filter`, `ghostbutton`, `ghostbuttonicon`, `kpichart`, `linechart`, `markdown`, `overlay`, `piechart`, `selectfield`, `skeleton`, `switch`, `tablechart`, `textfield`, `tooltip`
+
+### Key Component → Semantic Mappings
+
+These are the default mappings from component tokens to semantic tokens. Understanding these is critical for predicting how semantic changes cascade to components.
+
+#### `actionicon`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-actionicon-background` | `--em-sem-background--light` |
+| `--em-actionicon-background--active` | `--em-sem-background--muted` |
+| `--em-actionicon-background--hover` | `--em-sem-background--subtle` |
+| `--em-actionicon-color` | `--em-sem-text` |
+| `--em-actionicon-color--disabled` | `--em-sem-text--subtle` |
+
+#### `button`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-button-background--disabled` | `--em-sem-background--light` |
+| `--em-button-background--primary` | `--em-sem-text--muted` |
+| `--em-button-background--primary--active` | `--em-sem-text--neutral` |
+| `--em-button-background--primary--hover` | `--em-sem-text` |
+| `--em-button-background--secondary` | `--em-sem-background--light` |
+| `--em-button-background--secondary--active` | `--em-sem-background--muted` |
+| `--em-button-background--secondary--hover` | `--em-sem-background--subtle` |
+| `--em-button-color--disabled` | `--em-sem-text--subtle` |
+| `--em-button-color--primary` | `--em-sem-text--inverted` |
+| `--em-button-color--secondary` | `--em-sem-text` |
+
+#### `buttonicon`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-buttonicon-background--primary` | `--em-sem-text--muted` |
+| `--em-buttonicon-background--primary--active` | `--em-sem-text--neutral` |
+| `--em-buttonicon-background--primary--disabled` | `--em-sem-background--light` |
+| `--em-buttonicon-background--primary--hover` | `--em-sem-text` |
+| `--em-buttonicon-background--secondary` | `--em-sem-background--light` |
+| `--em-buttonicon-background--secondary--active` | `--em-sem-background--muted` |
+| `--em-buttonicon-background--secondary--disabled` | `--em-sem-background--light` |
+| `--em-buttonicon-background--secondary--hover` | `--em-sem-background--subtle` |
+| `--em-buttonicon-color--disabled` | `--em-sem-text--subtle` |
+| `--em-buttonicon-color--primary` | `--em-sem-text--inverted` |
+| `--em-buttonicon-color--secondary` | `--em-sem-text` |
+
+#### `card`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-card-background` | `--em-sem-background` |
+| `--em-card-feedback-color--error` | `--em-sem-status-error-text` |
+| `--em-card-feedback-subtitle-color` | `--em-sem-text--muted` |
+| `--em-card-feedback-title-color` | `--em-sem-text` |
+| `--em-card-info-icon-color` | `--em-sem-text` |
+| `--em-card-loader-background` | `--em-sem-background--neutral` |
+| `--em-card-loader-color` | `--em-sem-text` |
+| `--em-card-subtitle-color` | `--em-sem-text--muted` |
+| `--em-card-title-color` | `--em-sem-text` |
+
+#### `chart`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-chart-category-color` | `--em-sem-text--muted` |
+| `--em-chart-category-indicator-color` | `--em-sem-chart-color--1` |
+| `--em-chart-grid-label-color` | `--em-sem-text` |
+| `--em-chart-grid-label-color--light` | `--em-sem-background--light` |
+| `--em-chart-grid-label-color--muted` | `--em-sem-text--muted` |
+| `--em-chart-grid-label-color--subtle` | `--em-sem-text--subtle` |
+| `--em-chart-grid-line-color` | `--em-sem-text` |
+| `--em-chart-grid-line-color--light` | `--em-sem-background--light` |
+| `--em-chart-grid-line-color--subtle` | `--em-sem-text--subtle` |
+| `--em-chart-label-background` | `--em-sem-background--neutral` |
+| `--em-chart-label-color` | `--em-sem-text` |
+| `--em-chart-tabs-color` | `--em-sem-text--neutral` |
+| `--em-chart-tooltip-background` | `--em-sem-background--inverted` |
+| `--em-chart-tooltip-title-color` | `--em-sem-text--inverted` |
+
+#### `daterangepicker`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-daterangepicker-accent-color` | `--em-sem-background--inverted` |
+| `--em-daterangepicker-chevron--active` | `--em-sem-background--muted` |
+| `--em-daterangepicker-chevron--hover` | `--em-sem-background--subtle` |
+| `--em-daterangepicker-chevron-background` | `--em-sem-background--light` |
+| `--em-daterangepicker-chevron-color` | `--em-sem-text` |
+| `--em-daterangepicker-day-color` | `--em-sem-text` |
+| `--em-daterangepicker-day-outside` | `--em-sem-text--subtle` |
+| `--em-daterangepicker-day-range-background` | `--em-sem-background--light` |
+| `--em-daterangepicker-day-range-limit-color` | `--em-sem-text--inverted` |
+| `--em-daterangepicker-label-color` | `--em-sem-text` |
+| `--em-daterangepicker-weekday-color` | `--em-sem-text--muted` |
+
+#### `divider`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-divider-color` | `--em-sem-background--subtle` |
+
+#### `field`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-field-feedback-color` | `--em-sem-text--muted` |
+| `--em-field-feedback-color--error` | `--em-sem-status-error-text` |
+| `--em-field-header-color` | `--em-sem-text` |
+
+#### `filter`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-filter-background--chevron` | `--em-sem-background--neutral` |
+| `--em-filter-background--filter` | `--em-sem-background--light` |
+| `--em-filter-background--hover` | `--em-sem-background--subtle` |
+| `--em-filter-background--selected` | `--em-sem-background--muted` |
+| `--em-filter-color` | `--em-sem-text--neutral` |
+| `--em-filter-color--operator` | `--em-sem-text--muted` |
+
+#### `ghostbutton`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-ghostbutton-background--active` | `--em-sem-background--subtle` |
+| `--em-ghostbutton-background--hover` | `--em-sem-background--light` |
+| `--em-ghostbutton-color` | `--em-sem-text` |
+| `--em-ghostbutton-color--disabled` | `--em-sem-text--subtle` |
+
+#### `ghostbuttonicon`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-ghostbuttonicon-background--active` | `--em-sem-background--subtle` |
+| `--em-ghostbuttonicon-background--hover` | `--em-sem-background--light` |
+| `--em-ghostbuttonicon-color` | `--em-sem-text` |
+| `--em-ghostbuttonicon-color--disabled` | `--em-sem-text--subtle` |
+
+#### `kpichart`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-kpichart-color` | `--em-sem-text` |
+| `--em-kpichart-trend-background--negative` | `--em-sem-status-error-background` |
+| `--em-kpichart-trend-background--positive` | `--em-sem-status-success-background` |
+| `--em-kpichart-trend-color--negative` | `--em-sem-status-error-text` |
+| `--em-kpichart-trend-color--positive` | `--em-sem-status-success-text` |
+
+#### `markdown`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-markdown-background` | `--em-sem-background--neutral` |
+| `--em-markdown-code-color` | `--em-sem-text` |
+| `--em-markdown-color--placeholder` | `--em-sem-background--muted` |
+| `--em-markdown-h1-color` | `--em-sem-text` |
+| `--em-markdown-h2-color` | `--em-sem-text` |
+| `--em-markdown-h3-color` | `--em-sem-text` |
+| `--em-markdown-hr-color` | `--em-sem-background--muted` |
+| `--em-markdown-link-color` | `--em-sem-text` |
+| `--em-markdown-options-border-color` | `--em-sem-background--muted` |
+| `--em-markdown-p-color` | `--em-sem-text` |
+
+#### `piechart`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-piechart-donut-color` | `--em-sem-text` |
+
+#### `selectfield`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-selectfield-category-background` | `--em-sem-background--subtle` |
+| `--em-selectfield-category-color` | `--em-sem-text--neutral` |
+| `--em-selectfield-content-background` | `--em-sem-background--neutral` |
+| `--em-selectfield-item-background` | `--em-sem-background--neutral` |
+| `--em-selectfield-item-background--active` | `--em-sem-background--light` |
+| `--em-selectfield-item-background--hover` | `--em-sem-background` |
+| `--em-selectfield-item-background--selected` | `--em-sem-background--inverted` |
+| `--em-selectfield-item-icon-color` | `--em-sem-text` |
+| `--em-selectfield-item-icon-color--disabled` | `--em-sem-text--subtle` |
+| `--em-selectfield-item-icon-color--selected` | `--em-sem-text--inverted` |
+| `--em-selectfield-item-label-left-color` | `--em-sem-text` |
+| `--em-selectfield-item-label-left-color--disabled` | `--em-sem-text--subtle` |
+| `--em-selectfield-item-label-left-color--selected` | `--em-sem-text--inverted` |
+| `--em-selectfield-item-label-right-color` | `--em-sem-text--muted` |
+| `--em-selectfield-item-label-right-color--disabled` | `--em-sem-text--subtle` |
+| `--em-selectfield-item-label-right-color--selected` | `--em-sem-text--inverted` |
+| `--em-selectfield-trigger-background` | `--em-sem-background--neutral` |
+| `--em-selectfield-trigger-background--active` | `--em-sem-background--light` |
+| `--em-selectfield-trigger-background--filled` | `--em-sem-background--inverted` |
+| `--em-selectfield-trigger-background--hover` | `--em-sem-background` |
+| `--em-selectfield-trigger-border-color` | `--em-sem-background--muted` |
+| `--em-selectfield-trigger-border-color--error` | `--em-sem-status-error-text` |
+| `--em-selectfield-trigger-color` | `--em-sem-text` |
+| `--em-selectfield-trigger-color--disabled` | `--em-sem-text--subtle` |
+| `--em-selectfield-trigger-color--filled` | `--em-sem-text--inverted` |
+
+#### `switch`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-switch-background--disabled` | `--em-sem-background--subtle` |
+| `--em-switch-background--off` | `--em-sem-background--subtle` |
+| `--em-switch-background--on` | `--em-sem-background--inverted` |
+| `--em-switch-label-color` | `--em-sem-text` |
+| `--em-switch-label-color--disabled` | `--em-sem-text--subtle` |
+| `--em-switch-thumb-background` | `--em-sem-background--neutral` |
+| `--em-switch-thumb-background--disabled` | `--em-sem-background--light` |
+| `--em-switch-thumb-background--off` | `--em-sem-text--muted` |
+
+#### `tablechart`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-tablechart-border-color` | `--em-sem-background--light` |
+| `--em-tablechart-cell-background` | `--em-sem-background--neutral` |
+| `--em-tablechart-cell-background--hover` | `--em-sem-background` |
+| `--em-tablechart-color` | `--em-sem-text` |
+| `--em-tablechart-color--muted` | `--em-sem-text--muted` |
+| `--em-tablechart-header-background` | `--em-sem-background--neutral` |
+| `--em-tablechart-header-background--hover` | `--em-sem-background` |
+| `--em-tablechart-heatmap-color` | `--em-sem-chart-color--1` |
+| `--em-tablechart-loading-indicator-color` | `--em-sem-text--neutral` |
+
+#### `textfield`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-textfield-background` | `--em-sem-background` |
+| `--em-textfield-background--active` | `--em-sem-background--subtle` |
+| `--em-textfield-background--disabled` | `--em-sem-background--neutral` |
+| `--em-textfield-background--filled` | `--em-sem-background--light` |
+| `--em-textfield-border-color` | `--em-sem-text--subtle` |
+| `--em-textfield-border-color--error` | `--em-sem-status-error-text` |
+| `--em-textfield-color` | `--em-sem-text--muted` |
+| `--em-textfield-color--disabled` | `--em-sem-text--subtle` |
+| `--em-textfield-color--filled` | `--em-sem-text` |
+| `--em-textfield-feedback-color` | `--em-sem-text--muted` |
+| `--em-textfield-feedback-color--error` | `--em-sem-status-error-text` |
+
+#### `tooltip`
+
+| Component Token | Maps To (semantic/core) |
+|----------------|------------------------|
+| `--em-tooltip-background` | `--em-sem-background--inverted` |
+| `--em-tooltip-color` | `--em-sem-text--inverted` |
+
+---
+
+## Full Component Token Reference
+
+Complete listing of all component tokens and their defaults.
+
+### `actionicon` (14 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-actionicon-background` | `var(--em-sem-background--light)` |
+| `--em-actionicon-background--active` | `var(--em-sem-background--muted)` |
+| `--em-actionicon-background--hover` | `var(--em-sem-background--subtle)` |
+| `--em-actionicon-border-color` | `rgb(255 255 255 / 0%)` |
+| `--em-actionicon-border-color--active` | `rgb(255 255 255 / 0%)` |
+| `--em-actionicon-border-color--disabled` | `rgb(255 255 255 / 0%)` |
+| `--em-actionicon-border-color--hover` | `rgb(255 255 255 / 0%)` |
+| `--em-actionicon-border-radius` | `var(--em-core-border-radius--500)` |
+| `--em-actionicon-border-width` | `0px` |
+| `--em-actionicon-color` | `var(--em-sem-text)` |
+| `--em-actionicon-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-actionicon-height` | `var(--em-core-size--0800)` |
+| `--em-actionicon-icon-size` | `var(--em-core-size--0400)` |
+| `--em-actionicon-width` | `var(--em-core-size--0500)` |
+
+### `barchart` (2 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-barchart-border-radius` | `var(--em-core-border-radius--150)` |
+| `--em-barchart-label-gap` | `var(--em-core-spacing--0200)` |
+
+### `button` (33 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-button-background--disabled` | `var(--em-sem-background--light)` |
+| `--em-button-background--primary` | `var(--em-sem-text--muted)` |
+| `--em-button-background--primary--active` | `var(--em-sem-text--neutral)` |
+| `--em-button-background--primary--hover` | `var(--em-sem-text)` |
+| `--em-button-background--secondary` | `var(--em-sem-background--light)` |
+| `--em-button-background--secondary--active` | `var(--em-sem-background--muted)` |
+| `--em-button-background--secondary--hover` | `var(--em-sem-background--subtle)` |
+| `--em-button-border-color--primary` | `rgb(255 255 255 / 0%)` |
+| `--em-button-border-color--primary--active` | `rgb(255 255 255 / 0%)` |
+| `--em-button-border-color--primary--disabled` | `rgb(255 255 255 / 0%)` |
+| `--em-button-border-color--primary--hover` | `rgb(255 255 255 / 0%)` |
+| `--em-button-border-color--secondary` | `rgb(255 255 255 / 0%)` |
+| `--em-button-border-color--secondary--active` | `rgb(255 255 255 / 0%)` |
+| `--em-button-border-color--secondary--disabled` | `rgb(255 255 255 / 0%)` |
+| `--em-button-border-color--secondary--hover` | `rgb(255 255 255 / 0%)` |
+| `--em-button-border-radius` | `var(--em-core-border-radius--500)` |
+| `--em-button-border-width` | `0px` |
+| `--em-button-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-button-color--primary` | `var(--em-sem-text--inverted)` |
+| `--em-button-color--secondary` | `var(--em-sem-text)` |
+| `--em-button-font-family` | `var(--em-core-font-family--base)` |
+| `--em-button-font-size--medium` | `var(--em-core-font-size--sm)` |
+| `--em-button-font-size--small` | `var(--em-core-font-size--xs)` |
+| `--em-button-font-weight--medium` | `var(--em-core-font-weight--bold)` |
+| `--em-button-font-weight--small` | `var(--em-core-font-weight--medium)` |
+| `--em-button-height--medium` | `var(--em-core-size--1000)` |
+| `--em-button-height--small` | `var(--em-core-size--0800)` |
+| `--em-button-icon-size` | `var(--em-core-size--0400)` |
+| `--em-button-label-padding` | `var(--em-core-spacing--0200)` |
+| `--em-button-line-height--medium` | `var(--em-core-line-height--md)` |
+| `--em-button-line-height--small` | `var(--em-core-line-height--sm)` |
+| `--em-button-padding-left-right--medium` | `var(--em-core-spacing--0300)` |
+| `--em-button-padding-left-right--small` | `var(--em-core-spacing--0150)` |
+
+### `buttonicon` (26 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-buttonicon-background--primary` | `var(--em-sem-text--muted)` |
+| `--em-buttonicon-background--primary--active` | `var(--em-sem-text--neutral)` |
+| `--em-buttonicon-background--primary--disabled` | `var(--em-sem-background--light)` |
+| `--em-buttonicon-background--primary--hover` | `var(--em-sem-text)` |
+| `--em-buttonicon-background--secondary` | `var(--em-sem-background--light)` |
+| `--em-buttonicon-background--secondary--active` | `var(--em-sem-background--muted)` |
+| `--em-buttonicon-background--secondary--disabled` | `var(--em-sem-background--light)` |
+| `--em-buttonicon-background--secondary--hover` | `var(--em-sem-background--subtle)` |
+| `--em-buttonicon-border-color--primary` | `rgb(255 255 255 / 0%)` |
+| `--em-buttonicon-border-color--primary--active` | `rgb(255 255 255 / 0%)` |
+| `--em-buttonicon-border-color--primary--disabled` | `rgb(255 255 255 / 0%)` |
+| `--em-buttonicon-border-color--primary--hover` | `rgb(255 255 255 / 0%)` |
+| `--em-buttonicon-border-color--secondary` | `rgb(255 255 255 / 0%)` |
+| `--em-buttonicon-border-color--secondary--active` | `rgb(255 255 255 / 0%)` |
+| `--em-buttonicon-border-color--secondary--disabled` | `rgb(255 255 255 / 0%)` |
+| `--em-buttonicon-border-color--secondary--hover` | `rgb(255 255 255 / 0%)` |
+| `--em-buttonicon-border-radius` | `var(--em-core-border-radius--500)` |
+| `--em-buttonicon-border-width` | `0px` |
+| `--em-buttonicon-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-buttonicon-color--primary` | `var(--em-sem-text--inverted)` |
+| `--em-buttonicon-color--secondary` | `var(--em-sem-text)` |
+| `--em-buttonicon-height--medium` | `var(--em-core-size--1000)` |
+| `--em-buttonicon-height--small` | `var(--em-core-size--0800)` |
+| `--em-buttonicon-icon-size` | `var(--em-core-size--0400)` |
+| `--em-buttonicon-width--medium` | `var(--em-core-size--1000)` |
+| `--em-buttonicon-width--small` | `var(--em-core-size--0800)` |
+
+### `card` (36 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-card-background` | `var(--em-sem-background)` |
+| `--em-card-border-color` | `rgb(255 255 255 / 0%)` |
+| `--em-card-border-radius` | `var(--em-core-border-radius--400)` |
+| `--em-card-border-width` | `0px` |
+| `--em-card-feedback-color--error` | `var(--em-sem-status-error-text)` |
+| `--em-card-feedback-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-card-feedback-gap` | `var(--em-core-spacing--0300)` |
+| `--em-card-feedback-icon-size` | `var(--em-core-size--0400)` |
+| `--em-card-feedback-line-height` | `var(--em-core-line-height--md)` |
+| `--em-card-feedback-padding-bottom` | `var(--em-core-spacing--0800)` |
+| `--em-card-feedback-subtitle-color` | `var(--em-sem-text--muted)` |
+| `--em-card-feedback-subtitle-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-card-feedback-title-color` | `var(--em-sem-text)` |
+| `--em-card-feedback-title-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-card-font-family` | `var(--em-core-font-family--base)` |
+| `--em-card-gap` | `var(--em-core-spacing--0800)` |
+| `--em-card-gap--compact` | `var(--em-core-spacing--0200)` |
+| `--em-card-header-gap` | `var(--em-core-spacing--0400)` |
+| `--em-card-header-gap--compact` | `var(--em-core-spacing--0100)` |
+| `--em-card-info-icon-color` | `var(--em-sem-text)` |
+| `--em-card-info-icon-gap` | `var(--em-core-spacing--0100)` |
+| `--em-card-info-icon-size` | `var(--em-core-size--0400)` |
+| `--em-card-loader-background` | `var(--em-sem-background--neutral)` |
+| `--em-card-loader-border-radius` | `var(--em-core-border-radius--500)` |
+| `--em-card-loader-color` | `var(--em-sem-text)` |
+| `--em-card-loader-padding` | `var(--em-core-spacing--0100)` |
+| `--em-card-loader-size` | `var(--em-core-size--0600)` |
+| `--em-card-padding` | `var(--em-core-spacing--0800)` |
+| `--em-card-subtitle-color` | `var(--em-sem-text--muted)` |
+| `--em-card-subtitle-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-card-subtitle-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-card-subtitle-line-height` | `var(--em-core-line-height--l)` |
+| `--em-card-title-color` | `var(--em-sem-text)` |
+| `--em-card-title-font-size` | `var(--em-core-font-size--md)` |
+| `--em-card-title-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-card-title-line-height` | `var(--em-core-line-height--l)` |
+
+### `chart` (61 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-chart-category-color` | `var(--em-sem-text--muted)` |
+| `--em-chart-category-font-family` | `var(--em-core-font-family--base)` |
+| `--em-chart-category-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-chart-category-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-chart-category-gap` | `var(--em-core-spacing--0100)` |
+| `--em-chart-category-indicator-border-radius` | `var(--em-core-border-radius--500)` |
+| `--em-chart-category-indicator-color` | `var(--em-sem-chart-color--1)` |
+| `--em-chart-category-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-chart-category-list-gap` | `var(--em-core-spacing--0400)` |
+| `--em-chart-category-size` | `var(--em-core-size--0300)` |
+| `--em-chart-grid-font-family` | `var(--em-core-font-family--base)` |
+| `--em-chart-grid-label-color` | `var(--em-sem-text)` |
+| `--em-chart-grid-label-color--light` | `var(--em-sem-background--light)` |
+| `--em-chart-grid-label-color--muted` | `var(--em-sem-text--muted)` |
+| `--em-chart-grid-label-color--subtle` | `var(--em-sem-text--subtle)` |
+| `--em-chart-grid-label-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-chart-grid-label-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-chart-grid-line-color` | `var(--em-sem-text)` |
+| `--em-chart-grid-line-color--light` | `var(--em-sem-background--light)` |
+| `--em-chart-grid-line-color--subtle` | `var(--em-sem-text--subtle)` |
+| `--em-chart-grid-line-width--medium` | `2px` |
+| `--em-chart-grid-line-width--thick` | `4px` |
+| `--em-chart-grid-line-width--thin` | `1px` |
+| `--em-chart-grid-tick-length` | `var(--em-core-size--0100)` |
+| `--em-chart-grid-tick-width` | `1px` |
+| `--em-chart-grid-title-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-chart-grid-title-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-chart-label-background` | `var(--em-sem-background--neutral)` |
+| `--em-chart-label-border-radius` | `var(--em-core-border-radius--500)` |
+| `--em-chart-label-color` | `var(--em-sem-text)` |
+| `--em-chart-label-font-family` | `var(--em-core-font-family--base)` |
+| `--em-chart-label-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-chart-label-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-chart-label-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-chart-label-padding-left-right` | `var(--em-core-spacing--0100)` |
+| `--em-chart-label-padding-top-bottom` | `var(--em-core-spacing--0050)` |
+| `--em-chart-selectfield-padding-bottom` | `var(--em-core-spacing--0400)` |
+| `--em-chart-tabs-border-color--hover` | `var(--em-core-color-gray--0200)` |
+| `--em-chart-tabs-border-color--selected` | `var(--em-core-color-gray--0400)` |
+| `--em-chart-tabs-border-radius` | `var(--em-core-border-radius--300)` |
+| `--em-chart-tabs-border-width` | `var(--em-core-border-width--025)` |
+| `--em-chart-tabs-color` | `var(--em-sem-text--neutral)` |
+| `--em-chart-tabs-font-family` | `var(--em-core-font-family--base)` |
+| `--em-chart-tabs-gap` | `var(--em-core-spacing--0200)` |
+| `--em-chart-tabs-padding` | `var(--em-core-spacing--0300)` |
+| `--em-chart-tabs-pagination-padding` | `var(--em-core-spacing--0100)` |
+| `--em-chart-tabs-title-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-chart-tabs-title-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-chart-tabs-title-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-chart-tabs-value-font-size` | `var(--em-core-font-size--xl)` |
+| `--em-chart-tabs-value-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-chart-tabs-value-line-height` | `var(--em-core-line-height--l)` |
+| `--em-chart-tooltip-background` | `var(--em-sem-background--inverted)` |
+| `--em-chart-tooltip-border-radius` | `var(--em-core-border-radius--300)` |
+| `--em-chart-tooltip-family` | `var(--em-core-font-family--base)` |
+| `--em-chart-tooltip-gap` | `var(--em-core-spacing--0200)` |
+| `--em-chart-tooltip-padding` | `var(--em-core-spacing--0400)` |
+| `--em-chart-tooltip-title-color` | `var(--em-sem-text--inverted)` |
+| `--em-chart-tooltip-title-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-chart-tooltip-title-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-chart-tooltip-title-line-height` | `var(--em-core-line-height--md)` |
+
+### `daterangepicker` (25 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-daterangepicker-accent-color` | `var(--em-sem-background--inverted)` |
+| `--em-daterangepicker-chevron--active` | `var(--em-sem-background--muted)` |
+| `--em-daterangepicker-chevron--hover` | `var(--em-sem-background--subtle)` |
+| `--em-daterangepicker-chevron-background` | `var(--em-sem-background--light)` |
+| `--em-daterangepicker-chevron-border-radius` | `var(--em-core-border-radius--200)` |
+| `--em-daterangepicker-chevron-color` | `var(--em-sem-text)` |
+| `--em-daterangepicker-chevron-icon-size` | `var(--em-core-size--0400)` |
+| `--em-daterangepicker-chevron-size` | `var(--em-core-size--0800)` |
+| `--em-daterangepicker-day-color` | `var(--em-sem-text)` |
+| `--em-daterangepicker-day-font-family` | `var(--em-core-font-family--base)` |
+| `--em-daterangepicker-day-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-daterangepicker-day-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-daterangepicker-day-outside` | `var(--em-sem-text--subtle)` |
+| `--em-daterangepicker-day-range-background` | `var(--em-sem-background--light)` |
+| `--em-daterangepicker-day-range-limit-border-radius` | `var(--em-core-border-radius--200)` |
+| `--em-daterangepicker-day-range-limit-color` | `var(--em-sem-text--inverted)` |
+| `--em-daterangepicker-day-size` | `var(--em-core-size--0800)` |
+| `--em-daterangepicker-label-color` | `var(--em-sem-text)` |
+| `--em-daterangepicker-label-font-family` | `var(--em-core-font-family--base)` |
+| `--em-daterangepicker-label-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-daterangepicker-label-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-daterangepicker-weekday-color` | `var(--em-sem-text--muted)` |
+| `--em-daterangepicker-weekday-font-family` | `var(--em-core-font-family--base)` |
+| `--em-daterangepicker-weekday-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-daterangepicker-weekday-font-weight` | `var(--em-core-font-weight--medium)` |
+
+### `divider` (2 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-divider-color` | `var(--em-sem-background--subtle)` |
+| `--em-divider-thickness` | `1px` |
+
+### `field` (19 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-field-feedback-color` | `var(--em-sem-text--muted)` |
+| `--em-field-feedback-color--error` | `var(--em-sem-status-error-text)` |
+| `--em-field-feedback-error-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-field-feedback-error-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-field-feedback-error-line-height` | `var(--em-core-line-height--md)` |
+| `--em-field-feedback-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-field-feedback-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-field-feedback-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-field-feedback-padding-bottom` | `var(--em-core-spacing--0200)` |
+| `--em-field-feedback-padding-top` | `var(--em-core-spacing--0200)` |
+| `--em-field-font-family` | `var(--em-core-font-family--base)` |
+| `--em-field-header-color` | `var(--em-sem-text)` |
+| `--em-field-header-padding-bottom` | `var(--em-core-spacing--0200)` |
+| `--em-field-header-required-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-field-header-required-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-field-header-required-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-field-header-title-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-field-header-title-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-field-header-title-line-height` | `var(--em-core-line-height--md)` |
+
+### `filter` (25 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-filter-background--chevron` | `var(--em-sem-background--neutral)` |
+| `--em-filter-background--filter` | `var(--em-sem-background--light)` |
+| `--em-filter-background--hover` | `var(--em-sem-background--subtle)` |
+| `--em-filter-background--operator` | `var(--em-core-color-gray--0050)` |
+| `--em-filter-background--selected` | `var(--em-sem-background--muted)` |
+| `--em-filter-border-color` | `rgb(255 255 255 / 0%)` |
+| `--em-filter-border-color--hover` | `rgb(255 255 255 / 0%)` |
+| `--em-filter-border-color--operator` | `rgb(255 255 255 / 0%)` |
+| `--em-filter-border-color--selected` | `rgb(255 255 255 / 0%)` |
+| `--em-filter-border-radius` | `var(--em-core-border-radius--100)` |
+| `--em-filter-border-radius--group` | `var(--em-core-border-radius--400)` |
+| `--em-filter-border-width` | `0px` |
+| `--em-filter-color` | `var(--em-sem-text--neutral)` |
+| `--em-filter-color--operator` | `var(--em-sem-text--muted)` |
+| `--em-filter-gap--external` | `var(--em-core-spacing--0300)` |
+| `--em-filter-gap--internal` | `var(--em-core-spacing--0050)` |
+| `--em-filter-height` | `var(--em-core-size--0800)` |
+| `--em-filter-label-font-family` | `var(--em-core-font-family--base)` |
+| `--em-filter-label-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-filter-label-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-filter-label-font-weight--operator` | `var(--em-core-font-weight--regular)` |
+| `--em-filter-label-label-padding-left-right` | `var(--em-core-spacing--0150)` |
+| `--em-filter-label-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-filter-padding-left-right` | `var(--em-core-spacing--0300)` |
+| `--em-filter-padding-left-right--operator` | `var(--em-core-spacing--0100)` |
+
+### `ghostbutton` (19 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-ghostbutton-background--active` | `var(--em-sem-background--subtle)` |
+| `--em-ghostbutton-background--hover` | `var(--em-sem-background--light)` |
+| `--em-ghostbutton-border-color` | `rgb(255 255 255 / 0%)` |
+| `--em-ghostbutton-border-color--active` | `rgb(255 255 255 / 0%)` |
+| `--em-ghostbutton-border-color--disabled` | `rgb(255 255 255 / 0%)` |
+| `--em-ghostbutton-border-color--hover` | `rgb(255 255 255 / 0%)` |
+| `--em-ghostbutton-border-radius` | `var(--em-core-border-radius--100)` |
+| `--em-ghostbutton-border-width` | `0px` |
+| `--em-ghostbutton-color` | `var(--em-sem-text)` |
+| `--em-ghostbutton-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-ghostbutton-font-family` | `var(--em-core-font-family--base)` |
+| `--em-ghostbutton-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-ghostbutton-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-ghostbutton-height` | `var(--em-core-size--0500)` |
+| `--em-ghostbutton-icon-size` | `var(--em-core-size--0400)` |
+| `--em-ghostbutton-label-padding-left` | `var(--em-core-spacing--0100)` |
+| `--em-ghostbutton-label-padding-right` | `var(--em-core-spacing--0100)` |
+| `--em-ghostbutton-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-ghostbutton-padding-left-right` | `var(--em-core-spacing--0050)` |
+
+### `ghostbuttonicon` (13 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-ghostbuttonicon-background--active` | `var(--em-sem-background--subtle)` |
+| `--em-ghostbuttonicon-background--hover` | `var(--em-sem-background--light)` |
+| `--em-ghostbuttonicon-border-color` | `rgb(255 255 255 / 0%)` |
+| `--em-ghostbuttonicon-border-color--active` | `rgb(255 255 255 / 0%)` |
+| `--em-ghostbuttonicon-border-color--disabled` | `rgb(255 255 255 / 0%)` |
+| `--em-ghostbuttonicon-border-color--hover` | `rgb(255 255 255 / 0%)` |
+| `--em-ghostbuttonicon-border-radius` | `var(--em-core-border-radius--100)` |
+| `--em-ghostbuttonicon-border-width` | `0px` |
+| `--em-ghostbuttonicon-color` | `var(--em-sem-text)` |
+| `--em-ghostbuttonicon-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-ghostbuttonicon-height` | `var(--em-core-size--0500)` |
+| `--em-ghostbuttonicon-icon-size` | `var(--em-core-size--0400)` |
+| `--em-ghostbuttonicon-width` | `var(--em-core-size--0500)` |
+
+### `kpichart` (20 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-kpichart-color` | `var(--em-sem-text)` |
+| `--em-kpichart-font-family` | `var(--em-core-font-family--base)` |
+| `--em-kpichart-gap` | `var(--em-core-spacing--0400)` |
+| `--em-kpichart-label-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-kpichart-label-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-kpichart-label-gap` | `var(--em-core-spacing--0200)` |
+| `--em-kpichart-number-font-size` | `var(--em-core-font-size--xxl)` |
+| `--em-kpichart-number-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-kpichart-number-line-height` | `var(--em-core-line-height--xl)` |
+| `--em-kpichart-trend-background--negative` | `var(--em-sem-status-error-background)` |
+| `--em-kpichart-trend-background--positive` | `var(--em-sem-status-success-background)` |
+| `--em-kpichart-trend-border-radius` | `var(--em-core-border-radius--150)` |
+| `--em-kpichart-trend-color--negative` | `var(--em-sem-status-error-text)` |
+| `--em-kpichart-trend-color--positive` | `var(--em-sem-status-success-text)` |
+| `--em-kpichart-trend-font-size` | `var(--em-core-font-size--md)` |
+| `--em-kpichart-trend-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-kpichart-trend-height` | `var(--em-core-size--0600)` |
+| `--em-kpichart-trend-icon-size` | `var(--em-core-size--0400)` |
+| `--em-kpichart-trend-line-height` | `var(--em-core-line-height--md)` |
+| `--em-kpichart-trend-padding` | `var(--em-core-spacing--0100)` |
+
+### `linechart` (5 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-linechart-line-dash` | `var(--em-core-size--0100)` |
+| `--em-linechart-line-gap` | `var(--em-core-size--0100)` |
+| `--em-linechart-line-width` | `2px` |
+| `--em-linechart-point-size` | `var(--em-core-size--0200)` |
+| `--em-linechart-point-size--hover` | `var(--em-core-size--0300)` |
+
+### `markdown` (42 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-markdown-background` | `var(--em-sem-background--neutral)` |
+| `--em-markdown-code-color` | `var(--em-sem-text)` |
+| `--em-markdown-code-font-family` | `var(--em-core-font-family--code)` |
+| `--em-markdown-code-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-markdown-code-font-weight--regular` | `var(--em-core-font-weight--regular)` |
+| `--em-markdown-code-font-weight--strong` | `var(--em-core-font-weight--bold)` |
+| `--em-markdown-code-line-height` | `var(--em-core-line-height--md)` |
+| `--em-markdown-color--placeholder` | `var(--em-sem-background--muted)` |
+| `--em-markdown-h1-color` | `var(--em-sem-text)` |
+| `--em-markdown-h1-font-family` | `var(--em-core-font-family--base)` |
+| `--em-markdown-h1-font-size` | `var(--em-core-font-size--xxl)` |
+| `--em-markdown-h1-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-markdown-h1-line-height` | `var(--em-core-line-height--xl)` |
+| `--em-markdown-h2-color` | `var(--em-sem-text)` |
+| `--em-markdown-h2-font-family` | `var(--em-core-font-family--base)` |
+| `--em-markdown-h2-font-size` | `var(--em-core-font-size--xl)` |
+| `--em-markdown-h2-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-markdown-h2-line-height` | `var(--em-core-line-height--l)` |
+| `--em-markdown-h3-color` | `var(--em-sem-text)` |
+| `--em-markdown-h3-font-family` | `var(--em-core-font-family--base)` |
+| `--em-markdown-h3-font-size` | `var(--em-core-font-size--md)` |
+| `--em-markdown-h3-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-markdown-h3-line-height` | `var(--em-core-line-height--md)` |
+| `--em-markdown-hr-border-width` | `1px` |
+| `--em-markdown-hr-color` | `var(--em-sem-background--muted)` |
+| `--em-markdown-link-color` | `var(--em-sem-text)` |
+| `--em-markdown-link-font-family` | `var(--em-core-font-family--base)` |
+| `--em-markdown-link-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-markdown-link-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-markdown-link-line-height` | `var(--em-core-line-height--md)` |
+| `--em-markdown-min-height` | `160px` |
+| `--em-markdown-options-border-color` | `var(--em-sem-background--muted)` |
+| `--em-markdown-options-border-radius` | `var(--em-core-border-radius--100)` |
+| `--em-markdown-options-border-width` | `1px` |
+| `--em-markdown-options-gap` | `var(--em-core-spacing--0100)` |
+| `--em-markdown-options-padding` | `var(--em-core-spacing--0100)` |
+| `--em-markdown-p-color` | `var(--em-sem-text)` |
+| `--em-markdown-p-font-family` | `var(--em-core-font-family--base)` |
+| `--em-markdown-p-font-size` | `var(--em-core-font-size--sm)` |
+| `--em-markdown-p-font-weight--regular` | `var(--em-core-font-weight--regular)` |
+| `--em-markdown-p-font-weight--strong` | `var(--em-core-font-weight--bold)` |
+| `--em-markdown-p-line-height` | `var(--em-core-line-height--md)` |
+
+### `overlay` (1 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-overlay-background` | `rgb(33 33 41 / 90%)` |
+
+### `piechart` (8 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-piechart-donut-color` | `var(--em-sem-text)` |
+| `--em-piechart-donut-label-font-size` | `var(--em-core-font-size--md)` |
+| `--em-piechart-donut-label-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-piechart-donut-label-line-height` | `var(--em-core-line-height--md)` |
+| `--em-piechart-donut-number-font-size` | `var(--em-core-font-size--xxl)` |
+| `--em-piechart-donut-number-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-piechart-donut-number-line-height` | `var(--em-core-line-height--xl)` |
+| `--em-piechart-font-family` | `var(--em-core-font-family--base)` |
+
+### `selectfield` (66 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-selectfield-category-background` | `var(--em-sem-background--subtle)` |
+| `--em-selectfield-category-border-radius` | `var(--em-core-border-radius--150)` |
+| `--em-selectfield-category-color` | `var(--em-sem-text--neutral)` |
+| `--em-selectfield-category-font-family` | `var(--em-core-font-family--base)` |
+| `--em-selectfield-category-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-selectfield-category-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-selectfield-category-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-selectfield-category-padding` | `var(--em-core-spacing--0100)` |
+| `--em-selectfield-content-background` | `var(--em-sem-background--neutral)` |
+| `--em-selectfield-content-border-radius` | `var(--em-core-border-radius--300)` |
+| `--em-selectfield-content-gap` | `var(--em-core-spacing--0200)` |
+| `--em-selectfield-content-max-height` | `320px` |
+| `--em-selectfield-content-max-width` | `400px` |
+| `--em-selectfield-content-opacity--loading` | `0.5` |
+| `--em-selectfield-content-padding` | `var(--em-core-spacing--0200)` |
+| `--em-selectfield-content-shadow-blur` | `var(--em-core-shadow-blur)` |
+| `--em-selectfield-content-shadow-color` | `rgb(33 33 41 / 25%)` |
+| `--em-selectfield-content-shadow-position-x` | `var(--em-core-shadow-position-x)` |
+| `--em-selectfield-content-shadow-position-y` | `var(--em-core-shadow-position-y)` |
+| `--em-selectfield-content-shadow-spread` | `var(--em-core-shadow-spread)` |
+| `--em-selectfield-item-background` | `var(--em-sem-background--neutral)` |
+| `--em-selectfield-item-background--active` | `var(--em-sem-background--light)` |
+| `--em-selectfield-item-background--hover` | `var(--em-sem-background)` |
+| `--em-selectfield-item-background--selected` | `var(--em-sem-background--inverted)` |
+| `--em-selectfield-item-border-radius` | `var(--em-core-border-radius--200)` |
+| `--em-selectfield-item-font-family` | `var(--em-core-font-family--base)` |
+| `--em-selectfield-item-height` | `var(--em-core-size--0800)` |
+| `--em-selectfield-item-icon-color` | `var(--em-sem-text)` |
+| `--em-selectfield-item-icon-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-selectfield-item-icon-color--selected` | `var(--em-sem-text--inverted)` |
+| `--em-selectfield-item-icon-size` | `var(--em-core-size--0400)` |
+| `--em-selectfield-item-label-left-color` | `var(--em-sem-text)` |
+| `--em-selectfield-item-label-left-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-selectfield-item-label-left-color--selected` | `var(--em-sem-text--inverted)` |
+| `--em-selectfield-item-label-left-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-selectfield-item-label-left-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-selectfield-item-label-left-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-selectfield-item-label-padding-left-right` | `var(--em-core-spacing--0200)` |
+| `--em-selectfield-item-label-right-color` | `var(--em-sem-text--muted)` |
+| `--em-selectfield-item-label-right-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-selectfield-item-label-right-color--selected` | `var(--em-sem-text--inverted)` |
+| `--em-selectfield-item-label-right-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-selectfield-item-label-right-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-selectfield-item-label-right-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-selectfield-item-padding` | `var(--em-core-spacing--0200)` |
+| `--em-selectfield-trigger-background` | `var(--em-sem-background--neutral)` |
+| `--em-selectfield-trigger-background--active` | `var(--em-sem-background--light)` |
+| `--em-selectfield-trigger-background--filled` | `var(--em-sem-background--inverted)` |
+| `--em-selectfield-trigger-background--hover` | `var(--em-sem-background)` |
+| `--em-selectfield-trigger-border-color` | `var(--em-sem-background--muted)` |
+| `--em-selectfield-trigger-border-color--error` | `var(--em-sem-status-error-text)` |
+| `--em-selectfield-trigger-border-radius` | `var(--em-core-border-radius--200)` |
+| `--em-selectfield-trigger-border-width` | `var(--em-core-border-width--025)` |
+| `--em-selectfield-trigger-border-width--error` | `var(--em-core-border-width--050)` |
+| `--em-selectfield-trigger-color` | `var(--em-sem-text)` |
+| `--em-selectfield-trigger-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-selectfield-trigger-color--filled` | `var(--em-sem-text--inverted)` |
+| `--em-selectfield-trigger-font-family` | `var(--em-core-font-family--base)` |
+| `--em-selectfield-trigger-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-selectfield-trigger-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-selectfield-trigger-height` | `var(--em-core-size--1000)` |
+| `--em-selectfield-trigger-icon-size` | `var(--em-core-size--0400)` |
+| `--em-selectfield-trigger-label-padding-left-right` | `var(--em-core-spacing--0200)` |
+| `--em-selectfield-trigger-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-selectfield-trigger-min-width` | `64px` |
+| `--em-selectfield-trigger-padding` | `var(--em-core-spacing--0300)` |
+
+### `skeleton` (1 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-skeleton-border-radius` | `var(--em-core-border-radius--300)` |
+
+### `switch` (23 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-switch-background--disabled` | `var(--em-sem-background--subtle)` |
+| `--em-switch-background--off` | `var(--em-sem-background--subtle)` |
+| `--em-switch-background--on` | `var(--em-sem-background--inverted)` |
+| `--em-switch-font-family` | `var(--em-core-font-family--base)` |
+| `--em-switch-height` | `var(--em-core-size--0400)` |
+| `--em-switch-label-color` | `var(--em-sem-text)` |
+| `--em-switch-label-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-switch-label-color-font-size` | `var(--em-core-font-size--md)` |
+| `--em-switch-label-color-font-weight` | `var(--em-core-font-weight--medium)` |
+| `--em-switch-label-color-line-height` | `var(--em-core-line-height--md)` |
+| `--em-switch-label-gap` | `var(--em-core-spacing--0200)` |
+| `--em-switch-shadow-blur` | `var(--em-core-shadow-blur)` |
+| `--em-switch-shadow-color` | `var(--em-core-shadow-color)` |
+| `--em-switch-shadow-position-x` | `var(--em-core-shadow-position-x)` |
+| `--em-switch-shadow-position-y` | `var(--em-core-shadow-position-y)` |
+| `--em-switch-shadow-spread` | `var(--em-core-shadow-spread)` |
+| `--em-switch-size-border-radius` | `var(--em-core-border-radius--500)` |
+| `--em-switch-thumb-background` | `var(--em-sem-background--neutral)` |
+| `--em-switch-thumb-background--disabled` | `var(--em-sem-background--light)` |
+| `--em-switch-thumb-background--off` | `var(--em-sem-text--muted)` |
+| `--em-switch-thumb-padding` | `var(--em-core-spacing--0050)` |
+| `--em-switch-thumb-size` | `var(--em-core-size--0300)` |
+| `--em-switch-width` | `var(--em-core-size--0800)` |
+
+### `tablechart` (31 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-tablechart-border-color` | `var(--em-sem-background--light)` |
+| `--em-tablechart-border-radius` | `var(--em-core-border-radius--300)` |
+| `--em-tablechart-border-width` | `1px` |
+| `--em-tablechart-cell-background` | `var(--em-sem-background--neutral)` |
+| `--em-tablechart-cell-background--hover` | `var(--em-sem-background)` |
+| `--em-tablechart-cell-height` | `var(--em-core-size--1000)` |
+| `--em-tablechart-cell-min-width` | `var(--em-core-size--1200)` |
+| `--em-tablechart-cell-padding` | `var(--em-core-spacing--0200)` |
+| `--em-tablechart-color` | `var(--em-sem-text)` |
+| `--em-tablechart-color--muted` | `var(--em-sem-text--muted)` |
+| `--em-tablechart-font-family` | `var(--em-core-font-family--base)` |
+| `--em-tablechart-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-tablechart-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-tablechart-font-weight--bold` | `var(--em-core-font-weight--bold)` |
+| `--em-tablechart-font-weight--medium` | `var(--em-core-font-weight--medium)` |
+| `--em-tablechart-header-background` | `var(--em-sem-background--neutral)` |
+| `--em-tablechart-header-background--hover` | `var(--em-sem-background)` |
+| `--em-tablechart-heatmap-color` | `var(--em-sem-chart-color--1)` |
+| `--em-tablechart-icon-size` | `var(--em-core-size--0400)` |
+| `--em-tablechart-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-tablechart-loading-indicator-color` | `var(--em-sem-text--neutral)` |
+| `--em-tablechart-loading-indicator-font-family` | `var(--em-core-font-family--base)` |
+| `--em-tablechart-loading-indicator-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-tablechart-loading-indicator-font-weight` | `var(--em-core-font-weight--bold)` |
+| `--em-tablechart-loading-indicator-padding` | `var(--em-core-spacing--0300)` |
+| `--em-tablechart-padding-left-right` | `var(--em-core-spacing--0100)` |
+| `--em-tablechart-pagination-button-gap` | `var(--em-core-spacing--0200)` |
+| `--em-tablechart-pagination-height` | `var(--em-core-size--1200)` |
+| `--em-tablechart-pagination-label-padding-left-right` | `var(--em-core-spacing--0400)` |
+| `--em-tablechart-pivot-ident-padding` | `var(--em-core-spacing--0400)` |
+| `--em-tablechart-cell-max-width` | `calc(3 * var(--em-core-size--2000))` |
+
+### `textfield` (30 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-textfield-background` | `var(--em-sem-background)` |
+| `--em-textfield-background--active` | `var(--em-sem-background--subtle)` |
+| `--em-textfield-background--disabled` | `var(--em-sem-background--neutral)` |
+| `--em-textfield-background--filled` | `var(--em-sem-background--light)` |
+| `--em-textfield-border-color` | `var(--em-sem-text--subtle)` |
+| `--em-textfield-border-color--error` | `var(--em-sem-status-error-text)` |
+| `--em-textfield-border-radius` | `var(--em-core-border-radius--200)` |
+| `--em-textfield-border-width` | `var(--em-core-border-width--025)` |
+| `--em-textfield-border-width--error` | `var(--em-core-border-width--050)` |
+| `--em-textfield-color` | `var(--em-sem-text--muted)` |
+| `--em-textfield-color--disabled` | `var(--em-sem-text--subtle)` |
+| `--em-textfield-color--filled` | `var(--em-sem-text)` |
+| `--em-textfield-feedback-color` | `var(--em-sem-text--muted)` |
+| `--em-textfield-feedback-color--error` | `var(--em-sem-status-error-text)` |
+| `--em-textfield-feedback-font-family` | `var(--em-core-font-family--base)` |
+| `--em-textfield-feedback-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-textfield-feedback-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-textfield-feedback-font-weight--error` | `var(--em-core-font-weight--medium)` |
+| `--em-textfield-feedback-line-height` | `var(--em-core-line-height--md)` |
+| `--em-textfield-font-family` | `var(--em-core-font-family--base)` |
+| `--em-textfield-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-textfield-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-textfield-font-weight--filled` | `var(--em-core-font-weight--medium)` |
+| `--em-textfield-height` | `var(--em-core-size--1000)` |
+| `--em-textfield-icon-size` | `var(--em-core-size--0400)` |
+| `--em-textfield-label-padding` | `var(--em-core-spacing--0200)` |
+| `--em-textfield-line-height` | `var(--em-core-line-height--md)` |
+| `--em-textfield-max-width` | `400px` |
+| `--em-textfield-min-width` | `160px` |
+| `--em-textfield-padding` | `var(--em-core-spacing--0200)` |
+
+### `tooltip` (10 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-tooltip-background` | `var(--em-sem-background--inverted)` |
+| `--em-tooltip-border-radius` | `var(--em-core-border-radius--150)` |
+| `--em-tooltip-color` | `var(--em-sem-text--inverted)` |
+| `--em-tooltip-font-family` | `var(--em-core-font-family--base)` |
+| `--em-tooltip-font-size` | `var(--em-core-font-size--xs)` |
+| `--em-tooltip-font-weight` | `var(--em-core-font-weight--regular)` |
+| `--em-tooltip-line-height` | `var(--em-core-line-height--sm)` |
+| `--em-tooltip-max-width` | `256px` |
+| `--em-tooltip-padding-left-right` | `var(--em-core-spacing--0200)` |
+| `--em-tooltip-padding-top-bottom` | `var(--em-core-spacing--0150)` |

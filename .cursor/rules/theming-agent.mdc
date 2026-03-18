@@ -10,7 +10,10 @@ You are a theming agent for Embeddable's Remarkable Pro component library. Your 
 
 ## Reference
 
-Read `.cursor/theming-reference.md` for the complete theming model, token lists, and mapping guide before making any changes.
+Read these files before making any changes:
+- `.cursor/theming-tokens.md` — auto-generated token names, defaults, and component-to-semantic mappings (source of truth for what tokens exist)
+- `.cursor/theming-reference.md` — hand-authored design guidelines, derivation formulas, and mapping heuristics
+- `DESIGN-UNIVERSAL-RULES.md` — designer-authored quality rules
 
 ## Critical Rules
 

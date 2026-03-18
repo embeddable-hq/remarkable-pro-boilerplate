@@ -18,7 +18,8 @@
     "reinstall": "rm -rf node_modules package-lock.json && npm install",
     "extract-figma-tokens": "tsx scripts/extract-figma-tokens.ts",
     "parse-theme": "tsx scripts/parse-theme.ts",
-    "score-theme": "tsx scripts/score-theme.ts"
+    "score-theme": "tsx scripts/score-theme.ts",
+    "generate:theming-tokens": "tsx scripts/generate-theming-tokens.ts"
   },
   "dependencies": {
     "@embeddable.com/remarkable-pro": "^0.1.19"

@@ -1,7 +1,11 @@
-# Embeddable Remarkable Pro — Theming Reference
+# Embeddable Remarkable Pro — Theming Reference (Hand-Authored)
 
-This is the comprehensive reference for theming Remarkable Pro components via `embeddable.theme.ts`.
-The agent should use this file as its primary knowledge source when generating or editing theme files.
+Design knowledge for theming Remarkable Pro components. This file contains design guidelines,
+derivation formulas, and mapping heuristics — content authored by humans that does not change
+when packages update.
+
+For the complete list of token names, defaults, and component-to-semantic mappings, see
+`.cursor/theming-tokens.md` (auto-generated from packages).
 
 ## Architecture
 
@@ -25,56 +29,18 @@ export default themeProvider;
 - Only override what you need — everything else inherits from `parentTheme`.
 - The `Theme` type has these top-level keys: `styles`, `charts`, `i18n`, `formatter`, `defaults`.
 
-### Theme type shape
-
-```ts
-type Theme = {
-  i18n: ThemeI18n;          // language + translations (i18next Resource)
-  charts: ThemeCharts;      // chart colors, color maps, legend position, per-chart options
-  styles: ThemeStyles;      // CSS design tokens (552 variables)
-  formatter: ThemeFormatter; // locale, number/date formatting
-  defaults: ThemeDefaults;  // date ranges, comparison periods, menu options
-};
-```
-
 ---
 
-## Token Layers (CSS Variables in `theme.styles`)
+## Token Layers Overview
 
 Remarkable uses a 3-layer token system. All tokens live in `theme.styles` as CSS variable strings.
+For the full list of all tokens and their default values, see `.cursor/theming-tokens.md`.
 
-### Layer 1: Core Tokens (`--em-core-*`)
+- **Core (`--em-core-*`)**: Raw design primitives. Most teams do NOT override these.
+- **Semantic (`--em-sem-*`)**: PRIMARY theming layer — controls global appearance.
+- **Component (`--em-{component}-*`)**: Per-component overrides for isolated tweaks.
 
-Raw design primitives. Most teams do NOT override these.
-
-| Category | Pattern | Example |
-|----------|---------|---------|
-| Border radius | `--em-core-border-radius--{scale}` | `--em-core-border-radius--200` = `8px` |
-| Border width | `--em-core-border-width--{scale}` | `--em-core-border-width--025` = `1px` |
-| Gray scale | `--em-core-color-gray--{scale}` | `--em-core-color-gray--0900` = `rgb(33 33 41)` |
-| Font family | `--em-core-font-family--{name}` | `--em-core-font-family--base` = `inter` |
-| Font size | `--em-core-font-size--{size}` | `--em-core-font-size--md` = `16px` |
-| Font weight | `--em-core-font-weight--{weight}` | `--em-core-font-weight--bold` = `700` |
-| Line height | `--em-core-line-height--{size}` | `--em-core-line-height--md` = `16px` |
-| Shadow | `--em-core-shadow-*` | `--em-core-shadow-blur` = `40px` |
-| Size scale | `--em-core-size--{scale}` | `--em-core-size--0800` = `32px` |
-| Spacing scale | `--em-core-spacing--{scale}` | `--em-core-spacing--0400` = `16px` |
-
-**Full gray scale (light → dark):**
-- `--em-core-color-gray--0000` = `rgb(255 255 255)` (white)
-- `--em-core-color-gray--0050` = `rgb(247 247 248)`
-- `--em-core-color-gray--0100` = `rgb(237 237 241)`
-- `--em-core-color-gray--0200` = `rgb(228 228 234)`
-- `--em-core-color-gray--0300` = `rgb(210 210 213)`
-- `--em-core-color-gray--0400` = `rgb(184 184 189)`
-- `--em-core-color-gray--0500` = `rgb(144 144 152)`
-- `--em-core-color-gray--0600` = `rgb(114 114 121)`
-- `--em-core-color-gray--0700` = `rgb(92 92 102)`
-- `--em-core-color-gray--0800` = `rgb(49 49 61)`
-- `--em-core-color-gray--0900` = `rgb(33 33 41)`
-- `--em-core-color-gray--1000` = `rgb(0 0 0)` (black)
-
-### Layer 2: Semantic Tokens (`--em-sem-*`) — PRIMARY THEMING LAYER
+### Semantic Token Roles
 
 These describe **what a value is used for**, not what color it is. This is where most theming work happens.
 
@@ -106,19 +72,8 @@ These describe **what a value is used for**, not what color it is. This is where
 | `--em-sem-status-success-text` | Positive status text (KPI positive trend) |
 
 #### Chart Colors (semantic)
-| Token | Default |
-|-------|---------|
-| `--em-sem-chart-color--1` through `--em-sem-chart-color--10` | 10 chart series colors |
 
-These provide CSS-variable-based chart colors. They are used by the heatmap and can be referenced by other tokens. For array-based chart colors, use `theme.charts.backgroundColors` instead.
-
-### Layer 3: Component Tokens (`--em-{component}-*`)
-
-Fine-grained per-component overrides. Use only when you need to deviate from the global theme for a specific component.
-
-**Components with tokens:** actionicon, barchart, button, buttonicon, card, chart (shared), daterangepicker, divider, field, filter, ghostbutton, ghostbuttonicon, kpichart, linechart, markdown, overlay, piechart, selectfield, skeleton, switch, tablechart, textfield, tooltip.
-
-Component tokens reference semantic or core tokens by default. Override them only for targeted component-specific tweaks.
+10 chart series colors (`--em-sem-chart-color--1` through `--em-sem-chart-color--10`). Used by heatmaps and can be referenced by other tokens. For array-based chart colors, use `theme.charts.backgroundColors` instead.
 
 ---
 
@@ -191,11 +146,40 @@ When extracting design tokens from a Figma file, map them as follows:
 | Dark/inverted surface | `styles['--em-sem-background--inverted']` | Default `#000000` for tooltips |
 | Error color | `styles['--em-sem-status-error-text']` | Default `#d92d20` if absent |
 | Success color | `styles['--em-sem-status-success-text']` | Default from brand green or `#16a34a` |
+| Primary brand color | `styles['--em-button-background--primary']` | See **Button Component Mapping** above |
 | Font family | NOT SUPPORTED | Custom fonts cannot be loaded through theming |
 | Border radius (global) | `styles['--em-core-border-radius--200']` | Adjust the 200 scale step |
 | Card border radius | `styles['--em-card-border-radius']` | Component-level override |
 | Card padding | `styles['--em-card-padding']` | Component-level override |
 | Dark mode surfaces | `styles['--em-sem-background']` etc. | Invert the gray scale references |
+
+---
+
+## Button Component Mapping (CRITICAL)
+
+The default Remarkable UI maps primary button backgrounds to **semantic text tokens**, not brand colors:
+
+```
+--em-button-background--primary        → var(--em-sem-text--muted)
+--em-button-background--primary--hover  → var(--em-sem-text)
+--em-button-background--primary--active → var(--em-sem-text--neutral)
+--em-button-color--primary             → var(--em-sem-text--inverted)
+```
+
+This means buttons inherit gray tones from the text scale, which looks wrong for branded designs.
+**You must explicitly set button tokens to the primary brand/accent color.**
+
+| Token | Value | Notes |
+|-------|-------|-------|
+| `--em-button-background--primary` | Brand primary color | The design's main action color |
+| `--em-button-background--primary--hover` | Brand primary darkened ~15% | Hover state |
+| `--em-button-background--primary--active` | Brand primary darkened ~25% | Active/pressed state |
+| `--em-button-color--primary` | `#FFFFFF` | Use dark text if brand color is very light |
+
+**How to identify the brand color from Figma tokens:**
+1. Look for `Primary/*` or `Brand/*` named colors, or button nodes (e.g. "Btn-free-trial")
+2. If not found, use the most prominent saturated color from `chartColorCandidates`
+3. The brand color is typically saturated and medium-lightness (not a gray)
 
 ---
 

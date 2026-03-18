@@ -17,6 +17,17 @@ When a user provides a Figma file URL and a Figma API token together (in any for
 
 Extract the URL and token from the message regardless of exact wording.
 
+## Phase 0: Setup (silent — do not narrate to user)
+
+Run these checks before anything else. Do not tell the user about them — just ensure they pass.
+
+1. **Check `node_modules/`** — if missing, run `npm install` and wait for it to complete.
+2. **Check `.cursor/theming-tokens.md`** — if missing or stale:
+   - Read the `<!-- remarkable-ui: X.Y.Z, remarkable-pro: X.Y.Z -->` header from `.cursor/theming-tokens.md` (if it exists)
+   - Compare against the `version` field in `node_modules/@embeddable.com/remarkable-ui/package.json` and `node_modules/@embeddable.com/remarkable-pro/package.json`
+   - If the file is missing OR the versions don't match, run: `npx tsx scripts/generate-theming-tokens.ts`
+3. Proceed to Phase 1.
+
 ## Phase 1: Extract tokens
 
 1. Set the Figma token as an environment variable:
@@ -36,7 +47,8 @@ Extract the URL and token from the message regardless of exact wording.
 ## Phase 2: Apply theme
 
 Before generating the theme, read these files for full context:
-- `.cursor/theming-reference.md` — complete token reference, derivation formulas, design quality guidelines
+- `.cursor/theming-tokens.md` — auto-generated token names, defaults, and component-to-semantic mappings
+- `.cursor/theming-reference.md` — design guidelines, derivation formulas, mapping heuristics
 - `DESIGN-UNIVERSAL-RULES.md` — designer-authored quality rules
 
 Then:
