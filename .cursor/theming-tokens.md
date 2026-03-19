@@ -1,6 +1,6 @@
 <!-- AUTO-GENERATED — do not edit manually -->
 <!-- Run: npx tsx scripts/generate-theming-tokens.ts -->
-<!-- Generated: 2026-03-19T08:26:40.796Z -->
+<!-- Generated: 2026-03-19T13:14:17.189Z -->
 <!-- remarkable-ui: 2.0.45, remarkable-pro: 0.1.24 -->
 
 # Embeddable Theming Tokens Reference
@@ -1179,6 +1179,8 @@ Auto-classified grouping of semantic tokens by role. These counts are the source
 | `--em-sem-chart-color--7` | `rgb(131 56 236)` |
 | `--em-sem-chart-color--8` | `rgb(0 180 216)` |
 | `--em-sem-chart-color--9` | `rgb(76 175 80)` |
+
+**IMPORTANT:** These semantic chart tokens and `theme.charts.backgroundColors` are two independent code paths. `backgroundColors` drives bar/line/pie/donut charts; these semantic tokens drive heatmaps (via `--em-tablechart-heatmap-color`) and chart category indicators. There is NO automatic sync — you must always set both.
 
 ---
 

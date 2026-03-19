@@ -548,6 +548,10 @@ async function main() {
       lines.push(`| \`${t.name}\` | \`${escaped}\` |`);
     }
     lines.push('');
+    if (group.label === 'Chart Color') {
+      lines.push('**IMPORTANT:** These semantic chart tokens and `theme.charts.backgroundColors` are two independent code paths. `backgroundColors` drives bar/line/pie/donut charts; these semantic tokens drive heatmaps (via `--em-tablechart-heatmap-color`) and chart category indicators. There is NO automatic sync — you must always set both.');
+      lines.push('');
+    }
   }
 
   lines.push('---');

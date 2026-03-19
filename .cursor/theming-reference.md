@@ -71,9 +71,15 @@ These describe **what a value is used for**, not what color it is. This is where
 | `--em-sem-status-success-background` | Positive status backgrounds (KPI positive trend bg) |
 | `--em-sem-status-success-text` | Positive status text (KPI positive trend) |
 
-#### Chart Colors (semantic)
+#### Chart Colors (semantic) — MUST be synced with `charts.backgroundColors`
 
-10 chart series colors (`--em-sem-chart-color--1` through `--em-sem-chart-color--10`). Used by heatmaps and can be referenced by other tokens. For array-based chart colors, use `theme.charts.backgroundColors` instead.
+10 chart series colors (`--em-sem-chart-color--1` through `--em-sem-chart-color--10`). Used by heatmaps (via `--em-tablechart-heatmap-color`) and chart category indicators.
+
+**IMPORTANT:** `charts.backgroundColors` and `--em-sem-chart-color--N` are two independent code paths in remarkable-pro. There is NO automatic sync between them. You must always set both:
+- `charts.backgroundColors` — drives bar, line, pie, donut charts
+- `--em-sem-chart-color--1` through `--N` in `styles` — drives heatmaps and chart indicators
+
+If you only set `charts.backgroundColors`, heatmaps will show the default orange (`#FF5400`) instead of your palette.
 
 ---
 
@@ -443,6 +449,16 @@ const brandTheme: DeepPartial<Theme> = {
     '--em-sem-status-error-background': '#fef2f2',
     '--em-sem-status-success-text': '#16a34a',
     '--em-sem-status-success-background': '#f0fdf4',
+
+    // Semantic chart tokens — must match charts.backgroundColors for heatmaps
+    '--em-sem-chart-color--1': '#2563EB',
+    '--em-sem-chart-color--2': '#DC2626',
+    '--em-sem-chart-color--3': '#16A34A',
+    '--em-sem-chart-color--4': '#F59E0B',
+    '--em-sem-chart-color--5': '#8B5CF6',
+    '--em-sem-chart-color--6': '#EC4899',
+    '--em-sem-chart-color--7': '#14B8A6',
+    '--em-sem-chart-color--8': '#F97316',
   },
 };
 

@@ -29,7 +29,7 @@ Read these files before making any changes:
 
 - Do NOT set raw color values on `--em-core-color-gray--*` tokens unless explicitly asked.
 - Do NOT set font tokens (`--em-core-font-family--*`, `--em-*-font-family`) — custom fonts are not supported through theming. Font extraction from Figma should be ignored.
-- Do NOT duplicate chart colors in both `theme.styles['--em-sem-chart-color--N']` AND `theme.charts.backgroundColors` — use one approach, prefer `charts.backgroundColors`.
+- Always set BOTH `charts.backgroundColors` AND `--em-sem-chart-color--1` through `--em-sem-chart-color--N` in `theme.styles` (up to the number of chart colors, max 10). The `backgroundColors` array drives bar/line/pie/donut charts; the semantic tokens drive heatmaps and chart category indicators. These two paths are NOT synced automatically by the framework.
 - Do NOT change the `themeProvider` function signature or its export.
 - Do NOT modify `embeddable.config.ts`.
 - Do NOT invent token names — only use tokens that exist in the type system.
@@ -99,7 +99,7 @@ a different dark surface for tooltips/overlays. Do NOT use OS chrome colors (sta
 
 When the user provides a `figma-tokens.json` file (from the extraction script):
 
-1. **`chartColorCandidates`** → `charts.backgroundColors` (use directly, they are pre-filtered).
+1. **`chartColorCandidates`** → `charts.backgroundColors` AND `--em-sem-chart-color--1` through `--N` in `styles` (use directly, they are pre-filtered). Both must be set — `backgroundColors` for bar/line/pie/donut, semantic tokens for heatmaps and indicators.
    If fewer than 6, expand the palette using the chart derivation rules below.
 2. **`backgroundCandidates`** → semantic background tokens. **Use extraction values as-is.**
 3. **`textColorCandidates`** → semantic text tokens. **Use extraction values as-is.**
@@ -274,6 +274,7 @@ Before outputting a theme, verify:
 - [ ] **No brand tint bleed** — tables, dropdowns, cards use white or neutral surfaces
 - [ ] **Contrast check** — text-on-background pairs meet 4.5:1 WCAG AA ratio
 - [ ] **Chart colors from Figma used directly** — no unnecessary derivative generation
+- [ ] **Semantic chart tokens synced** — `--em-sem-chart-color--1` through `--N` match `charts.backgroundColors` (required for heatmaps)
 
 ### Iterative theming
 
