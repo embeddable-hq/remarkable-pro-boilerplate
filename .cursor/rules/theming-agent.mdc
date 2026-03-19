@@ -104,7 +104,7 @@ When the user provides a `figma-tokens.json` file (from the extraction script):
 2. **`backgroundCandidates`** → semantic background tokens. **Use extraction values as-is.**
 3. **`textColorCandidates`** → semantic text tokens. **Use extraction values as-is.**
 4. **`statusColorCandidates`** → status tokens. **Use extraction values as-is.**
-5. **`effects`** → shadow core tokens (pick the most prominent DROP_SHADOW)
+5. **`effects`** → shadow core tokens (use the deterministic shadow selection rule below)
 6. **`colors`** array → use for additional context when candidates are insufficient
 7. **Text styles** → IGNORE font families (not supported). Only note them in summary.
 
@@ -116,6 +116,30 @@ Always verify that extraction values satisfy the ordering rules in "Token semant
 above — the extraction heuristics may occasionally get the ordering wrong. If a candidate
 clearly violates ordering (e.g. a chromatic color classified as background), discard it
 and treat that token as missing.
+
+### Deterministic selection rules
+
+These rules eliminate run-to-run variability when multiple candidates exist.
+
+#### Shadow selection
+
+When `effects` contains multiple DROP_SHADOW entries, select one deterministically:
+
+1. Pick the shadow whose `name` contains "card", "bg", "panel", or "container" (case-insensitive).
+2. If multiple match by name, pick the one with blur in the 20–60px range.
+3. If none match by name, pick the DROP_SHADOW with the smallest blur ≥ 10px.
+4. If no shadow has blur ≥ 10px, pick the one with the largest blur.
+
+Apply the selected shadow to `--em-core-shadow--sm`, `--em-core-shadow--md`,
+`--em-core-shadow--lg` (scaling blur proportionally: sm = 0.5×, md = 1×, lg = 2×).
+
+#### Chart color ordering
+
+Chart colors in `chartColorCandidates` are **pre-sorted by prominence** (frequency × area
+from the extraction script). Preserve this order when assigning to `charts.backgroundColors`.
+
+When expanding a palette with fewer than 6 colors, append generated colors AFTER the
+extracted ones — never re-sort or interleave with the originals.
 
 ### Deriving missing tokens (ONLY for gaps)
 

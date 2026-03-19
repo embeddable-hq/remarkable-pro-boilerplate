@@ -130,6 +130,15 @@ function hexToHsl(hex: string): [number, number, number] {
   return [h * 360, s, l];
 }
 
+function mixColors(a: string, b: string, t: number): string {
+  const [ar, ag, ab] = hexToRgb(a);
+  const [br, bg, bb] = hexToRgb(b);
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${bl.toString(16).padStart(2, '0')}`.toUpperCase();
+}
+
 function isNearWhite(hex: string): boolean {
   return hexToLuminance(hex) > 0.85;
 }
@@ -145,6 +154,12 @@ function isGrayish(hex: string): boolean {
 
 function isChromatic(hex: string): boolean {
   return !isGrayish(hex) && !isNearWhite(hex) && !isNearBlack(hex);
+}
+
+function isTintedGray(hex: string): boolean {
+  const [, s] = hexToHsl(hex);
+  const lum = hexToLuminance(hex);
+  return s >= 0.1 && s <= 0.3 && lum > 0.05 && lum < 0.85;
 }
 
 function hueDistance(h1: number, h2: number): number {
@@ -213,6 +228,9 @@ interface TraversalState {
   textStyles: Map<string, ExtractedTextStyle>;
   effects: Map<string, ExtractedEffect>;
   nodeCount: number;
+  textNodeFills: Map<string, number>;
+  colorNodeData: Map<string, { count: number; totalArea: number }>;
+  colorFirstSeen: Map<string, number>;
 }
 
 function getNodePath(node: any, parentPath: string): string {
@@ -224,12 +242,29 @@ function traverseNode(node: any, state: TraversalState, path: string): void {
   state.nodeCount++;
   const nodePath = getNodePath(node, path);
 
+  const nodeArea = (node.absoluteBoundingBox?.width ?? node.size?.x ?? 0) *
+                   (node.absoluteBoundingBox?.height ?? node.size?.y ?? 0);
+
   if (node.fills && Array.isArray(node.fills)) {
     for (const fill of node.fills) {
       if (fill.type === 'SOLID' && fill.visible !== false && fill.color) {
         const opacity = fill.opacity ?? fill.color.a ?? 1;
         if (opacity < 0.01) continue;
         const hex = figmaColorToHex(fill.color);
+
+        const freqData = state.colorNodeData.get(hex) || { count: 0, totalArea: 0 };
+        freqData.count++;
+        freqData.totalArea += nodeArea;
+        state.colorNodeData.set(hex, freqData);
+
+        if (!state.colorFirstSeen.has(hex)) {
+          state.colorFirstSeen.set(hex, state.colorFirstSeen.size);
+        }
+
+        if (node.type === 'TEXT') {
+          state.textNodeFills.set(hex, (state.textNodeFills.get(hex) || 0) + 1);
+        }
+
         const key = `fill:${hex}`;
         if (!state.colors.has(key)) {
           state.colors.set(key, {
@@ -324,6 +359,9 @@ function traverseDocument(document: any): TraversalState {
     textStyles: new Map(),
     effects: new Map(),
     nodeCount: 0,
+    textNodeFills: new Map(),
+    colorNodeData: new Map(),
+    colorFirstSeen: new Map(),
   };
   if (document) {
     traverseNode(document, state, '');
@@ -403,13 +441,13 @@ function classifyByLuminance(colors: ExtractedColor[]): {
   const backgrounds: Record<string, string> = {};
   const textColors: Record<string, string> = {};
 
-  const chromatic = colors.filter(c => isChromatic(c.hex));
+  const chromatic = colors.filter(c => isChromatic(c.hex) && !isTintedGray(c.hex));
   const uniqueChromatic = [...new Set(chromatic.map(c => c.hex))];
   for (const hex of uniqueChromatic) {
     chartColors.push(hex);
   }
 
-  const grays = colors.filter(c => isGrayish(c.hex));
+  const grays = colors.filter(c => isGrayish(c.hex) || isTintedGray(c.hex));
   const uniqueGrays = [...new Set(grays.map(c => c.hex))];
   const sortedByLum = uniqueGrays.sort((a, b) => hexToLuminance(b) - hexToLuminance(a));
 
@@ -429,12 +467,18 @@ function classifyByLuminance(colors: ExtractedColor[]): {
     backgrounds['--em-sem-background--neutral'] = lightGrays[0]!;
   }
 
-  // Text: darkest = primary, then neutral, subtle, muted (lightest)
+  // Text: darkest = primary, then neutral (near-primary luminance), subtle, muted (lightest)
   if (darkGrays.length >= 1) {
     textColors['--em-sem-text'] = darkGrays[darkGrays.length - 1]!;
   }
   if (darkGrays.length >= 2) {
-    textColors['--em-sem-text--neutral'] = darkGrays[darkGrays.length - 2]!;
+    const primaryLum = hexToLuminance(darkGrays[darkGrays.length - 1]!);
+    const nearPrimary = darkGrays.slice(0, -1).filter(h =>
+      Math.abs(hexToLuminance(h) - primaryLum) < 0.15
+    );
+    textColors['--em-sem-text--neutral'] = nearPrimary.length > 0
+      ? nearPrimary[nearPrimary.length - 1]!
+      : darkGrays[darkGrays.length - 1]!;
   }
 
   // Mid-grays become subtle and muted text
@@ -448,6 +492,71 @@ function classifyByLuminance(colors: ExtractedColor[]): {
   }
 
   return { chartColors, backgrounds, textColors };
+}
+
+/**
+ * Dedicated TEXT node fill analysis.
+ * Uses fill colors specifically from TEXT-type nodes with frequency weighting.
+ * Handles flat designs (>80% same color) and blue-gray/tinted-gray text colors.
+ */
+function classifyTextFromTextNodes(
+  textNodeFills: Map<string, number>,
+  cardBg: string = '#FFFFFF',
+): Record<string, string> {
+  const textColors: Record<string, string> = {};
+  if (textNodeFills.size === 0) return textColors;
+
+  const totalTextNodes = Array.from(textNodeFills.values()).reduce((a, b) => a + b, 0);
+  const sorted = Array.from(textNodeFills.entries()).sort((a, b) => b[1] - a[1]);
+
+  if (sorted[0]![1] / totalTextNodes > 0.8) {
+    const flatColor = sorted[0]![0];
+    textColors['--em-sem-text'] = flatColor;
+    textColors['--em-sem-text--neutral'] = mixColors(cardBg, flatColor, 0.90);
+    textColors['--em-sem-text--subtle'] = mixColors(cardBg, flatColor, 0.55);
+    textColors['--em-sem-text--muted'] = mixColors(cardBg, flatColor, 0.30);
+    return textColors;
+  }
+
+  const textCandidates = sorted.filter(([hex]) => {
+    if (isNearWhite(hex)) return false;
+    if (isChromatic(hex) && !isTintedGray(hex)) return false;
+    const [, s] = hexToHsl(hex);
+    if (s > 0.3 && hexToLuminance(hex) < 0.15) return false;
+    return true;
+  });
+
+  if (textCandidates.length === 0) return textColors;
+
+  const withLum = textCandidates.map(([hex, count]) => ({
+    hex, count, lum: hexToLuminance(hex),
+  }));
+
+  const dark = withLum.filter(c => c.lum < 0.25).sort((a, b) => b.count - a.count);
+  const mid = withLum.filter(c => c.lum >= 0.25 && c.lum <= 0.7).sort((a, b) => a.lum - b.lum);
+
+  if (dark.length >= 1) {
+    textColors['--em-sem-text'] = dark[0]!.hex;
+  }
+  if (dark.length >= 2) {
+    const primaryLum = dark[0]!.lum;
+    const nearPrimary = dark.slice(1).filter(c =>
+      Math.abs(c.lum - primaryLum) < 0.15
+    );
+    textColors['--em-sem-text--neutral'] = nearPrimary.length > 0
+      ? nearPrimary[0]!.hex
+      : dark[0]!.hex;
+  }
+  if (mid.length >= 1) {
+    textColors['--em-sem-text--subtle'] = mid[0]!.hex;
+  }
+  if (mid.length >= 2) {
+    textColors['--em-sem-text--muted'] = mid[mid.length - 1]!.hex;
+  } else if (mid.length === 1) {
+    textColors['--em-sem-text--muted'] = mid[0]!.hex;
+  }
+
+  return textColors;
 }
 
 /**
@@ -490,6 +599,32 @@ function filterChartCandidates(
   }
 
   return deduped;
+}
+
+/**
+ * Sort chart candidates by prominence: frequency × area from node traversal.
+ * Falls back to hue-sorted ordering for deterministic results when
+ * frequency data is insufficient.
+ */
+function sortChartCandidates(
+  candidates: string[],
+  colorNodeData: Map<string, { count: number; totalArea: number }>,
+  colorFirstSeen: Map<string, number>,
+): string[] {
+  if (candidates.length <= 1) return candidates;
+
+  const withScore = candidates.map(hex => ({
+    hex,
+    firstSeen: colorFirstSeen.get(hex) ?? Infinity,
+    freqScore: (colorNodeData.get(hex)?.count ?? 0) *
+               Math.max(colorNodeData.get(hex)?.totalArea ?? 0, 1),
+  }));
+
+  withScore.sort((a, b) =>
+    a.firstSeen - b.firstSeen || b.freqScore - a.freqScore
+  );
+
+  return withScore.map(c => c.hex);
 }
 
 // ─── Style extraction (local styles from file metadata) ──────────────
@@ -708,12 +843,28 @@ async function extractTokens(fileKey: string, nodeId: string | null, token: stri
     }
   }
 
+  // Validate status candidate hue ranges: error must be red-ish, success must be green-ish
+  for (const key of Object.keys(statusColorCandidates)) {
+    const hex = statusColorCandidates[key]!;
+    const [h, s] = hexToHsl(hex);
+    if (s > 0.2) {
+      if (key.includes('error') && h > 40 && h < 320) {
+        delete statusColorCandidates[key];
+      }
+      if (key.includes('success') && (h < 80 || h > 180)) {
+        delete statusColorCandidates[key];
+      }
+    }
+  }
+
+  const nameBasedTextKeys = new Set(Object.keys(textColorCandidates));
+
   // Second pass: luminance-based fallback
   // Always run for chart colors if none were found by name
   // Run for backgrounds/text if overall name matches are sparse
   const totalNameMatches = chartColorCandidates.length +
     Object.keys(backgroundCandidates).length +
-    Object.keys(textColorCandidates).length +
+    nameBasedTextKeys.size +
     Object.keys(statusColorCandidates).length;
 
   const needsLuminanceFallback = totalNameMatches < 3 || chartColorCandidates.length === 0;
@@ -734,8 +885,37 @@ async function extractTokens(fileKey: string, nodeId: string | null, token: stri
     }
   }
 
-  // Filter chart candidates for quality
-  const filteredChartColors = filterChartCandidates(chartColorCandidates, backgroundCandidates);
+  // Third pass: TEXT node dedicated analysis (overrides luminance, respects name-based)
+  if (state.textNodeFills.size > 0) {
+    const cardBg = backgroundCandidates['--em-sem-background'] || backgroundCandidates['--em-sem-background--neutral'] || '#FFFFFF';
+    const textNodeResult = classifyTextFromTextNodes(state.textNodeFills, cardBg);
+    if (Object.keys(textNodeResult).length > 0) {
+      console.log('Using TEXT node analysis for text color classification...');
+      for (const [key, val] of Object.entries(textNodeResult)) {
+        if (!nameBasedTextKeys.has(key)) {
+          textColorCandidates[key] = val;
+        }
+      }
+    }
+  }
+
+  // Detect inverted surface from dark chromatic text fills
+  if (!backgroundCandidates['--em-sem-background--inverted'] && state.textNodeFills.size > 0) {
+    for (const [hex] of state.textNodeFills.entries()) {
+      const [, s] = hexToHsl(hex);
+      if (s > 0.3 && hexToLuminance(hex) < 0.15) {
+        backgroundCandidates['--em-sem-background--inverted'] = hex;
+        break;
+      }
+    }
+  }
+
+  // Filter chart candidates for quality, then sort by prominence
+  const filteredChartColors = sortChartCandidates(
+    filterChartCandidates(chartColorCandidates, backgroundCandidates),
+    state.colorNodeData,
+    state.colorFirstSeen,
+  );
   const distinctHues = countDistinctHues(filteredChartColors);
 
   if (distinctHues < 3 && filteredChartColors.length > 0) {

@@ -38,11 +38,11 @@
         "--em-sem-background--inverted": { "value": "#000000", "label": "Dark / inverted surface — tooltips, filled select triggers, switch off state" }
       },
       "textColors": {
-        "_description": "Pure black primary text on white backgrounds, with mid-gray for secondary roles and near-black for neutral/subtle content. White reserved for text on the black inverted surface.",
+        "_description": "Flat black text design — hierarchy derived from mix(#FFFFFF, #000000, t). Primary is pure black, neutral/subtle/muted are progressively lighter grays. White reserved for text on the black inverted surface.",
         "--em-sem-text":           { "value": "#000000", "label": "Primary text — titles, labels, values, icons, all primary content" },
-        "--em-sem-text--muted":    { "value": "#666666", "label": "Secondary text — subtitles, descriptions, axis labels, legends" },
-        "--em-sem-text--subtle":   { "value": "#212529", "label": "Disabled / low-contrast — disabled states, placeholder text, subtle grid lines" },
-        "--em-sem-text--neutral":  { "value": "#212529", "label": "Neutral emphasis — loading indicators, category labels" },
+        "--em-sem-text--muted":    { "value": "#B3B3B3", "label": "Secondary text — derived mix(white, black, 0.30) — subtitles, descriptions, axis labels, legends" },
+        "--em-sem-text--subtle":   { "value": "#737373", "label": "Disabled / low-contrast — derived mix(white, black, 0.55) — disabled states, placeholder text, subtle grid lines" },
+        "--em-sem-text--neutral":  { "value": "#1A1A1A", "label": "Neutral emphasis — derived mix(white, black, 0.90) — loading indicators, category labels" },
         "--em-sem-text--inverted": { "value": "#FFFFFF",  "label": "Text on dark surfaces — tooltip titles, selected dropdown items, primary buttons" }
       },
       "statusColors": {

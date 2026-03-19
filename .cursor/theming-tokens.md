@@ -1,6 +1,6 @@
 <!-- AUTO-GENERATED — do not edit manually -->
 <!-- Run: npx tsx scripts/generate-theming-tokens.ts -->
-<!-- Generated: 2026-03-18T12:34:18.181Z -->
+<!-- Generated: 2026-03-19T08:26:40.796Z -->
 <!-- remarkable-ui: 2.0.45, remarkable-pro: 0.1.24 -->
 
 # Embeddable Theming Tokens Reference
@@ -1017,3 +1017,211 @@ Complete listing of all component tokens and their defaults.
 | `--em-tooltip-max-width` | `256px` |
 | `--em-tooltip-padding-left-right` | `var(--em-core-spacing--0200)` |
 | `--em-tooltip-padding-top-bottom` | `var(--em-core-spacing--0150)` |
+
+---
+
+## Theme Type Structure
+
+Extracted from `@embeddable.com/remarkable-pro` type definitions. This is the shape of the `Theme` object the agent produces.
+
+### `ThemeI18n`
+
+| Property | Type | Required |
+|----------|------|----------|
+| `language` | `string` | Yes |
+| `translations` | `Resource` | Yes |
+
+### `ThemeChartsColors`
+
+| Property | Type | Required |
+|----------|------|----------|
+| `borderColor` | `string` | Yes |
+| `backgroundColor` | `string` | Yes |
+
+### `ThemeChartsColorMap`
+
+| Property | Type | Required |
+|----------|------|----------|
+| `dimensionValue` | `Record&lt;string, string&gt;` | No |
+| `measure` | `Record&lt;string, string&gt;` | No |
+
+### `ThemeCharts`
+
+| Property | Type | Required |
+|----------|------|----------|
+| `backgroundColorMap` | `ThemeChartsColorMap` | No |
+| `borderColorMap` | `ThemeChartsColorMap` | No |
+| `backgroundColors` | `string[]` | No |
+| `borderColors` | `string[]` | No |
+| `legendPosition` | `ThemeChartsLegendPosition` | Yes |
+| `pieChartPro` | `{ options: Partial&lt;ChartOptions&lt;'pie'&gt;&gt;; }` | No |
+| `donutChartPro` | `{ options: Partial&lt;ChartOptions&lt;'pie'&gt;&gt;; }` | No |
+| `donutLabelChartPro` | `{ options: Partial&lt;ChartOptions&lt;'pie'&gt;&gt;; }` | No |
+| `barChartDefaultPro` | `{ options: Partial&lt;ChartOptions&lt;'bar'&gt;&gt;; }` | No |
+| `barChartDefaultHorizontalPro` | `{ options: Partial&lt;ChartOptions&lt;'bar'&gt;&gt;; }` | No |
+| `barChartGroupedPro` | `{ options: Partial&lt;ChartOptions&lt;'bar'&gt;&gt;; }` | No |
+| `barChartGroupedHorizontalPro` | `{ options: Partial&lt;ChartOptions&lt;'bar'&gt;&gt;; }` | No |
+| `barChartStackedPro` | `{ options: Partial&lt;ChartOptions&lt;'bar'&gt;&gt;; }` | No |
+| `barChartStackedHorizontalPro` | `{ options: Partial&lt;ChartOptions&lt;'bar'&gt;&gt;; }` | No |
+| `lineChartDefaultPro` | `{ options: Partial&lt;ChartOptions&lt;'line'&gt;&gt;; }` | No |
+| `lineChartGroupedPro` | `{ options: Partial&lt;ChartOptions&lt;'line'&gt;&gt;; }` | No |
+| `lineChartComparisonDefaultPro` | `{ options: Partial&lt;ChartOptions&lt;'line'&gt;&gt;; }` | No |
+
+### `ThemeDefaults`
+
+| Property | Type | Required |
+|----------|------|----------|
+| `comparisonPeriodsOptions` | `ComparisonPeriodOption[]` | Yes |
+| `dateRangesOptions` | `DateRangeOption[]` | Yes |
+| `chartMenuOptions` | `ChartCardMenuOption[]` | Yes |
+| `tableCellStyleOptions` | `TableCellStyleOption[]` | No |
+
+### `Theme`
+
+| Property | Type | Required |
+|----------|------|----------|
+| `i18n` | `ThemeI18n` | Yes |
+| `charts` | `ThemeCharts` | Yes |
+| `styles` | `ThemeStyles` | Yes |
+| `formatter` | `ThemeFormatter` | Yes |
+| `defaults` | `ThemeDefaults` | Yes |
+
+### `ThemeChartsLegendPosition`
+
+Union type: `'top' | 'right' | 'bottom' | 'left'`
+
+---
+
+## API and File Template
+
+### `defineTheme` (from `@embeddable.com/core`)
+
+```ts
+export declare const defineTheme: <T extends Record<string, any>>(parentTheme: DeepPartial<T>, childTheme: DeepPartial<T>) => T;
+```
+
+Deep-merges `childTheme` overrides onto `parentTheme` defaults. Only override what you need.
+
+### `DeepPartial<T>` (from `@embeddable.com/remarkable-pro`)
+
+```ts
+export type DeepPartial<T> = {
+    [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
+```
+
+### Canonical `embeddable.theme.ts` Template
+
+This is the expected file structure. Imports and type names are derived from the installed packages.
+
+```ts
+import { defineTheme } from '@embeddable.com/core';
+import { Theme, DeepPartial } from '@embeddable.com/remarkable-pro';
+
+const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
+  const newTheme: DeepPartial<Theme> = {
+    // theme overrides
+  };
+  return defineTheme(parentTheme, newTheme) as Theme;
+};
+
+export default themeProvider;
+```
+
+---
+
+## Semantic Token Roles
+
+Auto-classified grouping of semantic tokens by role. These counts are the source of truth for how many tokens exist per category.
+
+**Semantic color tokens (excluding chart):** 15 (6 background, 5 text, 4 status)
+
+### Background (6 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-sem-background` | `var(--em-core-color-gray--0050)` |
+| `--em-sem-background--inverted` | `var(--em-core-color-gray--0900)` |
+| `--em-sem-background--light` | `var(--em-core-color-gray--0100)` |
+| `--em-sem-background--muted` | `var(--em-core-color-gray--0300)` |
+| `--em-sem-background--neutral` | `var(--em-core-color-gray--0000)` |
+| `--em-sem-background--subtle` | `var(--em-core-color-gray--0200)` |
+
+### Text (5 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-sem-text` | `var(--em-core-color-gray--0900)` |
+| `--em-sem-text--inverted` | `var(--em-core-color-gray--0000)` |
+| `--em-sem-text--muted` | `var(--em-core-color-gray--0700)` |
+| `--em-sem-text--neutral` | `var(--em-core-color-gray--1000)` |
+| `--em-sem-text--subtle` | `var(--em-core-color-gray--0400)` |
+
+### Status (4 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-sem-status-error-background` | `rgb(246 226 226)` |
+| `--em-sem-status-error-text` | `rgb(188 16 16)` |
+| `--em-sem-status-success-background` | `rgb(225 240 233)` |
+| `--em-sem-status-success-text` | `rgb(15 149 90)` |
+
+### Chart Color (10 tokens)
+
+| Token | Default |
+|-------|---------|
+| `--em-sem-chart-color--1` | `rgb(255 84 0)` |
+| `--em-sem-chart-color--10` | `rgb(141 153 174)` |
+| `--em-sem-chart-color--2` | `rgb(58 134 255)` |
+| `--em-sem-chart-color--3` | `rgb(255 138 0)` |
+| `--em-sem-chart-color--4` | `rgb(255 47 109)` |
+| `--em-sem-chart-color--5` | `rgb(46 196 182)` |
+| `--em-sem-chart-color--6` | `rgb(106 76 255)` |
+| `--em-sem-chart-color--7` | `rgb(131 56 236)` |
+| `--em-sem-chart-color--8` | `rgb(0 180 216)` |
+| `--em-sem-chart-color--9` | `rgb(76 175 80)` |
+
+---
+
+## Button Default Mappings (Critical)
+
+The default Remarkable UI maps primary button backgrounds to **semantic text tokens**, not brand colors. This means buttons inherit gray tones from the text scale unless explicitly overridden with the brand/accent color.
+
+### Button → Semantic Mappings
+
+These are the critical defaults that need overriding for branded themes:
+
+| Button Token | Default Maps To |
+|-------------|----------------|
+| `--em-button-background--disabled` | `--em-sem-background--light` |
+| `--em-button-background--primary` | `--em-sem-text--muted` |
+| `--em-button-background--primary--active` | `--em-sem-text--neutral` |
+| `--em-button-background--primary--hover` | `--em-sem-text` |
+| `--em-button-background--secondary` | `--em-sem-background--light` |
+| `--em-button-background--secondary--active` | `--em-sem-background--muted` |
+| `--em-button-background--secondary--hover` | `--em-sem-background--subtle` |
+| `--em-button-color--disabled` | `--em-sem-text--subtle` |
+| `--em-button-color--primary` | `--em-sem-text--inverted` |
+| `--em-button-color--secondary` | `--em-sem-text` |
+
+### Button → Core Mappings
+
+| Button Token | Default Maps To |
+|-------------|----------------|
+| `--em-button-border-radius` | `--em-core-border-radius--500` |
+| `--em-button-font-family` | `--em-core-font-family--base` |
+| `--em-button-font-size--medium` | `--em-core-font-size--sm` |
+| `--em-button-font-size--small` | `--em-core-font-size--xs` |
+| `--em-button-font-weight--medium` | `--em-core-font-weight--bold` |
+| `--em-button-font-weight--small` | `--em-core-font-weight--medium` |
+| `--em-button-height--medium` | `--em-core-size--1000` |
+| `--em-button-height--small` | `--em-core-size--0800` |
+| `--em-button-icon-size` | `--em-core-size--0400` |
+| `--em-button-label-padding` | `--em-core-spacing--0200` |
+| `--em-button-line-height--medium` | `--em-core-line-height--md` |
+| `--em-button-line-height--small` | `--em-core-line-height--sm` |
+| `--em-button-padding-left-right--medium` | `--em-core-spacing--0300` |
+| `--em-button-padding-left-right--small` | `--em-core-spacing--0150` |
+
+**Total button tokens:** 33
+
+---
