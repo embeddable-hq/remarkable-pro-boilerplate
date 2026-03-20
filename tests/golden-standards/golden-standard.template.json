@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "name": "",
+    "figmaUrl": "",
+    "description": ""
+  },
+  "expected": {
+    "chartColors": {
+      "_description": "The branded data/chart palette in order of priority. Use hex values (e.g. '#2563EB'). Include 6-10 colors for good coverage. borderColors are optional (slightly darker variants of backgroundColors for chart strokes). Include colors the agent should derive if fewer than 6 are in the Figma — the scorer will check them.",
+      "backgroundColors": [],
+      "borderColors": []
+    },
+    "backgrounds": {
+      "_description": "Surface and container colors. Include tokens from the Figma design AND any tokens you expect the agent to derive from the palette. If you omit a token, the scorer won't check it.",
+      "--em-sem-background":          { "value": "", "label": "Card / widget surface — the primary background for chart cards and interactive hover surfaces" },
+      "--em-sem-background--neutral":  { "value": "", "label": "Page / container surface — default surface for table headers, select dropdowns, loaders" },
+      "--em-sem-background--light":    { "value": "", "label": "Secondary surface — used for filled inputs, date range backgrounds, disabled buttons" },
+      "--em-sem-background--muted":    { "value": "", "label": "Pressed / low-emphasis — select field borders, active button states" },
+      "--em-sem-background--subtle":   { "value": "", "label": "Hover / soft emphasis — active inputs, toggle-on state, hover buttons" },
+      "--em-sem-background--inverted": { "value": "", "label": "Dark / inverted surface — tooltips, filled select triggers, switch off state" }
+    },
+    "textColors": {
+      "_description": "Text colors used across the UI. Include tokens from the Figma design AND any tokens you expect the agent to derive from the palette. If you omit a token, the scorer won't check it.",
+      "--em-sem-text":           { "value": "", "label": "Primary text — titles, labels, values, icons, all primary content" },
+      "--em-sem-text--muted":    { "value": "", "label": "Secondary text — subtitles, descriptions, axis labels, legends" },
+      "--em-sem-text--subtle":   { "value": "", "label": "Disabled / low-contrast — disabled states, placeholder text, subtle grid lines" },
+      "--em-sem-text--neutral":  { "value": "", "label": "Neutral emphasis — loading indicators, category labels" },
+      "--em-sem-text--inverted": { "value": "", "label": "Text on dark surfaces — tooltip titles, selected dropdown items, primary buttons" }
+    },
+    "statusColors": {
+      "_description": "Error and success indicator colors. Even if your design doesn't define explicit status colors, include the values you'd expect the agent to derive from the overall palette. If you omit this section entirely, the scorer won't check status colors.",
+      "_note": "The agent derives status colors from the palette's warmth and any brand greens. Include your expected values here so the scorer can verify the derivation is harmonious.",
+      "--em-sem-status-error-text":         { "value": "", "label": "Error text / icon — error messages, negative KPI trend indicators" },
+      "--em-sem-status-error-background":   { "value": "", "label": "Error surface — background behind error indicators" },
+      "--em-sem-status-success-text":       { "value": "", "label": "Success text / icon — positive KPI trend indicators" },
+      "--em-sem-status-success-background": { "value": "", "label": "Success surface — background behind success indicators" }
+    },
+    "shadows": {
+      "_description": "Shadow styling for elevated surfaces (cards, dropdowns). This entire section is optional — remove it if your design does not define custom shadows.",
+      "--em-core-shadow-color":      { "value": "", "label": "Shadow color — e.g. 'rgb(0 0 0 / 25%)'" },
+      "--em-core-shadow-blur":       { "value": "", "label": "Shadow blur radius — e.g. '20px'" },
+      "--em-core-shadow-spread":     { "value": "", "label": "Shadow spread — e.g. '0px'" },
+      "--em-core-shadow-position-x": { "value": "", "label": "Shadow horizontal offset — e.g. '0px'" },
+      "--em-core-shadow-position-y": { "value": "", "label": "Shadow vertical offset — e.g. '2px'" }
+    }
+  },
+  "scoring": {
+    "_description": "Weights control how much each category contributes to the overall score (should sum to 100). colorTolerance is the max deltaE for a 'close match' — 0 means exact only, 15 means perceptually similar colors are accepted.",
+    "weights": {
+      "chartColors": 30,
+      "backgrounds": 25,
+      "textColors": 25,
+      "statusColors": 10,
+      "shadows": 10
+    },
+    "colorTolerance": 15
+  }
+}

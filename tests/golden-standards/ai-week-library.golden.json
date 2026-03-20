@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "name": "AI Week Library - Light Theme",
+    "figmaUrl": "https://www.figma.com/design/WOjKOg4kuRNddqJLI1rlS1/AI-Week-Library---1?node-id=194-1561",
+    "description": "Clean light mobile UI kit with a green brand accent (#5db075), white card surfaces, and a colorful data palette. Uses Inter font (not themeable)."
+  },
+  "expected": {
+    "chartColors": {
+      "_description": "Vibrant palette extracted from the data/chart screens. Green brand color leads, followed by distinct hues for maximum differentiation.",
+      "backgroundColors": [
+        "#5db075",
+        "#5162fa",
+        "#2cbdfb",
+        "#ffb84e",
+        "#a160fb",
+        "#fd7366",
+        "#ef4f2b",
+        "#24ce85",
+        "#4b9460"
+      ],
+      "borderColors": [
+        "#4e9963",
+        "#4353d4",
+        "#24a1d4",
+        "#d99b42",
+        "#8850d4",
+        "#d66157",
+        "#c94224",
+        "#1fad70",
+        "#3f7d51"
+      ]
+    },
+    "backgrounds": {
+      "_description": "Light UI with white cards, near-white containers, and a dark status bar for inverted surfaces.",
+      "--em-sem-background":          { "value": "#ffffff", "label": "Card / widget surface — white screen backgrounds" },
+      "--em-sem-background--neutral":  { "value": "#fafafa", "label": "Page / container surface — bottom bar, panel backgrounds" },
+      "--em-sem-background--light":    { "value": "#f6f6f6", "label": "Secondary surface — input field backgrounds" },
+      "--em-sem-background--muted":    { "value": "#e8e8e8", "label": "Pressed / low-emphasis — input border stroke areas" },
+      "--em-sem-background--subtle":   { "value": "#f0f0f0", "label": "Hover / soft emphasis — image placeholder fills" },
+      "--em-sem-background--inverted": { "value": "#24262b", "label": "Dark / inverted surface — iOS status bar dark fill" }
+    },
+    "textColors": {
+      "_description": "Dark text on light backgrounds. Primary is pure black, with progressively lighter grays for secondary roles.",
+      "--em-sem-text":           { "value": "#000000", "label": "Primary text — headings, screen titles" },
+      "--em-sem-text--muted":    { "value": "#666666", "label": "Secondary text — checkbox descriptions, body copy" },
+      "--em-sem-text--subtle":   { "value": "#999999", "label": "Disabled / low-contrast — divider-level gray elements" },
+      "--em-sem-text--neutral":  { "value": "#202020", "label": "Neutral emphasis — option labels, near-black UI text" },
+      "--em-sem-text--inverted": { "value": "#ffffff", "label": "Text on dark surfaces — white text on dark status bar" }
+    },
+    "statusColors": {
+      "_description": "Red-orange for errors (from the design's accent rectangles), brand green for success.",
+      "--em-sem-status-error-text":         { "value": "#ef4f2b", "label": "Error text / icon — red-orange accent" },
+      "--em-sem-status-error-background":   { "value": "#fef0ec", "label": "Error surface — light red-orange tint" },
+      "--em-sem-status-success-text":       { "value": "#5db075", "label": "Success text / icon — brand green" },
+      "--em-sem-status-success-background": { "value": "#eef8f1", "label": "Success surface — light green tint" }
+    },
+    "shadows": {
+      "_description": "Cool-toned purple shadow from the design's card/BG drop shadow effect.",
+      "--em-core-shadow-color":      { "value": "rgb(38 36 131 / 25%)", "label": "Shadow color — cool purple-tinted" },
+      "--em-core-shadow-blur":       { "value": "20px", "label": "Shadow blur radius" },
+      "--em-core-shadow-position-y": { "value": "2px", "label": "Shadow vertical offset" }
+    }
+  },
+  "scoring": {
+    "weights": {
+      "chartColors": 30,
+      "backgrounds": 25,
+      "textColors": 25,
+      "statusColors": 10,
+      "shadows": 10
+    },
+    "colorTolerance": 15
+  }
+}

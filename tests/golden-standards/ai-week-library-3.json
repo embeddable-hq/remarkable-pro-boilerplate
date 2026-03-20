@@ -1,0 +1,72 @@
+{
+    "meta": {
+      "name": "AI Week Library - 3",
+      "figmaUrl": "https://www.figma.com/design/CVw4qSm1wVQrYMjCCSZN0n/AI-Week-Library---3?node-id=39-1402&t=iQYNKajIuSObaR5M-1",
+      "description": "Bold monochromatic fashion e-commerce UI with a strict black-and-white visual language — no colored brand accent in the interface itself. Black hero sections, black CTAs, and black typography sit on pure white card and container surfaces. Secondary surfaces use warm off-white (#F2F0F1, #F0F0F0) and the inverted surface is pure black for tooltips and filled triggers. The data/chart palette is a separate full-spectrum 8-color set (green, red, yellow, orange, cyan, blue, purple, pink) used exclusively for analytics components. Dramatic shadow with an 80px blur and 40px vertical offset gives elevated cards strong visual depth."
+    },
+    "expected": {
+      "chartColors": {
+        "_description": "Full-spectrum 8-color data palette used exclusively for charts and analytics — not a UI brand color. Green leads, followed by red, yellow, orange, cyan, blue, purple, and pink for maximum differentiation across chart series.",
+        "backgroundColors": [
+          "#00C12B",
+          "#F50606",
+          "#F5DD06",
+          "#F57906",
+          "#06CAF5",
+          "#063AF5",
+          "#7D06F5",
+          "#F506A4"
+        ],
+        "borderColors": [
+          "#00A325",
+          "#CC0505",
+          "#CCB905",
+          "#CC6505",
+          "#05ABCC",
+          "#0531CC",
+          "#6905CC",
+          "#CC0589"
+        ]
+      },
+      "backgrounds": {
+        "_description": "White-dominant surface system with warm off-white secondary surfaces and a pure black inverted surface for high-contrast elements.",
+        "--em-sem-background":          { "value": "#FFFFFF", "label": "Card / widget surface — primary background for chart cards and interactive hover surfaces" },
+        "--em-sem-background--neutral":  { "value": "#FFFFFF", "label": "Page / container surface — default surface for table headers, select dropdowns, loaders" },
+        "--em-sem-background--light":    { "value": "#F2F0F1", "label": "Secondary surface — filled inputs, date range backgrounds, disabled buttons" },
+        "--em-sem-background--muted":    { "value": "#F0F0F0", "label": "Pressed / low-emphasis — select field borders, active button states" },
+        "--em-sem-background--subtle":   { "value": "#F0F0F0", "label": "Hover / soft emphasis — active inputs, toggle-on state, hover buttons" },
+        "--em-sem-background--inverted": { "value": "#000000", "label": "Dark / inverted surface — tooltips, filled select triggers, switch off state" }
+      },
+      "textColors": {
+        "_description": "Flat black text design — hierarchy derived from mix(#FFFFFF, #000000, t). Primary is pure black, neutral/subtle/muted are progressively lighter grays. White reserved for text on the black inverted surface.",
+        "--em-sem-text":           { "value": "#000000", "label": "Primary text — titles, labels, values, icons, all primary content" },
+        "--em-sem-text--muted":    { "value": "#B3B3B3", "label": "Secondary text — derived mix(white, black, 0.30) — subtitles, descriptions, axis labels, legends" },
+        "--em-sem-text--subtle":   { "value": "#737373", "label": "Disabled / low-contrast — derived mix(white, black, 0.55) — disabled states, placeholder text, subtle grid lines" },
+        "--em-sem-text--neutral":  { "value": "#1A1A1A", "label": "Neutral emphasis — derived mix(white, black, 0.90) — loading indicators, category labels" },
+        "--em-sem-text--inverted": { "value": "#FFFFFF",  "label": "Text on dark surfaces — tooltip titles, selected dropdown items, primary buttons" }
+      },
+      "statusColors": {
+        "_description": "Vivid red for errors with a soft pink tint background; brand-aligned green for success with a light green tint background.",
+        "--em-sem-status-error-text":         { "value": "#FF3333", "label": "Error text / icon — error messages, negative KPI trend indicators" },
+        "--em-sem-status-error-background":   { "value": "#FFEAEA", "label": "Error surface — background behind error indicators" },
+        "--em-sem-status-success-text":       { "value": "#01AB31", "label": "Success text / icon — positive KPI trend indicators" },
+        "--em-sem-status-success-background": { "value": "#E6F7EA", "label": "Success surface — background behind success indicators" }
+      },
+      "shadows": {
+        "_description": "Dramatic black shadow with a large blur and significant vertical offset for strongly elevated card and dropdown surfaces.",
+        "--em-core-shadow-color":      { "value": "rgb(0 0 0 / 20%)", "label": "Shadow color — neutral black at 20% opacity" },
+        "--em-core-shadow-blur":       { "value": "80px",             "label": "Shadow blur radius" },
+        "--em-core-shadow-position-y": { "value": "40px",             "label": "Shadow vertical offset" }
+      }
+    },
+    "scoring": {
+      "weights": {
+        "chartColors": 30,
+        "backgrounds": 25,
+        "textColors": 25,
+        "statusColors": 10,
+        "shadows": 10
+      },
+      "colorTolerance": 15
+    }
+  }

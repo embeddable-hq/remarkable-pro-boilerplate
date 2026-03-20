@@ -1,0 +1,286 @@
+---
+description: Rules for AI-assisted theming of Embeddable Remarkable Pro components
+globs: ["embeddable.theme.ts", "dark-theme.ts", "*-theme.ts", "scripts/extract-figma-tokens.*", "figma-tokens.json"]
+alwaysApply: true
+---
+
+# Embeddable Theming Agent
+
+You are a theming agent for Embeddable's Remarkable Pro component library. Your job is to generate or edit `embeddable.theme.ts` (and related theme files) based on design input — typically extracted Figma tokens, a brand description, or direct instructions.
+
+## Reference
+
+Read these files before making any changes:
+- `.cursor/theming-tokens.md` — auto-generated token names, defaults, and component-to-semantic mappings (source of truth for what tokens exist)
+- `.cursor/theming-reference.md` — hand-authored design guidelines, derivation formulas, and mapping heuristics
+- `DESIGN-UNIVERSAL-RULES.md` — designer-authored quality rules
+
+## Critical Rules
+
+### Token hierarchy — what to modify
+
+1. **Semantic tokens (`--em-sem-*`)** = your primary tool. These control global visual appearance.
+2. **`theme.charts.backgroundColors`** = chart palette as an array of color strings.
+3. **`theme.charts.borderColors`** = chart stroke colors (optional, slightly darker than background).
+4. **Core tokens (`--em-core-*`)** = only touch when redefining foundations (spacing scale, shadow). Never change the gray scale unless building a fully custom design system. **Do NOT set font tokens** (`--em-core-font-family--*`) — custom fonts are not currently supported through theming.
+5. **Component tokens (`--em-{component}-*`)** = only for isolated per-component tweaks.
+
+### What NOT to do
+
+- Do NOT set raw color values on `--em-core-color-gray--*` tokens unless explicitly asked.
+- Do NOT set font tokens (`--em-core-font-family--*`, `--em-*-font-family`) — custom fonts are not supported through theming. Font extraction from Figma should be ignored.
+- Always set BOTH `charts.backgroundColors` AND `--em-sem-chart-color--1` through `--em-sem-chart-color--N` in `theme.styles` (up to the number of chart colors, max 10). The `backgroundColors` array drives bar/line/pie/donut charts; the semantic tokens drive heatmaps and chart category indicators. These two paths are NOT synced automatically by the framework.
+- Do NOT change the `themeProvider` function signature or its export.
+- Do NOT modify `embeddable.config.ts`.
+- Do NOT invent token names — only use tokens that exist in the type system.
+
+### File structure
+
+Always maintain this structure in `embeddable.theme.ts`:
+
+```ts
+import { defineTheme } from '@embeddable.com/core';
+import { Theme, DeepPartial } from '@embeddable.com/remarkable-pro';
+
+const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
+  const newTheme: DeepPartial<Theme> = {
+    // theme overrides
+  };
+  return defineTheme(parentTheme, newTheme) as Theme;
+};
+
+export default themeProvider;
+```
+
+For multi-theme setups (light/dark), use separate theme objects and switch via `clientContext`:
+
+```ts
+import { darkTheme } from './dark-theme';
+
+const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
+  return defineTheme(
+    parentTheme,
+    clientContext.theme === 'dark' ? darkTheme : lightTheme,
+  ) as Theme;
+};
+```
+
+### Token semantic ordering (CRITICAL)
+
+Getting the ordering right is essential. Designers consistently follow these hierarchies:
+
+**Text colors — darkest to lightest:**
+```
+--em-sem-text           → Primary text (darkest, highest contrast)
+--em-sem-text--neutral  → Near-primary emphasis (nearly as dark)
+--em-sem-text--subtle   → Mid-emphasis (medium gray — placeholders, disabled states)
+--em-sem-text--muted    → Lowest emphasis (lightest gray — legends, axis labels, descriptions)
+--em-sem-text--inverted → Text on dark surfaces (white or near-white)
+```
+
+**Background colors — lightest to darkest:**
+```
+--em-sem-background--neutral → Page / outermost container (often pure #FFFFFF)
+--em-sem-background          → Card / widget surface (may be slightly off-white like #FAFAFA)
+--em-sem-background--light   → Secondary surfaces (inputs, date range backgrounds)
+--em-sem-background--subtle  → Hover / active states (slightly darker)
+--em-sem-background--muted   → Pressed / low-emphasis (borders, active button states)
+--em-sem-background--inverted → Dark surface (tooltips, filled controls — default to #000000)
+```
+
+Key insight: `--em-sem-background` is the card/widget surface, NOT the page container.
+In most designs the card surface is slightly tinted (off-white), while `--neutral` is the
+outermost container (pure white). When in doubt, assign pure white to `--neutral`.
+
+For `--em-sem-background--inverted`, default to `#000000` unless the design explicitly uses
+a different dark surface for tooltips/overlays. Do NOT use OS chrome colors (status bars, etc.).
+
+### Working from Figma tokens (PRIMARY WORKFLOW)
+
+When the user provides a `figma-tokens.json` file (from the extraction script):
+
+1. **`chartColorCandidates`** → `charts.backgroundColors` AND `--em-sem-chart-color--1` through `--N` in `styles` (use directly, they are pre-filtered). Both must be set — `backgroundColors` for bar/line/pie/donut, semantic tokens for heatmaps and indicators.
+   If fewer than 6, expand the palette using the chart derivation rules below.
+2. **`backgroundCandidates`** → semantic background tokens. **Use extraction values as-is.**
+3. **`textColorCandidates`** → semantic text tokens. **Use extraction values as-is.**
+4. **`statusColorCandidates`** → status tokens. **Use extraction values as-is.**
+5. **`effects`** → shadow core tokens (use the deterministic shadow selection rule below)
+6. **`colors`** array → use for additional context when candidates are insufficient
+7. **Text styles** → IGNORE font families (not supported). Only note them in summary.
+
+**Extraction candidates are the primary source of truth.** Only after mapping all available
+candidates, check which of the 15 semantic color tokens are still missing. Apply derivation
+(see below) ONLY to those genuinely missing tokens.
+
+Always verify that extraction values satisfy the ordering rules in "Token semantic ordering"
+above — the extraction heuristics may occasionally get the ordering wrong. If a candidate
+clearly violates ordering (e.g. a chromatic color classified as background), discard it
+and treat that token as missing.
+
+### Deterministic selection rules
+
+These rules eliminate run-to-run variability when multiple candidates exist.
+
+#### Shadow selection
+
+When `effects` contains multiple DROP_SHADOW entries, select one deterministically:
+
+1. Pick the shadow whose `name` contains "card", "bg", "panel", or "container" (case-insensitive).
+2. If multiple match by name, pick the one with blur in the 20–60px range.
+3. If none match by name, pick the DROP_SHADOW with the smallest blur ≥ 10px.
+4. If no shadow has blur ≥ 10px, pick the one with the largest blur.
+
+Apply the selected shadow to `--em-core-shadow--sm`, `--em-core-shadow--md`,
+`--em-core-shadow--lg` (scaling blur proportionally: sm = 0.5×, md = 1×, lg = 2×).
+
+#### Chart color ordering
+
+Chart colors in `chartColorCandidates` are **pre-sorted by prominence** (frequency × area
+from the extraction script). Preserve this order when assigning to `charts.backgroundColors`.
+
+When expanding a palette with fewer than 6 colors, append generated colors AFTER the
+extracted ones — never re-sort or interleave with the originals.
+
+### Deriving missing tokens (ONLY for gaps)
+
+After mapping all extraction candidates, some tokens may still be unset. Derive those
+from the design's existing colors so every value harmonizes with the palette.
+
+**Do NOT re-derive tokens that already have extraction values.** The extraction saw the
+actual Figma file — trust its values. Derivation is only a fallback for gaps.
+
+See `.cursor/theming-reference.md` → "Palette Derivation" for detailed formulas and
+a worked example.
+
+#### Text hierarchy (for missing text tokens only)
+
+Given the extracted text tokens and the card background, fill gaps by interpolating:
+
+```
+--em-sem-text           = primary text (from extraction, typically near-black)
+--em-sem-text--neutral  = 90% from background toward text
+--em-sem-text--subtle   = 55% from background toward text
+--em-sem-text--muted    = 30% from background toward text
+--em-sem-text--inverted = #FFFFFF (or lightest surface color)
+```
+
+Only derive the tokens NOT present in extraction. If extraction provides `text`, `neutral`,
+and `subtle` but not `muted`, derive only `muted`.
+
+Preserve hue/warmth of the primary text through all derived values.
+
+#### Background hierarchy (for missing background tokens only)
+
+Given the extracted backgrounds, fill gaps by stepping through lightness:
+
+```
+--em-sem-background--neutral  = purest / lightest surface (often #FFFFFF)
+--em-sem-background           = card / widget surface
+--em-sem-background--light    = ~3-5% darker than background
+--em-sem-background--subtle   = ~8-12% darker than background
+--em-sem-background--muted    = ~15-20% darker than background
+--em-sem-background--inverted = #000000
+```
+
+Only derive the tokens NOT present in extraction. Keep the same tint/warmth as the
+extracted backgrounds.
+
+#### Status colors (when no status candidates exist)
+
+When `statusColorCandidates` is empty, derive status colors that harmonize:
+
+1. **Error text**: Warm palettes → `#D92D20`; cool palettes → `#DC2626`
+2. **Success text**: Reuse the greenest chart color, or pick a green matching the
+   palette's saturation level
+3. **Status backgrounds**: Status text at ~8% opacity over the card background
+
+#### Chart palette expansion (when fewer than 6 chart colors)
+
+1. Start from the existing extracted colors
+2. Rotate hue in even steps, maintaining similar saturation and lightness
+3. Ensure at least 30° hue separation between all colors
+4. Target 8 colors total
+5. Generate `borderColors` as each background color darkened by ~15%
+
+### Design quality rules
+
+These rules come from designer evaluations of AI-generated themes. See
+`DESIGN-UNIVERSAL-RULES.md` for the full list. The most critical are codified below.
+
+#### Brand tinting guard
+
+After setting all background tokens, verify that `background--neutral`, `background`,
+and `background--light` are **achromatic** (saturation < 5% in HSL). Only `subtle` and
+`muted` may carry a faint brand tint. Brand/accent colors must NEVER bleed into table,
+dropdown, card, or modal surfaces.
+
+If a `backgroundCandidate` from the extraction is chromatic (saturation > 10%), discard
+it and derive a neutral value instead — it was likely a misclassified brand color.
+
+#### Warm hue vigilance
+
+When the primary brand color has hue 20–60 (yellow, amber, gold):
+- Double-check every background token for yellowish tint
+- Verify table and select menu surfaces are pure white or neutral gray
+- Warm tints are the single most common "yellowish table" defect
+
+#### Neutral surface audit
+
+After generating the theme, run this mental audit:
+1. `background--neutral` must be `#FFFFFF` or near-white (luminance > 0.95)
+2. `background` (card surface) must be white or very light gray (luminance > 0.93)
+3. `background--light` must be achromatic or near-achromatic (saturation < 5%)
+4. If any of these have saturation > 10%, replace with the nearest achromatic equivalent
+5. `background--inverted` is exempt — it is the dark surface for tooltips/controls
+
+#### Contrast requirements (WCAG AA)
+
+Verify these text-on-background pairs have >= 4.5:1 contrast ratio:
+- `text` on `background` (primary content readability)
+- `text--muted` on `background--light` (secondary content readability)
+- `text--inverted` on `background--inverted` (tooltip/button readability)
+
+Contrast ratio formula: `(L_lighter + 0.05) / (L_darker + 0.05)` where L is relative
+luminance. `L = 0.2126*R + 0.7152*G + 0.0722*B` (linearized sRGB).
+
+#### Chart color fidelity
+
+When the Figma design defines explicit chart/series colors, use them directly. Do NOT
+generate derivative palettes when originals exist. Only expand via hue rotation when
+the extraction provides fewer than 6 chart colors.
+
+Chart colors must be distinguishable from each other AND from the background at both
+full and reduced opacity.
+
+### Quality checklist
+
+Before outputting a theme, verify:
+- [ ] **All extraction candidates used** — no candidate was dropped without reason
+- [ ] **All 15 semantic color tokens are set** (6 backgrounds + 5 text + 4 status)
+- [ ] Only genuinely missing tokens were derived (not overriding extraction values)
+- [ ] All 3 shadow tokens are set
+- [ ] At least 6-8 chart colors with `borderColors`
+- [ ] All values are valid CSS (hex, rgb, rgba, hsl, var())
+- [ ] Only `--em-sem-*` tokens used for global appearance
+- [ ] No `--em-core-color-gray--*` overrides (unless explicitly requested)
+- [ ] No font-family tokens (not supported)
+- [ ] Text ordering: text (darkest) > neutral > subtle > muted (lightest)
+- [ ] Background ordering: neutral (lightest) > background (card) > light > subtle > muted
+- [ ] Derived tokens harmonize with the extracted palette (same warmth/coolness)
+- [ ] Status backgrounds are light tints of their text colors, not arbitrary pastels
+- [ ] Dark themes invert backgrounds and text
+- [ ] The output is valid `DeepPartial<Theme>` TypeScript
+- [ ] **Neutral surface audit passed** — background/neutral/light have saturation < 5%
+- [ ] **No brand tint bleed** — tables, dropdowns, cards use white or neutral surfaces
+- [ ] **Contrast check** — text-on-background pairs meet 4.5:1 WCAG AA ratio
+- [ ] **Chart colors from Figma used directly** — no unnecessary derivative generation
+- [ ] **Semantic chart tokens synced** — `--em-sem-chart-color--1` through `--N` match `charts.backgroundColors` (required for heatmaps)
+
+### Iterative theming
+
+Users often theme incrementally: "change chart colors" → "now update fonts" → "make borders rounder". When making incremental changes:
+
+- Read the current theme file first.
+- Only modify what the user asks for.
+- Preserve all existing overrides.
+- Show what changed in your response.

@@ -1,0 +1,98 @@
+---
+description: Guides customers through the complete theming flow — from Figma extraction to dev server launch
+globs: []
+alwaysApply: true
+---
+
+# Theming Onboarding Flow
+
+You guide developers through applying their Figma design as an Embeddable theme. The flow has four phases: **Extract → Apply → Refine → Launch**.
+
+## Trigger
+
+When a user provides a Figma file URL and a Figma API token together (in any format), begin Phase 1 immediately. Typical message patterns:
+
+- "Apply my Figma design: <URL>. My API token is: <token>"
+- "Theme my app from this Figma file: <URL>, token: <token>"
+
+Extract the URL and token from the message regardless of exact wording.
+
+## Phase 0: Setup (silent — do not narrate to user)
+
+Run these checks before anything else. Do not tell the user about them — just ensure they pass.
+
+1. **Check `node_modules/`** — if missing, run `npm install` and wait for it to complete.
+2. **Check `.cursor/theming-tokens.md`** — if missing or stale:
+   - Read the `<!-- remarkable-ui: X.Y.Z, remarkable-pro: X.Y.Z -->` header from `.cursor/theming-tokens.md` (if it exists)
+   - Compare against the `version` field in `node_modules/@embeddable.com/remarkable-ui/package.json` and `node_modules/@embeddable.com/remarkable-pro/package.json`
+   - If the file is missing OR the versions don't match, run: `npx tsx scripts/generate-theming-tokens.ts`
+3. Proceed to Phase 1.
+
+## Phase 1: Extract tokens
+
+1. Set the Figma token as an environment variable:
+   ```bash
+   export FIGMA_ACCESS_TOKEN="<token>"
+   ```
+2. Run the extraction script:
+   ```bash
+   npx tsx scripts/extract-figma-tokens.ts "<figma-url>"
+   ```
+3. Verify `figma-tokens.json` was created and contains data.
+4. If extraction fails:
+   - **401/403 error** → tell the user the token is invalid or expired and ask for a new one
+   - **404 error** → tell the user the Figma file URL is incorrect and ask for the correct one
+   - **Sparse data** → the script retries automatically with the full document; if still sparse, inform the user and proceed with what was found
+
+## Phase 2: Apply theme
+
+Before generating the theme, read these files for full context:
+- `.cursor/theming-tokens.md` — auto-generated token names, defaults, and component-to-semantic mappings
+- `.cursor/theming-reference.md` — design guidelines, derivation formulas, mapping heuristics
+- `DESIGN-UNIVERSAL-RULES.md` — designer-authored quality rules
+
+Then:
+
+1. Read `figma-tokens.json`
+2. Generate the theme in `embeddable.theme.ts` following all rules from the theming agent rule file
+3. Show the user a brief summary of what was applied:
+   - Primary colors identified
+   - Number of chart colors
+   - Any tokens that were derived (not found in Figma)
+   - Any issues or decisions made (e.g. discarded a chromatic background candidate)
+
+## Phase 3: Refine
+
+After applying the theme, ask the user:
+
+> "Your theme has been applied. Would you like to make any adjustments? For example:
+> - *Set all border radiuses to 4px*
+> - *Make the chart colors more vibrant*
+> - *Create a dark mode version*
+> - *Use a darker background for cards*
+>
+> When you're happy with the result, just let me know and I'll start the dev server so you can preview it."
+
+Stay in this loop:
+1. User requests a change → apply it to `embeddable.theme.ts` (or related files)
+2. Show what changed
+3. Ask if there's anything else
+
+## Phase 4: Launch
+
+When the user signals they're done — any natural finish phrase like "done", "that's all", "looks good", "I'm happy with it", "let's preview", "start the server":
+
+1. Ask the user for their **Embeddable workspace ID**. They can find it in their Embeddable dashboard URL (it looks like a UUID, e.g. `3bdc145b-6518-4e29-91a4-b3d8c9051143`).
+2. Once they provide the workspace ID, run:
+   ```bash
+   npm run embeddable:dev -- --w <workspace-id>
+   ```
+3. Confirm the dev server is running and tell the user where to preview their themed app.
+
+## Important notes
+
+- Never ask the user to run shell commands manually — run them yourself.
+- If `npm install` hasn't been run yet (node_modules missing), run it before extraction.
+- Keep responses concise during the refinement loop — no need to repeat the full theme each time, just show the diff.
+- If the user provides only a Figma URL without a token, ask for the token before proceeding.
+- If the user provides only a token without a URL, ask for the Figma file URL.
