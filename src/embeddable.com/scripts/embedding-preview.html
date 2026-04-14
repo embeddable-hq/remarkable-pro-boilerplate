@@ -134,6 +134,15 @@
               name="clientContext"
             ></textarea>
 
+            <label for="variables"
+              >Variables <span class="tiny">(valid JSON)</span></label
+            >
+            <textarea
+              cols="4"
+              id="variables"
+              name="variables"
+            ></textarea>
+
             <label for="customCanvasState">Custom Canvas State</label>
             <textarea
               id="customCanvasState"
@@ -252,7 +261,7 @@
           const formInputs = Object.fromEntries(formData.entries());
 
           // Validate JSON fields
-          for (const field of ['securityContext', 'clientContext']) {
+          for (const field of ['securityContext', 'clientContext', 'variables']) {
             const error = validateJSON(
               formInputs[field],
               field
@@ -271,6 +280,7 @@
 
           // Set default for clientContext if empty
           formInputs.clientContext = formInputs.clientContext || '{}';
+          formInputs.variables = formInputs.variables || '{}';
 
           // Remove empty customCanvasReadOnly
           if (formInputs.customCanvasReadOnly === '') {
@@ -295,6 +305,7 @@
             );
             em.setAttribute('token', json.token);
             em.setAttribute('client-context', formInputs.clientContext);
+            em.setAttribute('variables', formInputs.variables);
             main.appendChild(em);
           } catch (err) {
             document.getElementById('form-error').textContent = err.message;
