@@ -18,13 +18,13 @@
     "reinstall": "rm -rf node_modules package-lock.json && npm install"
   },
   "dependencies": {
-    "@embeddable.com/remarkable-pro": "^0.2.2"
+    "@embeddable.com/remarkable-pro": "^0.2.4"
   },
   "devDependencies": {
     "@embeddable.com/core": "2.13.7",
     "@embeddable.com/react": "2.13.6",
-    "@embeddable.com/sdk-core": "4.3.3",
-    "@embeddable.com/sdk-react": "4.3.5",
+    "@embeddable.com/sdk-core": "4.4.0",
+    "@embeddable.com/sdk-react": "4.3.6",
     "@swc/core": "1.13.5",
     "@types/react": "^19.1.13",
     "cross-env": "^7.0.3",
