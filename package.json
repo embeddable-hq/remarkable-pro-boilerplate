@@ -15,7 +15,8 @@
     "embeddable:login": "embeddable login",
     "embeddable:push": "embeddable push",
     "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\"",
-    "reinstall": "rm -rf node_modules package-lock.json && npm install"
+    "reinstall": "rm -rf node_modules package-lock.json && npm install",
+    "embedding-preview": "node src/embeddable.com/scripts/embedding-preview.cjs"
   },
   "dependencies": {
     "@embeddable.com/remarkable-pro": "^0.2.4"
