@@ -19,7 +19,7 @@
     "embedding-preview": "node src/embeddable.com/scripts/embedding-preview.cjs"
   },
   "dependencies": {
-    "@embeddable.com/remarkable-pro": "^0.2.4"
+    "@embeddable.com/remarkable-pro": "^0.2.8"
   },
   "devDependencies": {
     "@embeddable.com/core": "2.13.7",
