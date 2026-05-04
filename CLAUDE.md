@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A boilerplate workspace for [Embeddable](https://docs.embeddable.com) — a fully-customizable embedded analytics platform. This repo pulls in the pre-built `@embeddable.com/remarkable-pro` component library, supplies configuration, theming, data models, presets, and (optionally) custom components and dashboards, and pushes the result to the Embeddable cloud. It produces no application of its own — once pushed, the content becomes available in the no-code dashboard builder and can be embedded in customer apps.
+A boilerplate workspace for Embeddable — a fully-customizable embedded analytics platform. This repo pulls in the pre-built `@embeddable.com/remarkable-pro` component library, supplies configuration, theming, data models, presets, and (optionally) custom components and dashboards, and pushes the result to the Embeddable cloud. It produces no application of its own — once pushed, the content becomes available in the no-code dashboard builder and can be embedded in customer apps.
 
 ## How Embeddable works
 
 **Components.** The Embeddable SDK (`@embeddable.com/sdk-core`, `@embeddable.com/sdk-react`) turns any React component into an Embeddable component. A component is a regular React file plus a companion `<ComponentName>.emb.ts` descriptor that declares the component's `meta` (inputs that become props in the no-code builder), the events it emits, and the mapping from inputs to React props. `@embeddable.com/remarkable-pro` is a ready-made library of such components — this repo uses it directly. Custom components can also live under `src/embeddable.com/components/`.
 
-**Data models.** `*.cube.yml` files under `src/embeddable.com/models/` are [Cube](https://cube.dev) definitions (dimensions, measures, joins, `sql_table`). Cube runs in the Embeddable cloud and queries the customer's database; components consume the resulting datasets to render charts.
+**Data models.** `*.cube.yml` files under `src/embeddable.com/models/` are Cube definitions (dimensions, measures, joins, `sql_table`). Cube runs in the Embeddable cloud and queries the customer's database; components consume the resulting datasets to render charts.
 
 **Build & push.** `embeddable:build` walks the component libraries listed in `embeddable.config.ts` plus any local `*.emb.ts` files and compiles them. `embeddable:push` uploads the compiled bundle and all YAML (cubes, presets, dashboards) to the workspace, where each becomes a new immutable *version* (model version, component version, dashboard version).
 
@@ -41,6 +41,21 @@ Auth for `embeddable:push` is either `-k <api_key>` (per-workspace API key) or a
 - `npm run ct` — typecheck (`tsc --noEmit`).
 
 There is no test suite or lint script. Prettier config lives in `.prettierrc.json`.
+
+## Confirm before running
+
+Always confirm with the developer before running:
+
+- `npm run embeddable:push` — writes to the **shared primary workspace**, visible to the whole organization and used by real customer embeds.
+- `npm run embeddable:upgrade` and `npm run reinstall` — modify `package.json` / `package-lock.json` / `node_modules`.
+- Any `src/embeddable.com/scripts/connection-*.cjs` script — these CRUD live database connections via the REST API.
+
+Don't run these automatically — ask the developer to run them themselves:
+
+- `npm run embeddable:login` — opens a browser auth flow with a verification code; launching it unprompted is jarring and security-sensitive.
+- `npm run dev` — long-running watcher / dev server; if Claude starts it, the process can be left holding the port after the conversation ends.
+
+Everything else (`embeddable:build`, `embedding-preview`, `ct`) is local-only and safe to run without confirmation.
 
 ## Region
 
