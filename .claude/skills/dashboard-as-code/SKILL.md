@@ -74,6 +74,5 @@ The format is NDJSON; each line is either a `marker` (build cycle progress) or a
 
 ## Out of scope
 
-- Component-level filters — only dataset-level filters are covered.
 - Custom variable types — only the built-in types listed in `references/variables.md` are covered.
 - Custom components, theme customization, cube model generation, presets (`*.cc.yml`/`*.sc.yml`) — separate skills will handle these.

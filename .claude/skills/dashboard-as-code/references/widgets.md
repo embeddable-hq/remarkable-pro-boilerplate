@@ -42,6 +42,39 @@ inputs:
 
 - Always `valueType: VALUE`. Datasets cannot be variables.
 - `value` is the `name` of a dataset declared in the same embeddable.
+- `config` may carry **component-level filters, sort, and limit** that further narrow or shape this widget's view of the dataset. Filters do **not replace** the dataset's filters — they are additional AND conditions on top. This is heavily used: define one shared dataset (e.g. "Orders filtered by the current date range") and have multiple widgets reuse it, each adding its own narrowing — by product type, by region, etc. Each widget then shows its own slice while honouring the shared date range.
+
+#### Component-level `filters` / `order` / `limit` on a `dataset` input
+
+```yaml
+- input: dataset
+  inputType: dataset
+  valueType: VALUE
+  value: Orders
+  config:
+    filters:                          # extra AND conditions added on top of the dataset's filters
+      - member: products.size
+        operator: equals
+        value: 'large'
+        valueType: VALUE
+      - member: orders.created_at
+        operator: afterDate
+        value: cutoff-date            # variables work here too
+        valueType: VARIABLE
+    order:                            # this widget's sort
+      - member: orders.count
+        direction: desc               # `asc` or `desc`
+    limit: 10                         # this widget's row cap
+```
+
+Rules:
+
+- `config.filters` — extra filters that are **AND-combined** with the dataset's own filters; the dataset's filters always still apply. Each entry adds another `WHERE` clause to the query for this widget only. Same shape as dataset filters: `member`, `operator`, `value`, `valueType` (`VALUE` or `VARIABLE`). The full operator catalogue from [datasets.md](datasets.md) applies, including the type restrictions.
+- `config.limit` — integer row cap for this widget. Useful for "top N" widgets sharing a wider dataset. Datasets don't carry a limit themselves, so this is purely a component-level cap.
+- `config.order` — list of `{ member, direction }`. `direction` is `asc` or `desc`. Members must exist in the dataset's model or its joins.
+- These three fields are valid only on inputs of type `dataset`. Don't put `filters` / `limit` / `order` on `dimension` / `measure` / `dimensionOrMeasure` inputs.
+
+When several widgets need different views of the same data, prefer **one shared dataset + per-widget `config.filters`** over many near-duplicate datasets.
 
 ### `dimension` / `measure` / `dimensionOrMeasure` inputs
 
