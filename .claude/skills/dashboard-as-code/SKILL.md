@@ -27,11 +27,11 @@ embeddables:
 ## Workflow when generating or editing
 
 1. **Discover available components from both sources.** Components come from (a) `componentLibraries` declared in `embeddable.config.ts` and (b) local `*.emb.ts` files under `src/embeddable.com/components/`. Walk both:
-   - **Libraries**: each entry is either a string (`<package-name>`) or `{ name, include?, exclude? }`. For each enabled library, read `node_modules/<package-name>/meta/index.json` (`name`, `label`, `category`, `description?`) and apply per-library `include`/`exclude` filters. **If a library's `meta/` directory is missing, tell the user which package needs to be updated and stop — never guess at component or input names.**
+   - **Libraries**: each entry is either a string (`<package-name>`) or `{ name, include?, exclude? }`. For each enabled library, read `node_modules/<package-name>/dist/meta/index.json` (`name`, `label`, `category`, `description?`) and apply per-library `include`/`exclude` filters. **If a library's `dist/meta/` directory is missing, tell the user which package needs to be updated and stop — never guess at component or input names.**
    - **Local**: glob `src/embeddable.com/components/**/*.emb.ts` and read each file's `meta` const for `name`, `label`, `category`. An empty `components/` directory is normal — not an error.
    - Build the union as your candidate set. If a local `meta.name` collides with a library component's `name`, surface the ambiguity to the user instead of picking one.
    - Details: [references/component-discovery.md](references/component-discovery.md).
-2. **Read meta lazily.** Only for the components actually being placed: read `node_modules/<package-name>/meta/<componentName>.meta.json` for library components, or read the corresponding `*.emb.ts` (focus on the `meta` const; ignore the `defineComponent` call and any sibling React files) for local components. Don't bulk-load.
+2. **Read meta lazily.** Only for the components actually being placed: read `node_modules/<package-name>/dist/meta/<componentName>.meta.json` for library components, or read the corresponding `*.emb.ts` (focus on the `meta` const; ignore the `defineComponent` call and any sibling React files) for local components. Don't bulk-load.
 3. **Read the data models.** Inspect relevant `src/embeddable.com/models/cubes/*.cube.yml` to confirm cube/dimension/measure names exist and are typed correctly. Only join-related cubes can be referenced together inside one widget.
 4. **Generate or edit the YAML** under `src/embeddable.com/embeddables/`. Use the references for any non-trivial section.
 5. **Check validation feedback** if `embeddable:dev` is running — see "Dev events log" below.

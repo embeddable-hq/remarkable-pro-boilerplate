@@ -2,7 +2,7 @@
 
 Embeddable components come from **two sources**, both walked at build time and both producing first-class candidates for any widget:
 
-1. **Component libraries** declared in `embeddable.config.ts` (npm packages with a `meta/` directory).
+1. **Component libraries** declared in `embeddable.config.ts` (npm packages that ship a `dist/meta/` directory).
 2. **Local components** under `src/embeddable.com/components/` (`*.emb.ts` files exporting a `meta` const).
 
 The skill stays library-agnostic — never hardcode a specific package, and never assume one source is "primary" and the other a fallback. Always check both before proposing components.
@@ -23,7 +23,7 @@ type ComponentLibraryConfig = {
 For each enabled entry, the metadata for that library lives at:
 
 ```
-node_modules/<package-name>/meta/
+node_modules/<package-name>/dist/meta/
 ├─ index.json                       # discovery: array of { name, label, category, description? }
 └─ <componentName>.meta.json        # full schema: inputs, events, variables, defaultWidth, defaultHeight
 ```
@@ -42,15 +42,15 @@ These filters apply to library entries only — they don't affect local componen
 
 1. **At the start of work**, read `index.json` once for each enabled library. This gives the full discovery surface (`name`, `label`, `category`, `description?`).
 2. **Use the index for narrowing**: `category` groups (e.g. `Bar Charts`, `Dropdowns - dates`), `description` (when present) explains intent. Pick candidate components by scanning these fields.
-3. **Read the per-component file** `node_modules/<package-name>/meta/<componentName>.meta.json` only for the specific components you're going to place.
+3. **Read the per-component file** `node_modules/<package-name>/dist/meta/<componentName>.meta.json` only for the specific components you're going to place.
 4. **Do not bulk-load** — reading every per-component meta inflates context for no benefit.
 
 ### When a library's meta is missing
 
-If `node_modules/<package-name>/meta/` does not exist for a library that's listed in `componentLibraries`:
+If `node_modules/<package-name>/dist/meta/` does not exist for a library that's listed in `componentLibraries`:
 
 1. Stop generation immediately — do not invent component, input, or event names from that library.
-2. Tell the user which package's metadata is missing and ask them to update the package (e.g. `npm install <package>@latest`) so it ships with the `meta/` directory.
+2. Tell the user which package's metadata is missing and ask them to update the package (e.g. `npm install <package>@latest`) so it ships with the `dist/meta/` directory.
 3. Resume only once the directory is present.
 
 (This applies to libraries only. An empty `src/embeddable.com/components/` directory is normal — see below — and is not an error.)
