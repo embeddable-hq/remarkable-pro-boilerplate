@@ -1,0 +1,86 @@
+# Example: main canvas + custom canvas with templates and a starter canvas
+# Demonstrates:
+# - One static widget on the main canvas
+# - customCanvas.datasets exposing the Orders dataset to end users
+# - customCanvas.templates with the `key` (stable identifier) vs `name` (cosmetic) distinction
+# - starterCanvas pre-populating one widget that references a template by `key`
+
+embeddables:
+  - name: orders-with-custom-canvas
+    title: Orders — custom canvas demo
+    description: Showcases customCanvas templates and starterCanvas references by template key.
+    datasets:
+      - name: Orders
+        model: orders
+    widgets:
+      - component: BarChartDefaultPro
+        position: { x: 0, y: 0 }
+        dimensions: { width: 12, height: 10 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Orders overview
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: Orders
+          - input: measures
+            inputType: measure
+            valueType: VALUE
+            array: true
+            value:
+              - orders.count
+            config:
+              dataset: dataset
+          - input: dimension
+            inputType: dimension
+            valueType: VALUE
+            value: orders.created_at
+            config:
+              dataset: dataset
+              inputs:
+                - input: granularity
+                  valueType: VALUE
+                  value: month
+    customCanvas:
+      datasets:
+        - dataset: Orders
+      templates:
+        # `key` is the stable reference. `name` and `description` are cosmetic and safe to edit.
+        # Changing or removing `key` deletes every widget end users created from this template.
+        - key: orders-bar-by-month
+          name: Orders bar chart
+          description: Pre-configured bar chart over the Orders dataset, grouped by month.
+          component: BarChartDefaultPro
+          icon: vertical-bar
+          inputs:
+            - input: dataset
+              inputType: dataset
+              valueType: VALUE
+              value: Orders
+            - input: dimension
+              inputType: dimension
+              valueType: VALUE
+              value: orders.created_at
+              config:
+                dataset: dataset
+                inputs:
+                  - input: granularity
+                    valueType: VALUE
+                    value: month
+
+        - key: blank-bar
+          name: Blank bar chart
+          description: Empty bar chart — end user picks dataset, measures, and dimension.
+          component: BarChartDefaultPro
+          icon: chart-bar-popular
+          inputs: []
+
+      starterCanvas:
+        widgets:
+          # `template:` references a template by its `key`, not its `name`.
+          - template: orders-bar-by-month
+            position: { x: 0, y: 0 }
+            dimensions: { width: 6, height: 6 }
+            inputs: []

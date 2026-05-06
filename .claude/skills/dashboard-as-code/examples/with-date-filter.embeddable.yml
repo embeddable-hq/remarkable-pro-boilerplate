@@ -1,0 +1,73 @@
+# Example: dashboard wired through a variable
+# A date-range picker fires onChange events that update a `timeRange` variable.
+# A dataset filter consumes that variable, so the bar chart re-queries on every change.
+# Demonstrates: variables with relativeTimeString defaultValue, VARIABLE-typed dataset filters,
+# SET_VARIABLE events with EVENT_PROPERTY source.
+
+embeddables:
+  - name: filtered-orders-bar
+    title: Orders by month — filtered by date
+    description: Date range picker drives a `timeRange` variable that filters the dataset.
+    variables:
+      - name: date-range
+        type: timeRange
+        defaultValue: { relativeTimeString: 'Last 30 days' }
+    datasets:
+      - name: Orders
+        model: orders
+        filters:
+          - member: orders.created_at
+            operator: inDateRange
+            value: date-range
+            valueType: VARIABLE
+    widgets:
+      - component: DateRangePickerCustomPro
+        position: { x: 0, y: 0 }
+        dimensions: { width: 4, height: 3 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Date range
+          - input: selectedValue
+            inputType: timeRange
+            valueType: VARIABLE
+            value: date-range
+        events:
+          - event: onChange
+            action: SET_VARIABLE
+            config:
+              variable: date-range
+              sourceType: EVENT_PROPERTY
+              sourceValue: value
+
+      - component: BarChartDefaultPro
+        position: { x: 0, y: 3 }
+        dimensions: { width: 12, height: 12 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Orders by month
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: Orders
+          - input: measures
+            inputType: measure
+            valueType: VALUE
+            array: true
+            value:
+              - orders.count
+            config:
+              dataset: dataset
+          - input: dimension
+            inputType: dimension
+            valueType: VALUE
+            value: orders.created_at
+            config:
+              dataset: dataset
+              inputs:
+                - input: granularity
+                  valueType: VALUE
+                  value: month

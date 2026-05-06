@@ -5,3 +5,4 @@ node_modules
 .embeddable-dev-tmp
 embeddable-entry-point.jsx
 .DS_Store
+/.claude/settings.local.json

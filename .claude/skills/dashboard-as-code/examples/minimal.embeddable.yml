@@ -1,0 +1,42 @@
+# Example: minimal embeddable
+# A single bar chart over the Orders cube. No variables, no filters, no custom canvas.
+# Useful as a starting point — copy and replace the cube / measures / dimension.
+
+embeddables:
+  - name: minimal-orders-bar
+    title: Minimal — Orders by month
+    description: Smallest possible embeddable; one widget, one dataset, no variables.
+    datasets:
+      - name: Orders
+        model: orders
+    widgets:
+      - component: BarChartDefaultPro
+        position: { x: 0, y: 0 }
+        dimensions: { width: 12, height: 12 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Orders by month
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: Orders
+          - input: measures
+            inputType: measure
+            valueType: VALUE
+            array: true
+            value:
+              - orders.count
+            config:
+              dataset: dataset
+          - input: dimension
+            inputType: dimension
+            valueType: VALUE
+            value: orders.created_at
+            config:
+              dataset: dataset
+              inputs:
+                - input: granularity
+                  valueType: VALUE
+                  value: month
