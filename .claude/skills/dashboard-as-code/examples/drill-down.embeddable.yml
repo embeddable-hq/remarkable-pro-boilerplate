@@ -27,7 +27,7 @@ embeddables:
     widgets:
       - component: DateRangePickerCustomPro
         position: { x: 0, y: 0 }
-        dimensions: { width: 4, height: 3 }
+        dimensions: { width: 3, height: 7 }     # formula: defaultWidth 300, defaultHeight 120 → 3 × 7
         inputs:
           - input: title
             inputType: string
@@ -46,8 +46,8 @@ embeddables:
               sourceValue: value
 
       - component: BarChartDefaultPro
-        position: { x: 0, y: 3 }
-        dimensions: { width: 12, height: 12 }
+        position: { x: 0, y: 7 }                # below the date picker (which has height 7)
+        dimensions: { width: 12, height: 15 }   # fallback (component meta has no defaultWidth/defaultHeight)
         inputs:
           - input: title
             inputType: string
@@ -116,7 +116,7 @@ embeddables:
     widgets:
       - component: BarChartDefaultPro
         position: { x: 0, y: 0 }
-        dimensions: { width: 12, height: 12 }
+        dimensions: { width: 12, height: 15 }   # fallback (component meta has no defaultWidth/defaultHeight)
         inputs:
           - input: title
             inputType: string

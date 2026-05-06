@@ -25,14 +25,14 @@ widgets:
 
 ### Initial widget size
 
-When you place a new widget, derive its starting `width` and `height` from the component meta:
+When you place a new widget, derive its `width` and `height` from the component meta. **This rule is mandatory — do not deviate to fit a "nicer" multi-column layout, equalise widget heights across a row, or any other visual reason. Layout customisation is the user's call; if they want different sizes or a side-by-side grid, they will ask. The agent's job is to place widgets at the rule-derived size and let the user drive the arrangement after.**
 
 - **If the meta has both `defaultWidth` and `defaultHeight`** (both in pixels), convert to grid units with these exact formulas:
   - `width  = clamp(round((defaultWidth  + 20) / 108.33), 1, 12)`
   - `height = round((defaultHeight + 20) / 21)`
-- **If either `defaultWidth` or `defaultHeight` is missing**, fall back to `width: 12, height: 15`.
+- **If either `defaultWidth` or `defaultHeight` is missing**, fall back to `width: 12, height: 15`. No other fallback values are acceptable.
 
-These are starting values — the user can always resize after. The arithmetic is simple enough to do inline; if you want a safety check on edge cases, run a one-liner:
+The arithmetic is simple enough to do inline; if you want a safety check on edge cases, run a one-liner:
 
 ```bash
 python3 -c "W,H=300,120; w=max(1,min(12,round((W+20)/108.33))); h=round((H+20)/21); print(w,h)"
@@ -46,6 +46,10 @@ Sanity-check examples:
 | 600 × 400 | 6 × 20 |
 | 900 × 400 | 8 × 20 |
 | (missing) | 12 × 15 |
+
+#### Default placement
+
+Place widgets sequentially down the canvas: `x: 0` for each, with each widget's `y` equal to the `y + height` of the previous one. This produces a single-column stack, which is the correct starting state. **Do not preemptively compose multi-column rows or grids** — that's a user-driven layout decision, applied after the initial generation. When the user asks for a different layout, only then change `x` / `width` to fit it.
 
 ## Inputs
 

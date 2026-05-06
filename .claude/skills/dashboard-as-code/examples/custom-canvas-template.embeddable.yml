@@ -15,7 +15,7 @@ embeddables:
     widgets:
       - component: BarChartDefaultPro
         position: { x: 0, y: 0 }
-        dimensions: { width: 12, height: 10 }
+        dimensions: { width: 12, height: 15 }   # fallback (component meta has no defaultWidth/defaultHeight)
         inputs:
           - input: title
             inputType: string
@@ -82,5 +82,5 @@ embeddables:
           # `template:` references a template by its `key`, not its `name`.
           - template: orders-bar-by-month
             position: { x: 0, y: 0 }
-            dimensions: { width: 6, height: 6 }
+            dimensions: { width: 12, height: 15 }   # fallback (BarChartDefaultPro has no defaultWidth/defaultHeight)
             inputs: []
