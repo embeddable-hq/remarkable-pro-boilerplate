@@ -22,7 +22,30 @@ widgets:
 - The canvas is **12 columns** wide.
 - `position.x` / `position.y` and `dimensions.width` / `dimensions.height` are all in grid units, not pixels.
 - Widgets must not overlap. The dev events log will emit a `validation_error` describing the conflicting rectangles when they do.
-- A component meta file may include `defaultWidth` / `defaultHeight` (in pixels) — use them as a hint when sizing on the grid; convert pragmatically to grid units that fit the layout.
+
+### Initial widget size
+
+When you place a new widget, derive its starting `width` and `height` from the component meta:
+
+- **If the meta has both `defaultWidth` and `defaultHeight`** (both in pixels), convert to grid units with these exact formulas:
+  - `width  = clamp(round((defaultWidth  + 20) / 108.33), 1, 12)`
+  - `height = round((defaultHeight + 20) / 21)`
+- **If either `defaultWidth` or `defaultHeight` is missing**, fall back to `width: 12, height: 15`.
+
+These are starting values — the user can always resize after. The arithmetic is simple enough to do inline; if you want a safety check on edge cases, run a one-liner:
+
+```bash
+python3 -c "W,H=300,120; w=max(1,min(12,round((W+20)/108.33))); h=round((H+20)/21); print(w,h)"
+```
+
+Sanity-check examples:
+
+| `defaultWidth` × `defaultHeight` | grid `width` × `height` |
+|---|---|
+| 300 × 120 | 3 × 7 |
+| 600 × 400 | 6 × 20 |
+| 900 × 400 | 8 × 20 |
+| (missing) | 12 × 15 |
 
 ## Inputs
 
