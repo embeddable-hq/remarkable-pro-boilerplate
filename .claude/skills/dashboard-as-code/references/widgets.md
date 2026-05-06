@@ -112,9 +112,61 @@ The component meta lists the events a component can emit and the properties each
 ### `SET_VARIABLE` action
 
 - `config.variable` — the name of an existing variable in this embeddable.
-- `config.sourceType: EVENT_PROPERTY` — currently the only documented source.
+- `config.sourceType: EVENT_PROPERTY` — currently the only documented source for `SET_VARIABLE`.
 - `config.sourceValue` — the event property name from the meta. Its `type` must match the target variable's `type` (and `array` flag).
 
-### Other actions
+### `DRILLDOWN` action
 
-- `DRILLDOWN` is a separate, larger topic and is **not yet covered by this skill**. Don't generate `DRILLDOWN` events from this skill.
+Opens another embeddable in a modal, optionally pre-filling variables in the target embeddable from event properties or from variables in the current embeddable. Useful for click-to-detail navigation: click a bar in a summary chart, see the rows that make it up.
+
+```yaml
+events:
+  - event: onBarClicked
+    action: DRILLDOWN
+    config:
+      embeddable: orders-detail-by-country   # name of the target embeddable
+      variableOverrides:
+        - variable: country                   # variable in the TARGET embeddable
+          sourceType: EVENT_PROPERTY
+          sourceValue: axisDimensionValue     # event property from the firing component
+        - variable: date-range                # variable in the TARGET embeddable
+          sourceType: VARIABLE
+          sourceValue: date-range             # name of a variable in THIS embeddable
+```
+
+#### `config.embeddable`
+
+The target embeddable's `name`. Must reference an `embeddables[].name` that exists somewhere under `src/embeddable.com/embeddables/` — either in this same file or in another `*.embeddable.yml`. Before writing a `DRILLDOWN`, scan the embeddables directory and confirm the target exists; if it doesn't, ask the user whether to create it first or pick a different target.
+
+#### `config.variableOverrides`
+
+Optional list. If empty (or omitted), the modal opens with the target embeddable's defaults — basic navigation, no contextual filtering. Each entry overrides one variable in the target embeddable.
+
+| Field | Meaning |
+|---|---|
+| `variable` | Name of a variable declared in the **target** embeddable. Must exist there. |
+| `sourceType` | `EVENT_PROPERTY` — read a property off the firing event. `VARIABLE` — read the current value of a variable in **this** (source) embeddable. |
+| `sourceValue` | When `EVENT_PROPERTY`, the event property name (look it up in the firing component's meta). When `VARIABLE`, the variable name in this embeddable. |
+
+Rules:
+
+- The override value's type must match the target variable's type (and `array` flag).
+- Overrides supersede the target variable's `defaultValue` — the modal opens with the override applied.
+- Each target variable can only be overridden **once** per `variableOverrides` list.
+- If the target variable was deleted or renamed, the override is silently skipped at runtime — the drill-down still opens, just without that filter.
+
+#### Common patterns
+
+- **Click-to-context (most common):** pass a clicked dimension/measure value into the target. Use `EVENT_PROPERTY` and pick the relevant property from the firing component's meta (e.g. `axisDimensionValue`, `axisDimensionTimeRange`).
+- **State propagation:** carry over a filter from this embeddable into the target. Use `VARIABLE` with the source variable name.
+- **Combined:** mix the two — pass the clicked value plus the current date range, etc.
+
+#### Multi-level drill-down
+
+The target embeddable may itself have widgets with `DRILLDOWN` events, opening a deeper modal. Keep the chain shallow — 2–3 levels is the practical maximum so users don't get lost.
+
+#### Cross-file references and safety
+
+- Target embeddables can live in any `*.embeddable.yml` under `src/embeddable.com/embeddables/`. Cross-file references are fine.
+- Renaming an `embeddables[].name` breaks every `DRILLDOWN` event pointing at it. Always grep `embeddable: <old-name>` across all files in the embeddables directory before renaming, and update or warn.
+- Renaming a variable in the target breaks any override that referenced it (overrides silently skip, so the filter just goes missing — easy to miss in review).

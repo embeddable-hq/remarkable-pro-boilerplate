@@ -47,6 +47,7 @@ Read these on demand when scaffolding a new file:
 - [examples/minimal.embeddable.yml](examples/minimal.embeddable.yml) — single chart, one dataset, no variables.
 - [examples/with-date-filter.embeddable.yml](examples/with-date-filter.embeddable.yml) — date range picker → bar chart wired through one variable.
 - [examples/custom-canvas-template.embeddable.yml](examples/custom-canvas-template.embeddable.yml) — main canvas + customCanvas with two templates and a starter canvas.
+- [examples/drill-down.embeddable.yml](examples/drill-down.embeddable.yml) — two embeddables in one file: parent with a `DRILLDOWN` event that opens the target with overrides from both an event property and a parent variable.
 
 ## Dev events log
 
@@ -62,14 +63,13 @@ The format is NDJSON; each line is either a `marker` (build cycle progress) or a
 
 ## Safety rules
 
-- **`embeddables[].name`** is the workspace identifier. Renaming or deleting it removes the dashboard from the workspace, which breaks any live embeds pointing at it. Never change or delete it without explicit user confirmation.
+- **`embeddables[].name`** is the workspace identifier. Renaming or deleting it removes the dashboard from the workspace, which breaks any live embeds pointing at it. It also breaks every `DRILLDOWN` event that targets it — before renaming, grep `embeddable: <old-name>` across `src/embeddable.com/embeddables/` and update or warn. Never change or delete the name without explicit user confirmation.
 - **`customCanvas.templates[].key`** is the stable identifier that end-user-created widgets and `starterCanvas.widgets[].template` bind to. Changing or removing a `key` deletes every dependent widget. Treat `key` as effectively immutable. `name` and `description` are cosmetic and safe to edit. See [references/custom-canvas.md](references/custom-canvas.md).
 - **Don't run `embeddable:push`** automatically — that's the user's call (root `CLAUDE.md`).
 - **Don't start `embeddable:dev`** automatically — the user starts it themselves (root `CLAUDE.md`).
 
 ## Out of scope (planned for follow-up skills)
 
-- `DRILLDOWN` event action — only `SET_VARIABLE` is documented today.
 - Component-level filters — only dataset-level filters are covered.
 - Custom variable types — only the built-in types listed in `references/variables.md` are covered.
 - Custom components, theme customization, cube model generation, presets (`*.cc.yml`/`*.sc.yml`) — separate skills will handle these.
