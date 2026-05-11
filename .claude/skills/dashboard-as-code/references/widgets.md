@@ -49,7 +49,23 @@ Sanity-check examples:
 
 #### Default placement
 
-Place widgets sequentially down the canvas: `x: 0` for each, with each widget's `y` equal to the `y + height` of the previous one. This produces a single-column stack, which is the correct starting state. **Do not preemptively compose multi-column rows or grids** — that's a user-driven layout decision, applied after the initial generation. When the user asks for a different layout, only then change `x` / `width` to fit it.
+Sizes are determined by the rule above and are **never** changed for layout reasons. Only `x` / `y` positions are decided here.
+
+Pack widgets into rows greedily, respecting two constraints:
+
+1. **Each row's widgets must sum to ≤ 12 columns.** If adding the next widget would overflow, close the row and start a new one. The new row's `y` is `(previous row's y) + max(height of widgets in that previous row)`.
+2. **Control widgets get their own row(s).** A "control" is any widget whose component meta `category` is one of: `Dropdowns - dates`, `Dropdowns - values`, `Dropdowns - dimensions and measures`, `Filters`, or `Inputs`. Don't mix controls and content widgets in the same row — even if the math allows it. Date pickers, multi-selects, granularity dropdowns etc. belong on a control bar, not side-by-side with a chart.
+
+Within those constraints, place widgets left-to-right inside each row: each widget's `x` is the accumulated width of widgets already placed in that row. Start the first row at `x: 0, y: 0`; advance `x` as the row fills; advance `y` when a row closes.
+
+**Sizes are never adjusted to fit a row.** If a widget's rule-derived size is 12 wide (fallback), it owns its row, full stop. If one widget is 8 wide and the next is 5 wide, the second goes to a new row (8 + 5 > 12) — don't shrink either to make them fit, and don't grow either to "use" the empty space.
+
+Order:
+
+- If the user specified an order, keep it.
+- Otherwise, place control widgets first (top of canvas), then content widgets. KPIs typically come before larger charts within the content section, but this is a soft preference — don't reshuffle aggressively if the user's prompt implies an order.
+
+After the initial layout the user can ask to rearrange, resize specific widgets, or compose a different grid. Apply those changes when asked, not preemptively.
 
 ## Inputs
 
