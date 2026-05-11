@@ -26,7 +26,7 @@ Each filter applies a Cube member-level constraint when fetching data.
 
 | Field | Meaning |
 |---|---|
-| `member` | Qualified Cube member name (`<cube>.<dimension>` or `<cube>.<measure>`). Must exist in `model` or in a cube joined to `model`. |
+| `member` | Qualified Cube member name (`<cube>.<dimension>` or `<cube>.<measure>`). Must exist in `model` or in a cube joined to `model`. Primary-key dimensions are unusable unless they also declare `public: true` — see [widgets.md](widgets.md#dimension--measure--dimensionormeasure-inputs). |
 | `operator` | One of the operators below. |
 | `value` | A literal (when `valueType: VALUE`) or the name of a variable (when `valueType: VARIABLE`). Omit entirely for `set` / `notSet`. |
 | `valueType` | `VALUE` (use the literal in `value`) or `VARIABLE` (look up the variable named in `value`). |

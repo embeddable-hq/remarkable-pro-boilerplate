@@ -107,6 +107,24 @@ When several widgets need different views of the same data, prefer **one shared 
 
 - `config.dataset` **must** name another input on the same widget — usually the dataset input. This binds the dimension/measure to a specific dataset (a widget can have several dataset inputs).
 - Values are qualified Cube member names. They must come from cubes available in the bound dataset's `model` or from cubes joined to it. Combining members from unjoined cubes will fail at query time.
+- **Primary-key dimensions are hidden by default.** Any dimension in a `*.cube.yml` declared with `primary_key: true` is unusable in charts (and in filter `member` values, and as a `dimension` variable's value) **unless** it also has `public: true` explicitly. Before using a member, check its `*.cube.yml` definition:
+
+  ```yaml
+  # Not usable in YAML — primary_key with no public override:
+  - name: id
+    sql: id
+    type: number
+    primary_key: true
+
+  # Usable — explicitly marked public:
+  - name: id
+    sql: id
+    type: number
+    primary_key: true
+    public: true
+  ```
+
+  This applies to **every** place a cube member appears in YAML: widget input `value`, dataset `filters[].member`, component-level `config.filters[].member`, `config.order[].member`, and variable defaults of type `dimension`/`measure`. Non-primary-key dimensions and measures don't need `public: true` — they're public by default.
 
 ```yaml
 - input: measures
