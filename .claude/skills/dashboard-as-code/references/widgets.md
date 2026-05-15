@@ -71,6 +71,8 @@ After the initial layout the user can ask to rearrange, resize specific widgets,
 
 Each widget input is one of the values configured for that component instance. For every input declared `required: true` in the component meta, include an entry; for optional inputs, include an entry only when the user wants to set them.
 
+Before setting an input, **glance at its `description` field in the meta** if present. Most are UI copy for the no-code builder, but some contain decision-relevant signals (sizing implications, expected variable pairings, mutual-exclusivity with another input). See [component-discovery.md](component-discovery.md#reading-description-fields-on-inputs).
+
 ```yaml
 inputs:
   - input: dataset                  # name from the component meta

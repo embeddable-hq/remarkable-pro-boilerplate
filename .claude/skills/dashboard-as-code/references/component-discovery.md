@@ -113,7 +113,7 @@ export const meta = {
 } as const satisfies EmbeddedComponentMeta;
 ```
 
-The fields available — `name`, `label`, `category`, `defaultWidth`, `defaultHeight`, `inputs[]` (with `type`, `required`, `array`, `defaultValue`, `category`, `supportedTypes`, nested `inputs` for sub-inputs), optional `events[]`, optional `variables[]` — are identical to the library JSON schema. Everything in [`widgets.md`](widgets.md) about inputs, sub-inputs, and events applies unchanged.
+The fields available — `name`, `label`, `category`, optional `description`, `defaultWidth`, `defaultHeight`, `inputs[]` (with `type`, `required`, `array`, `defaultValue`, `category`, optional `description`, `supportedTypes`, nested `inputs` for sub-inputs), optional `events[]`, optional `variables[]` — are identical to the library JSON schema. Everything in [`widgets.md`](widgets.md) about inputs, sub-inputs, and events applies unchanged.
 
 The `name` field is the only thing widget YAML references (`component: <name>`).
 
@@ -146,6 +146,17 @@ Local components have the same standing as library components — they're not fa
 ### Name collisions
 
 If a local `*.emb.ts` declares `meta.name` equal to a library component's `name`, the resolution is ambiguous in YAML — `component: <name>` could mean either. Don't guess: surface the conflict to the user and ask which one they want before generating the widget. Suggest renaming the local component as the cleanest fix if they want both to remain.
+
+## Reading `description` fields on inputs
+
+Inputs may carry a `description` field (optional, free text). Most of the time it's UI copy for the no-code builder ("Show the legend below the chart"). Sometimes, however, it contains **decision-relevant information for the agent** — things that affect how the input should be wired, sized, or combined with others. Examples of what might be in there:
+
+- "Connect your primary date-range variable to enable auto-selection of the most appropriate granularity" — tells you this input pairs with a `timeRange` variable
+- "Setting a long title noticeably increases the required height of the component" — tells you to bump the widget's `height` beyond the formula-derived default
+- "Only relevant when …" — gates the input on another input's value
+- "Use this when …" — picks one input over a sibling
+
+Practice: when you're about to set an input, glance at its `description` first. If it carries actionable info (sizing, pairing, gating, mutual-exclusivity), respect it. If it's just UI copy, ignore it. The signal is whether the description talks about *behaviour* / *consequences*, not *meaning*.
 
 ## Never invent
 
