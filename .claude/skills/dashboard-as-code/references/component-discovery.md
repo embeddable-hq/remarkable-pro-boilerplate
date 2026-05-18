@@ -40,8 +40,8 @@ These filters apply to library entries only — they don't affect local componen
 
 ### Reading library meta efficiently
 
-1. **At the start of work**, read `index.json` once for each enabled library. This gives the full discovery surface (`name`, `label`, `category`, `description?`).
-2. **Use the index for narrowing**: `category` groups (e.g. `Bar Charts`, `Dropdowns - dates`), `description` (when present) explains intent. Pick candidate components by scanning these fields.
+1. **At the start of work**, read `index.json` **directly** for each enabled library — do not `ls` or `Glob` the `dist/meta/` directory first. The index already enumerates every component in the library along with `name`, `label`, `category`, and `description?`; listing the directory only gives you filenames, which strips the labels/categories/descriptions that are the actual signal for picking the right component. Picking by filename is the most common cause of silent wrong choices.
+2. **Use the index for narrowing**: `category` groups (e.g. `Bar Charts`, `Dropdowns - dates`), `description` (when present) explains the component's data shape and intent. Pick candidate components by scanning these fields.
 3. **Read the per-component file** `node_modules/<package-name>/dist/meta/<componentName>.meta.json` only for the specific components you're going to place.
 4. **Do not bulk-load** — reading every per-component meta inflates context for no benefit.
 
