@@ -3,6 +3,7 @@ node_modules
 .embeddable-build
 .embeddable-dev-build
 .embeddable-dev-tmp
+.embeddable-dev-logs
 embeddable-entry-point.jsx
 .DS_Store
 /.claude/settings.local.json
