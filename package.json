@@ -22,10 +22,10 @@
     "@embeddable.com/remarkable-pro": "^0.3.0"
   },
   "devDependencies": {
-    "@embeddable.com/core": "next",
-    "@embeddable.com/react": "next",
-    "@embeddable.com/sdk-core": "next",
-    "@embeddable.com/sdk-react": "next",
+    "@embeddable.com/core": "^2.13.7",
+    "@embeddable.com/react": "^2.13.7",
+    "@embeddable.com/sdk-core": "^4.7.0",
+    "@embeddable.com/sdk-react": "^4.3.10",
     "@swc/core": "1.13.5",
     "@types/react": "^19.1.13",
     "cross-env": "^7.0.3",
