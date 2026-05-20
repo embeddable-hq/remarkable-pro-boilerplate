@@ -43,7 +43,7 @@ embeddables:
 
       - component: BarChartDefaultPro
         position: { x: 0, y: 7 }                # below the date picker (which has height 7)
-        dimensions: { width: 12, height: 15 }   # fallback (component meta has no defaultWidth/defaultHeight)
+        dimensions: { width: 12, height: 22 }   # fallback (component meta has no defaultWidth/defaultHeight)
         inputs:
           - input: title
             inputType: string

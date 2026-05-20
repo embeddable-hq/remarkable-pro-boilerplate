@@ -47,3 +47,7 @@ Always cross-check the member's type in the relevant `*.cube.yml` before picking
 ## VARIABLE filters and the `noFilter` rule
 
 When a filter's `valueType` is `VARIABLE` and the referenced variable currently has no value (no `defaultValue` declared and nothing has set it), Embeddable omits that filter from the query entirely. This is the `noFilter` semantics — see [variables.md](variables.md).
+
+## Comparison widgets
+
+If a chosen component's name or description includes "comparison", plan its dataset to omit the date-range filter — the widget exposes dedicated date inputs that manage both the primary and comparison periods internally, and applying the date variable as a dataset filter would strip the comparison period from the data. Keep relevant non-date filters (segment, region, etc.) on that dataset so the widget stays consistent with the rest of the dashboard.

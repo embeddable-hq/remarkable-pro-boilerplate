@@ -12,7 +12,7 @@ widgets:
       y: 0
     dimensions:
       width: 12
-      height: 15
+      height: 22
     inputs: [...]
     events: [...]
 ```
@@ -30,7 +30,7 @@ When you place a new widget, derive its `width` and `height` from the component 
 - **If the meta has both `defaultWidth` and `defaultHeight`** (both in pixels), convert to grid units with these exact formulas:
   - `width  = clamp(round((defaultWidth  + 20) / 108.33), 1, 12)`
   - `height = round((defaultHeight + 20) / 21)`
-- **If either `defaultWidth` or `defaultHeight` is missing**, fall back to `width: 12, height: 15`. No other fallback values are acceptable.
+- **If either `defaultWidth` or `defaultHeight` is missing**, fall back to `width: 12, height: 22`. No other fallback values are acceptable.
 
 The arithmetic is simple enough to do inline; if you want a safety check on edge cases, run a one-liner:
 
@@ -45,7 +45,7 @@ Sanity-check examples:
 | 300 × 120 | 3 × 7 |
 | 600 × 400 | 6 × 20 |
 | 900 × 400 | 8 × 20 |
-| (missing) | 12 × 15 |
+| (missing) | 12 × 22 |
 
 #### Default placement
 
@@ -69,7 +69,16 @@ After the initial layout the user can ask to rearrange, resize specific widgets,
 
 ## Inputs
 
-Each widget input is one of the values configured for that component instance. For every input declared `required: true` in the component meta, include an entry; for optional inputs, include an entry only when the user wants to set them.
+Each widget input is one of the values configured for that component instance. Include an entry for:
+
+- every input declared `required: true` in the component meta;
+- every input that has a `defaultValue` in the meta — emit the default as the `value` (with `valueType: VALUE`), since optional defaults are not always applied at runtime;
+- every **sub-input** (in a parent input's nested `inputs`) that declares a `defaultValue` — same reasoning, but easy to miss because sub-input defaults are buried inside the parent input;
+- any other optional input the user wants to set.
+
+**Array-typed parents multiply this.** When the parent input is `array: true` (e.g. `measures` on most charts), every default sub-input must be emitted **once per `parentValue`** — each measure gets its own copy. N default sub-inputs × M values in the array = N×M entries; omitting any of them is a silent runtime regression where that value falls back to something other than the documented default. Concrete trap: `LineChartComparisonWithKpiTabsPro` declares `previousLineDashed: true` on its `measures` sub-inputs — skip it for any measure and that measure's comparison line renders solid instead of dashed.
+
+Before declaring a widget complete, scan the relevant section of the meta for every `"defaultValue"` key inside the inputs you've placed and confirm each one appears in your YAML — for every `parentValue` when the parent is `array: true`.
 
 Before setting an input, **glance at its `description` field in the meta** if present. Most are UI copy for the no-code builder, but some contain decision-relevant signals (sizing implications, expected variable pairings, mutual-exclusivity with another input). See [component-discovery.md](component-discovery.md#reading-description-fields-on-inputs).
 
