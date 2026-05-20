@@ -11,7 +11,7 @@
     "ct": "tsconfig --noEmit",
     "dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev",
     "embeddable:build": "embeddable build",
-    "embeddable:dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev",
+    "embeddable:dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev --events-file=.embeddable-dev-logs/dev.events.ndjson",
     "embeddable:login": "embeddable login",
     "embeddable:push": "embeddable push",
     "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\"",
@@ -19,13 +19,13 @@
     "embedding-preview": "node src/embeddable.com/scripts/embedding-preview.cjs"
   },
   "dependencies": {
-    "@embeddable.com/remarkable-pro": "^0.2.11"
+    "@embeddable.com/remarkable-pro": "^0.3.0"
   },
   "devDependencies": {
-    "@embeddable.com/core": "2.13.7",
-    "@embeddable.com/react": "2.13.6",
-    "@embeddable.com/sdk-core": "4.4.1",
-    "@embeddable.com/sdk-react": "4.3.7",
+    "@embeddable.com/core": "^2.13.7",
+    "@embeddable.com/react": "^2.13.7",
+    "@embeddable.com/sdk-core": "^4.7.0",
+    "@embeddable.com/sdk-react": "^4.3.10",
     "@swc/core": "1.13.5",
     "@types/react": "^19.1.13",
     "cross-env": "^7.0.3",

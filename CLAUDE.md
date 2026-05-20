@@ -65,7 +65,7 @@ Everything else (`embeddable:build`, `embedding-preview`, `ct`) is local-only an
 
 ### Root configuration
 
-- [embeddable.config.ts](embeddable.config.ts) — region, plugins (`@embeddable.com/sdk-react`), component libraries to load (`@embeddable.com/remarkable-pro`), and `starterEmbeddables` (demo dashboard UUIDs that are cloned into the workspace on first push so a new user has something to play with against the demo Spotify DB). The commented-out `previewBaseUrl` / `pushBaseUrl` / `audienceUrl` / `authDomain` / `authClientId` block is for Embeddable-internal dev environments — do not enable without reason.
+- [embeddable.config.ts](embeddable.config.ts) — region, plugins (`@embeddable.com/sdk-react`), component libraries to load (`@embeddable.com/remarkable-pro`; each entry is either a bare package name or `{ name, include?, exclude? }` to filter components), and `starterEmbeddables` (demo dashboard UUIDs that are cloned into the workspace on first push so a new user has something to play with against the demo Spotify DB). The commented-out `previewBaseUrl` / `pushBaseUrl` / `audienceUrl` / `authDomain` / `authClientId` block is for Embeddable-internal dev environments — do not enable without reason.
 - [embeddable.theme.ts](embeddable.theme.ts) — exports `themeProvider(clientContext, parentTheme) => Theme`. Branches on `clientContext.theme === 'dark'` to merge [dark-theme.ts](dark-theme.ts) (a `DeepPartial<Theme>` of CSS variables like `--em-sem-background`, `--em-sem-chart-color--N`). Light theme is the parent theme with no overrides — add inline overrides in the empty object.
 - [embeddable.lifecycle.ts](embeddable.lifecycle.ts) — runtime hooks. The only supported hook today is `onThemeUpdated`, which fires when the theme changes (e.g. to inject `<link>` font tags) and may return a cleanup function.
 
@@ -76,7 +76,13 @@ Everything else (`embeddable:build`, `embedding-preview`, `ct`) is local-only an
 - `models/views/` — Cube views (empty, just a `.gitkeep`).
 - `presets/*.cc.yml` — client-context presets used in the no-code builder to simulate different `clientContext` values (e.g. dark theme, locale) while previewing.
 - `presets/*.sc.yml` — security-context presets used in the builder to simulate row-level security ("view as…"). Each entry has a `securityContext`, optional `filters` applied as Cube member filters, and an `environment` selecting which DB connection to use.
-- `*.embeddable.yml` — *dashboard-as-code*. Each file describes a dashboard (layout, widgets, input mappings) declaratively. On push the file becomes a new dashboard version; existing published dashboards are unaffected because publishing pins versions. One example file is checked in as a reference.
+- `embeddables/*.embeddable.yml` — *dashboard-as-code*. Each file describes a dashboard (layout, widgets, input mappings) declaratively. On push the file becomes a new dashboard version; existing published dashboards are unaffected because publishing pins versions. One example (`first-dashboard.embeddable.yml`) is checked in as a reference. Schema, conventions, and authoring workflow live in `.claude/skills/dashboard-as-code/`.
 - `scripts/connection-*.cjs` — standalone Node scripts that hit the Embeddable REST API (`/api/v1/connections`) to CRUD database connections. They carry placeholder `apiKey` and credential blocks — fill in before running, e.g. `node src/embeddable.com/scripts/connection-create.cjs`.
 - `scripts/embedding-preview.{html,cjs}` — local HTML harness for iframe embedding tests, served by `npm run embedding-preview`. The `.cjs` file is a working example of server-side token generation.
 - `types/css.d.ts` — module declaration shim for CSS imports.
+
+## Skills
+
+Repo-specific Claude Code skills live under `.claude/skills/`. Each provides progressive-disclosure guidance for one area; consult the relevant one before generating or editing files it covers.
+
+- `.claude/skills/dashboard-as-code/` — for any work on `*.embeddable.yml` files (creating, scaffolding, editing dashboards, custom canvas templates, starter canvas, dataset filters, variables, events).
