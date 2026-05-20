@@ -5,7 +5,7 @@
   "type": "module",
   "engines": {
     "npm": ">=9.0.0",
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "ct": "tsconfig --noEmit",
