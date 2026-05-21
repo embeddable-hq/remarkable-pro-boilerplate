@@ -1,0 +1,397 @@
+embeddables:
+  - name: spotify-artist-dashboard
+    title: '[Example (YAML)] Spotify Artist dashboard'
+    description: Spotify-for-artists overview — listens KPI, demographics, top tracks, listens over time, and revenue heatmap.
+
+    variables:
+      - name: selected-age-groups
+        type: string
+        array: true
+      - name: date-range
+        type: timeRange
+        defaultValue: { relativeTimeString: 'Last 12 months' }
+      - name: comparison-period
+        type: comparisonPeriod
+        defaultValue: Previous period
+      - name: selected-granularity
+        type: granularity
+        defaultValue: month
+
+    datasets:
+      - name: all data
+        model: daily_listens
+      - name: data filtered by age
+        model: daily_listens
+        filters:
+          - member: daily_listens.age_group
+            operator: equals
+            value: selected-age-groups
+            valueType: VARIABLE
+
+    widgets:
+      # ---- Control bar (y=0) ----
+      - component: DateRangeSelectFieldPro
+        position: { x: 0, y: 0 }
+        dimensions: { width: 3, height: 6 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Date range
+          - input: selectedValue
+            inputType: timeRange
+            valueType: VARIABLE
+            value: date-range
+        events:
+          - event: onChange
+            action: SET_VARIABLE
+            config:
+              variable: date-range
+              sourceType: EVENT_PROPERTY
+              sourceValue: value
+
+      - component: ComparisonPeriodSelectFieldPro
+        position: { x: 3, y: 0 }
+        dimensions: { width: 3, height: 6 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Comparison period
+          - input: primaryDateRange
+            inputType: timeRange
+            valueType: VARIABLE
+            value: date-range
+          - input: comparisonPeriod
+            inputType: comparisonPeriod
+            valueType: VARIABLE
+            value: comparison-period
+        events:
+          - event: onChange
+            action: SET_VARIABLE
+            config:
+              variable: comparison-period
+              sourceType: EVENT_PROPERTY
+              sourceValue: value
+
+      - component: GranularitySelectFieldPro
+        position: { x: 6, y: 0 }
+        dimensions: { width: 2, height: 6 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Granularity
+          - input: granularity
+            inputType: granularity
+            valueType: VARIABLE
+            value: selected-granularity
+          - input: primaryTimeRange
+            inputType: timeRange
+            valueType: VARIABLE
+            value: date-range
+        events:
+          - event: onChange
+            action: SET_VARIABLE
+            config:
+              variable: selected-granularity
+              sourceType: EVENT_PROPERTY
+              sourceValue: value
+
+      - component: MultiSelectFieldPro
+        position: { x: 9, y: 0 }
+        dimensions: { width: 3, height: 6 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Audience age range
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: all data
+          - input: dimension
+            inputType: dimension
+            valueType: VALUE
+            value: daily_listens.age_group
+            config:
+              dataset: dataset
+          - input: selectedValues
+            inputType: string
+            valueType: VARIABLE
+            array: true
+            value: selected-age-groups
+        events:
+          - event: onChange
+            action: SET_VARIABLE
+            config:
+              variable: selected-age-groups
+              sourceType: EVENT_PROPERTY
+              sourceValue: value
+
+      # ---- Row 2 (y=6): KPI + Tracks table ----
+      - component: KpiChartNumberComparisonPro
+        position: { x: 0, y: 6 }
+        dimensions: { width: 4, height: 11 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Total listens
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: data filtered by age
+          - input: measure
+            inputType: measure
+            valueType: VALUE
+            value: daily_listens.total_daily_listens
+            config:
+              dataset: dataset
+          - input: timeProperty
+            inputType: dimension
+            valueType: VALUE
+            value: daily_listens.listened_date
+            config:
+              dataset: dataset
+          - input: primaryDateRange
+            inputType: timeRange
+            valueType: VARIABLE
+            value: date-range
+          - input: comparisonPeriod
+            inputType: comparisonPeriod
+            valueType: VARIABLE
+            value: comparison-period
+
+      - component: TableScrollable
+        position: { x: 4, y: 6 }
+        dimensions: { width: 8, height: 29 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Your tracks
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: data filtered by age
+            config:
+              filters:
+                - member: daily_listens.listened_date
+                  operator: inDateRange
+                  value: date-range
+                  valueType: VARIABLE
+          - input: dimensionsAndMeasures
+            inputType: dimensionOrMeasure
+            valueType: VALUE
+            array: true
+            value:
+              - tracks.track_name
+              - tracks.release_date
+              - tracks.duration_minutes
+              - daily_listens.streaming_royalties
+              - tracks.explicit
+              - music_artists.artist_name
+              - tracks.album_name
+            config:
+              dataset: dataset
+              inputs:
+                - input: granularity
+                  valueType: VALUE
+                  value: day
+                  parentValue: tracks.release_date
+
+      # ---- Row 3 (y=17): Donut ----
+      - component: DonutLabelChartPro
+        position: { x: 0, y: 17 }
+        dimensions: { width: 4, height: 18 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Unique listeners by age group
+          - input: innerLabelText
+            inputType: string
+            valueType: VALUE
+            value: Total
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: data filtered by age
+            config:
+              filters:
+                - member: daily_listens.listened_date
+                  operator: inDateRange
+                  value: date-range
+                  valueType: VARIABLE
+          - input: measure
+            inputType: measure
+            valueType: VALUE
+            value: daily_listens.unique_listeners
+            config:
+              dataset: dataset
+              inputs:
+                - input: abbreviateLargeNumber
+                  valueType: VALUE
+                  value: true
+          - input: dimension
+            inputType: dimension
+            valueType: VALUE
+            value: daily_listens.age_group
+            config:
+              dataset: dataset
+          - input: innerLabelMeasure
+            inputType: measure
+            valueType: VALUE
+            value: daily_listens.unique_listeners
+            config:
+              dataset: dataset
+              inputs:
+                - input: abbreviateLargeNumber
+                  valueType: VALUE
+                  value: true
+        events:
+          - event: onSegmentClick
+            action: SET_VARIABLE
+            config:
+              variable: selected-age-groups
+              sourceType: EVENT_PROPERTY
+              sourceValue: dimensionValue
+
+      # ---- Row 4 (y=35): Line chart ----
+      - component: LineChartComparisonDefaultPro
+        position: { x: 0, y: 35 }
+        dimensions: { width: 12, height: 30 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Listens over time
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: data filtered by age
+          - input: measures
+            inputType: measure
+            valueType: VALUE
+            array: true
+            value:
+              - daily_listens.total_daily_listens
+            config:
+              dataset: dataset
+              inputs:
+                - input: fillUnderLine
+                  valueType: VALUE
+                  value: true
+                  parentValue: daily_listens.total_daily_listens
+                - input: connectGaps
+                  valueType: VALUE
+                  value: true
+                  parentValue: daily_listens.total_daily_listens
+                - input: previousLineDashed
+                  valueType: VALUE
+                  value: true
+                  parentValue: daily_listens.total_daily_listens
+          - input: xAxis
+            inputType: dimension
+            valueType: VALUE
+            value: daily_listens.listened_date
+            config:
+              dataset: dataset
+              inputs:
+                - input: granularity
+                  valueType: VARIABLE
+                  value: selected-granularity
+          - input: primaryDateRange
+            inputType: timeRange
+            valueType: VARIABLE
+            value: date-range
+          - input: comparisonPeriod
+            inputType: comparisonPeriod
+            valueType: VARIABLE
+            value: comparison-period
+
+      # ---- Row 5 (y=65): Bar (stacked horizontal) + Heatmap ----
+      - component: BarChartStackedHorizontalPro
+        position: { x: 0, y: 65 }
+        dimensions: { width: 5, height: 24 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Your listeners, by country and gender
+          - input: showTotalLabels
+            inputType: boolean
+            valueType: VALUE
+            value: true
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: data filtered by age
+            config:
+              order:
+                - member: daily_listens.country
+                  direction: asc
+          - input: measure
+            inputType: measure
+            valueType: VALUE
+            value: daily_listens.unique_listeners
+            config:
+              dataset: dataset
+              inputs:
+                - input: abbreviateLargeNumber
+                  valueType: VALUE
+                  value: true
+          - input: yAxis
+            inputType: dimension
+            valueType: VALUE
+            value: daily_listens.country
+            config:
+              dataset: dataset
+          - input: groupBy
+            inputType: dimension
+            valueType: VALUE
+            value: daily_listens.gender
+            config:
+              dataset: dataset
+
+      - component: HeatMapPro
+        position: { x: 5, y: 65 }
+        dimensions: { width: 7, height: 24 }
+        inputs:
+          - input: title
+            inputType: string
+            valueType: VALUE
+            value: Total revenue, by demographic
+          - input: midColor
+            inputType: color
+            valueType: VALUE
+            value: '#FF5400'
+          - input: dataset
+            inputType: dataset
+            valueType: VALUE
+            value: data filtered by age
+            config:
+              order:
+                - member: daily_listens.age_group
+                  direction: asc
+                - member: daily_listens.country
+                  direction: asc
+          - input: measure
+            inputType: measure
+            valueType: VALUE
+            value: daily_listens.streaming_royalties
+            config:
+              dataset: dataset
+          - input: rowDimension
+            inputType: dimension
+            valueType: VALUE
+            value: daily_listens.age_group
+            config:
+              dataset: dataset
+          - input: columnDimension
+            inputType: dimension
+            valueType: VALUE
+            value: daily_listens.country
+            config:
+              dataset: dataset

@@ -1,0 +1,172 @@
+embeddables:
+  - name: spotify-artist-self-serve-dashboard
+    title: "[Example (YAML)] Spotify Self-serve dashboard"
+    variables:
+      - name: selected age groups
+        type: string
+        array: true
+        operation: NO_FILTER
+      - name: date-range
+        type: timeRange
+        operation: NO_FILTER
+    datasets:
+      - name: filtered data
+        model: daily_listens
+        filters:
+          - member: daily_listens.age_group
+            operator: equals
+            value: selected age groups
+            valueType: VARIABLE
+          - member: daily_listens.listened_date
+            operator: inDateRange
+            value: date-range
+            valueType: VARIABLE
+      - name: all data
+        model: daily_listens
+    widgets:
+      - component: MultiSelectFieldPro
+        position:
+          x: 3
+          "y": 0
+        dimensions:
+          width: 3
+          height: 7
+        inputs:
+          - input: title
+            inputType: string
+            value: Age group
+            valueType: VALUE
+          - input: dataset
+            inputType: dataset
+            value: all data
+            valueType: VALUE
+          - input: dimension
+            inputType: dimension
+            value: daily_listens.age_group
+            valueType: VALUE
+            config:
+              dataset: dataset
+          - input: selectedValues
+            inputType: string
+            value: selected age groups
+            valueType: VARIABLE
+        events:
+          - event: onChange
+            action: SET_VARIABLE
+            config:
+              variable: selected age groups
+              sourceType: EVENT_PROPERTY
+              sourceValue: value
+      - component: DateRangeSelectFieldPro
+        position:
+          x: 0
+          "y": 0
+        dimensions:
+          width: 3
+          height: 7
+        inputs:
+          - input: title
+            inputType: string
+            value: Date range
+            valueType: VALUE
+          - input: selectedValue
+            inputType: timeRange
+            value: date-range
+            valueType: VARIABLE
+        events:
+          - event: onChange
+            action: SET_VARIABLE
+            config:
+              variable: date-range
+              sourceType: EVENT_PROPERTY
+              sourceValue: value
+    customCanvas:
+      datasets:
+        - dataset: filtered data
+      templates:
+        - name: Kpi Chart
+          key: kpi-template
+          component: KpiChartNumberPro
+          icon: stairs
+          inputs:
+            - input: title
+              inputType: string
+              valueType: VALUE
+            - input: dataset
+              inputType: dataset
+              valueType: VALUE
+            - input: measure
+              inputType: measure
+              valueType: VALUE
+              config:
+                dataset: dataset
+            - input: fontSize
+              inputType: number
+              valueType: VALUE
+            - input: description
+              inputType: string
+              valueType: VALUE
+        - name: Donut Chart
+          key: donut-template
+          component: DonutChartPro
+          icon: chart-donut-filled
+          inputs:
+            - input: title
+              inputType: string
+              valueType: VALUE
+            - input: dataset
+              inputType: dataset
+              valueType: VALUE
+            - input: measure
+              inputType: measure
+              valueType: VALUE
+              config:
+                dataset: dataset
+            - input: dimension
+              inputType: dimension
+              valueType: VALUE
+              config:
+                dataset: dataset
+            - input: description
+              inputType: string
+              valueType: VALUE
+        - name: Bar Chart
+          key: bar-chart-template
+          component: BarChartDefaultPro
+          icon: chart-bar
+          inputs:
+            - input: title
+              inputType: string
+              valueType: VALUE
+            - input: dataset
+              inputType: dataset
+              valueType: VALUE
+            - input: measures
+              inputType: measure
+              array: true
+              valueType: VALUE
+              config:
+                dataset: dataset
+            - input: dimension
+              inputType: dimension
+              valueType: VALUE
+              config:
+                dataset: dataset
+            - input: xAxisLabel
+              inputType: string
+              valueType: VALUE
+            - input: yAxisLabel
+              inputType: string
+              valueType: VALUE
+            - input: description
+              inputType: string
+              valueType: VALUE
+            - input: xAxisMaxItems
+              inputType: number
+              valueType: VALUE
+            - input: yAxisRangeMax
+              inputType: number
+              valueType: VALUE
+            - input: yAxisRangeMin
+              inputType: number
+              valueType: VALUE
