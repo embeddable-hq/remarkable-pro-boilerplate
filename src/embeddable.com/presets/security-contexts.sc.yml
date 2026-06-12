@@ -7,27 +7,16 @@
   environment: default
 
 - name: Jake Sterling
-  securityContext: {}
-  filters: 
-    - member: 'music_artists.artist_id'
-      operator: 'equals'
-      values: ['ART_00002']
+  securityContext:
+    artistId: 'ART_00002'
   environment: default
 
 - name: The Crimson Wolves
-  securityContext: {}
-  filters: 
-    - member: 'music_artists.artist_id'
-      operator: 'equals'
-      values: ['ART_00001']
+  securityContext:
+    artistId: 'ART_00001'
   environment: default
 
 - name: Luna Starlight
-  securityContext: {}
-  filters: 
-    - member: 'music_artists.artist_id'
-      operator: 'equals'
-      values: ['ART_00003']
+  securityContext:
+    artistId: 'ART_00003'
   environment: default
-
-

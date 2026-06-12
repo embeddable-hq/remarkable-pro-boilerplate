@@ -1,0 +1,155 @@
+# Multi-table domain with joins — orders + customers example
+#
+# Pattern: one fact cube (orders) and one dimension cube (customers).
+# The join is declared on the FACT side (orders), not on the dimension side.
+# Both cubes live in separate files in practice; they're combined here for
+# illustration.
+
+cubes:
+  # ── Fact cube ─────────────────────────────────────────────────────────────
+  - name: orders
+    title: Orders
+    sql_table: ecommerce.orders
+
+    # Joins are declared on the fact/many side.
+    joins:
+      - name: customers
+        sql: "{CUBE}.customer_id = {customers}.customer_id"
+        relationship: many_to_one
+
+      - name: order_items
+        sql: "{CUBE}.order_id = {order_items}.order_id"
+        relationship: one_to_many
+
+    dimensions:
+      - name: order_id
+        sql: order_id
+        type: string
+        primary_key: true
+        public: false
+
+      - name: created_at
+        title: Order Date
+        sql: created_at
+        type: time
+
+      # Encoded status — expand to readable labels via CASE.
+      - name: status
+        sql: >
+          CASE status
+            WHEN 'pending'    THEN 'Pending'
+            WHEN 'processing' THEN 'Processing'
+            WHEN 'shipped'    THEN 'Shipped'
+            WHEN 'complete'   THEN 'Complete'
+            WHEN 'cancelled'  THEN 'Cancelled'
+            ELSE status
+          END
+        type: string
+        title: Order Status
+
+      - name: channel
+        sql: channel
+        type: string
+        title: Sales Channel
+
+    measures:
+      - name: count
+        type: count
+        title: "# Orders"
+
+      - name: total_revenue
+        sql: amount
+        type: sum
+        title: Revenue
+        meta:
+          currency: 'USD'
+          decimalPlaces: 2
+
+      - name: avg_order_value
+        sql: "{total_revenue} / NULLIF({count}, 0)"
+        type: number
+        title: Avg Order Value
+        meta:
+          currency: 'USD'
+          decimalPlaces: 2
+
+  # ── Dimension cube ─────────────────────────────────────────────────────────
+  # No joins declared here — the fact cube owns the relationship.
+  - name: customers
+    title: Customers
+    sql_table: ecommerce.customers
+
+    dimensions:
+      - name: customer_id
+        sql: customer_id
+        type: string
+        primary_key: true
+        public: false
+
+      - name: name
+        sql: name
+        type: string
+        title: Customer Name
+
+      - name: country
+        sql: country
+        type: string
+
+      - name: tier
+        sql: tier
+        type: string
+        title: Customer Tier
+
+      - name: signup_date
+        sql: created_at
+        type: time
+        title: Signup Date
+
+    measures:
+      - name: count
+        type: count
+        title: "# Customers"
+
+  # ── Line-item cube ─────────────────────────────────────────────────────────
+  # One row per line item. Joins back to orders (many-to-one).
+  - name: order_items
+    title: Order Items
+    sql_table: ecommerce.order_items
+
+    joins:
+      - name: orders
+        sql: "{CUBE}.order_id = {orders}.order_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: item_id
+        sql: item_id
+        type: string
+        primary_key: true
+        public: false
+
+      - name: product_name
+        sql: product_name
+        type: string
+
+      - name: category
+        sql: category
+        type: string
+
+    measures:
+      - name: count
+        type: count
+        title: "# Items"
+
+      - name: total_quantity
+        sql: quantity
+        type: sum
+        title: Total Quantity
+
+      - name: total_item_revenue
+        sql: quantity * unit_price
+        type: sum
+        title: Item Revenue
+        meta:
+          currency: 'USD'
+          decimalPlaces: 2
