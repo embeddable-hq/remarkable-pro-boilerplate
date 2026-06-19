@@ -21,6 +21,7 @@
  */
 
 import '@embeddable.com/remarkable-pro/dist/remarkable-pro.css';
+import { i18n } from '@embeddable.com/remarkable-pro';
 import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registry, componentNames, mockClientContext } from './registry.ts';
@@ -28,6 +29,12 @@ import { buildTheme, injectThemeStyles } from './theme.ts';
 import { ComponentView } from './ComponentView.tsx';
 
 export const SYSTEM_FONT = `system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif`;
+
+/** Languages offered by the sandbox toggle. Remarkable Pro ships `en` and `de` translations. */
+export const LANGUAGES = [
+  { code: 'en', label: 'English', locale: 'en-US' },
+  { code: 'de', label: 'Deutsch', locale: 'de-DE' },
+] as const;
 
 /** Inject the font override after the theme style tag so it wins the cascade. */
 function injectFontOverride() {
@@ -135,10 +142,27 @@ function App() {
     return params.get('c') ?? componentNames[0];
   });
   const [darkMode, setDarkMode] = useState(false);
+  const [language, setLanguage] = useState<string>('en');
 
-  const clientContext = { ...mockClientContext, ...(darkMode ? { theme: 'dark' } : {}) };
+  const lang = LANGUAGES.find((l) => l.code === language) ?? LANGUAGES[0];
+  const clientContext = {
+    ...mockClientContext,
+    language: lang.code,
+    locale: lang.locale,
+    ...(darkMode ? { theme: 'dark' } : {}),
+  };
   const theme = buildTheme(clientContext);
   const c = makeColors(darkMode);
+
+  // Switch language. i18nSetup(theme) reads theme.language but initialises i18next only once,
+  // so we also call changeLanguage directly and remount the component (via the key below) so it
+  // re-runs i18n.t / resolveI18nProps in the chosen language. Pro ships real en/de strings, so
+  // chrome (empty/error/menu text, etc.) translates; a string that does NOT change is either
+  // hardcoded (a bug to fix) or custom copy with no translation yet.
+  const selectLanguage = (code: string) => {
+    i18n.changeLanguage(code);
+    setLanguage(code);
+  };
 
   useEffect(() => {
     injectThemeStyles(theme);
@@ -199,30 +223,59 @@ function App() {
           </span>
         </div>
 
-        {/* Dark/Light toggle */}
-        <label style={{
-          display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
-          fontSize: 12, color: c.textMuted, userSelect: 'none',
-        }}>
-          <span style={{ color: !darkMode ? c.text : c.textMuted, fontWeight: !darkMode ? 500 : 400 }}>Light</span>
-          <div
-            onClick={() => setDarkMode((d) => !d)}
-            style={{
-              width: 38, height: 21, borderRadius: 11,
-              background: darkMode ? '#3b82f6' : '#d1d5db',
-              position: 'relative', cursor: 'pointer',
-              transition: 'background 0.2s', flexShrink: 0,
-            }}
-          >
-            <div style={{
-              position: 'absolute', top: 2.5, left: darkMode ? 19 : 2.5,
-              width: 16, height: 16, borderRadius: 8,
-              background: '#fff', transition: 'left 0.18s',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
-            }} />
+        {/* Right-side controls: language + theme */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* Language selector — Pro ships en/de; switching shows real translation */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 11, color: c.textFaint }}>Lang</span>
+            <div style={{ display: 'flex', border: `1px solid ${c.frameOutline}`, borderRadius: 6, overflow: 'hidden' }}>
+              {LANGUAGES.map((l) => {
+                const active = l.code === language;
+                return (
+                  <button
+                    key={l.code}
+                    onClick={() => selectLanguage(l.code)}
+                    title={`Render in ${l.label}`}
+                    style={{
+                      padding: '3px 9px', fontSize: 11, border: 'none', cursor: 'pointer',
+                      fontFamily: SYSTEM_FONT,
+                      background: active ? c.activeBg : 'transparent',
+                      color: active ? c.activeText : c.textMuted,
+                      fontWeight: active ? 700 : 400,
+                    }}
+                  >
+                    {l.code.toUpperCase()}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <span style={{ color: darkMode ? c.text : c.textMuted, fontWeight: darkMode ? 500 : 400 }}>Dark</span>
-        </label>
+
+          {/* Dark/Light toggle */}
+          <label style={{
+            display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
+            fontSize: 12, color: c.textMuted, userSelect: 'none',
+          }}>
+            <span style={{ color: !darkMode ? c.text : c.textMuted, fontWeight: !darkMode ? 500 : 400 }}>Light</span>
+            <div
+              onClick={() => setDarkMode((d) => !d)}
+              style={{
+                width: 38, height: 21, borderRadius: 11,
+                background: darkMode ? '#3b82f6' : '#d1d5db',
+                position: 'relative', cursor: 'pointer',
+                transition: 'background 0.2s', flexShrink: 0,
+              }}
+            >
+              <div style={{
+                position: 'absolute', top: 2.5, left: darkMode ? 19 : 2.5,
+                width: 16, height: 16, borderRadius: 8,
+                background: '#fff', transition: 'left 0.18s',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+              }} />
+            </div>
+            <span style={{ color: darkMode ? c.text : c.textMuted, fontWeight: darkMode ? 500 : 400 }}>Dark</span>
+          </label>
+        </div>
       </header>
 
       {/* ── Body: sidebar + content ──────────────────────────────────────────── */}
@@ -285,7 +338,7 @@ function App() {
 
         {/* ── CENTER + RIGHT: ComponentView renders both ─────────────────────── */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', overflow: 'hidden' }}>
-          <ComponentView key={entry.name} entry={entry} theme={theme} darkMode={darkMode} colors={c} />
+          <ComponentView key={`${entry.name}:${language}`} entry={entry} theme={theme} darkMode={darkMode} colors={c} />
         </div>
       </div>
     </div>

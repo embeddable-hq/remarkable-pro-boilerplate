@@ -18,12 +18,13 @@ Then:
 - Edit its inputs live in the **right panel** (generated from `meta.inputs`).
 - Resize via the frame corner or the **Narrow / Default / Wide / Tall** presets.
 - Toggle **Dark** (top-right) to check dark-mode rendering.
+- Toggle **Lang** (top-right) between English and Deutsch to check translations.
 - The **Build Status** panel runs `embeddable:build` / `tsc` without leaving the page.
 
 ## What it reproduces faithfully
 - The real `config.props()` mapping, including internal `[state, setState]` reactivity.
 - `loadData()` calls (replaced with typed mock rows — time-series or category).
-- The real theme pipeline (`themeProvider` → `EmbeddableThemeContext`), light and dark.
+- The real theme pipeline (`themeProvider` → `EmbeddableThemeContext`), with light/dark and English/German toggles. German uses Pro's shipped `de` translations, so i18n-wired strings (`resolveI18nProps`, `i18n.t`) actually translate — a string that *doesn't* change is either hardcoded (a bug) or custom copy with no translation yet.
 - Auto-discovery: drop a new `*.emb.ts` + `index.tsx` under
   `src/embeddable.com/components/<Name>/` and it appears automatically — the sandbox
   watches for added/removed component files and reloads. No registry edits.
