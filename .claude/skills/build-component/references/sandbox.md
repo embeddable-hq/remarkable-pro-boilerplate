@@ -48,7 +48,7 @@ cd sandbox
 npm run dev          # Vite on :5210
 ```
 
-**Stale registry warning:** If a newly-added component doesn't appear (the sandbox falls back to a different one), a stale Vite process is serving the old registry — restart `npm run dev`.
+**If a new component doesn't appear:** the sandbox watches `src/embeddable.com/components/` and auto-reloads when a `.emb.ts` is added, so it normally shows up on its own. If it doesn't (rare), restart `npm run dev`.
 
 ## User confirmation step (before push)
 Once the build is green and the sandbox is running, tell the user:
@@ -71,4 +71,4 @@ The sandbox calls the real `config.props()` and the real theme pipeline. Key gap
 These gaps don't affect typical build-and-review workflows.
 
 ## Adding new components
-Drop a `*.emb.ts` + `index.tsx` into `src/embeddable.com/components/<Name>/`. The sandbox auto-discovers the new component via `import.meta.glob` — no edits to `registry.ts` required. A Vite HMR reload or dev-server restart is sufficient.
+Drop a `*.emb.ts` + `index.tsx` into `src/embeddable.com/components/<Name>/`. The sandbox auto-discovers it via `import.meta.glob` — no edits to `registry.ts` required. A small Vite plugin (`sandbox-watch-components` in `vite.config.ts`) watches the components directory and reloads the page when a `.emb.ts` is added or removed, so new components appear on their own without a restart.

@@ -25,7 +25,8 @@ Then:
 - `loadData()` calls (replaced with typed mock rows — time-series or category).
 - The real theme pipeline (`themeProvider` → `EmbeddableThemeContext`), light and dark.
 - Auto-discovery: drop a new `*.emb.ts` + `index.tsx` under
-  `src/embeddable.com/components/<Name>/` and it appears on reload — no registry edits.
+  `src/embeddable.com/components/<Name>/` and it appears automatically — the sandbox
+  watches for added/removed component files and reloads. No registry edits.
 
 ## What it fakes (don't rely on these)
 - **Data is static mock data** — loading states never appear, and values aren't from a real database.
