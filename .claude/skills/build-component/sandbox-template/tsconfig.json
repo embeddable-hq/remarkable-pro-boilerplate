@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@real/react": ["../node_modules/@embeddable.com/react"],
+      "@embeddable.com/react": ["./src/shims/react-shim.ts"],
+      "@embeddable.com/core": ["../node_modules/@embeddable.com/core"],
+      "@embeddable.com/remarkable-pro": ["../node_modules/@embeddable.com/remarkable-pro"],
+      "@embeddable.com/remarkable-ui": ["../node_modules/@embeddable.com/remarkable-ui"]
+    }
+  },
+  "include": ["src"]
+}

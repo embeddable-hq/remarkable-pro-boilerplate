@@ -1,0 +1,96 @@
+---
+name: build-component
+description: Use when the user wants to create, scaffold, or build a custom Embeddable component — a React component plus its `*.emb.ts` descriptor — under `src/embeddable.com/components/`. Covers extending/wrapping an existing Remarkable Pro component, building a new chart from `remarkable-ui` primitives, an interactive control/filter that drives dashboard variables, or a presentational/content component. Triggers on phrases like "create a component", "build a custom chart", "wrap the bar chart", "add a dropdown that filters the dashboard", "make a KPI tile", "build a filter control", or any work on a `*.emb.ts`/`definition.ts`/`index.tsx` file under `src/embeddable.com/components/`.
+---
+# Build-component
+Generate and edit custom Embeddable components as a React component (`index.tsx`) plus an `*.emb.ts` descriptor that declares the component's `meta` (the inputs the no-code builder exposes), its data loading, the mapping from inputs to React props, the events it emits, and the variables it auto-creates. On `embeddable:push` each component becomes a new component version available in the no-code builder.
+## Prime directive: build ON Remarkable Pro, don't reinvent it
+Almost every customer runs on `@embeddable.com/remarkable-pro`, and that library is where i18n, locale/timezone-aware formatting, consistent chart colors, gap-filled time series, and the standard card chrome come from **for free**. A custom component that hand-rolls these silently loses all of them and won't match the rest of the dashboard.
+**So: before writing any custom logic, reach for the Pro built-ins.** Every generated chart/control must wire in the relevant ones from [references/pro-builtins.md](references/pro-builtins.md):
+- `useTheme()` → `i18nSetup(theme)` → `resolveI18nProps(props)` at the top of render
+- `getThemeFormatter(theme).data(dimensionOrMeasure, value)` for **all** value formatting
+- `useFillGaps({ results, dimension })` for any time-series chart
+- colour: **value colours** (data-driven — a dimension value / measure) via `getChartColors()` + `getDimensionMeasureColor(...)` (theme palette + `backgroundColorMap`, **never** CSS tokens); **chrome** (text/borders/accents) via component-token → base-token CSS fallbacks ([pro-builtins.md](references/pro-builtins.md) · [theming.md](references/theming.md))
+- `ChartCard` (charts) / `EditorCard` (controls) as the outer wrapper
+- the shared `inputs` / `subInputs` constants to compose `meta`, instead of writing input objects by hand
+The single biggest failure mode for this skill is generating a "plain React" component that ignores this layer. Don't.
+## File location
+New components live in `src/embeddable.com/components/<ComponentName>/`. **The `.emb.*` file's basename must exactly match `meta.name`** — the build enforces this (e.g. `KpiTile.emb.ts` ↔ `name: 'KpiTile'`). `meta.name` is also the workspace identifier — see [Safety](#safety-rules). One component per directory.
+## The two authoring patterns
+Pick deliberately — full detail and templates in [references/component-anatomy.md](references/component-anatomy.md) and [references/extending-pro.md](references/extending-pro.md).
+- **Pattern A — new component.** A React `index.tsx` + an `*.emb.ts` with an inline `defineComponent(Component, meta, config)`. Use for brand-new charts (composing `remarkable-ui` primitives), controls, and presentational components. This is the documented boilerplate pattern.
+- **Pattern B — extend a Pro component.** A `definition.ts` that **spreads** an existing Pro component's exported object (`...barChartDefaultPro.meta`, `...barChartDefaultPro.config`), overriding only what changes; an `*.emb.ts` that re-exports `preview`/`meta` and calls `defineComponent`; and `index.tsx` only if you wrap with new UI. Highest reuse, lowest risk.
+## Reuse-first decision tree
+Work top to bottom; stop at the first match. This is the heart of the skill.
+1. **Can an existing Pro component do it with configuration alone?** Check the candidates in `node_modules/@embeddable.com/remarkable-pro/dist/meta/index.json`. If yes → no code; this is a `dashboard-as-code` task, not a component task. Tell the user.
+   - **Comparison / "this period vs last" is already a whole Pro family — do not rebuild it.** `KpiChartNumberComparisonPro` (delta KPI), `LineChartComparisonDefaultPro` and `LineChartComparisonWithKpiTabsPro` (overlay current + prior period), all driven by `ComparisonPeriodSelectFieldPro`. They pair a `primaryDateRange` (`timeRange`) input with a `comparisonPeriod` (custom type, shipped by Pro) input. Reach for these first; only build custom if the *visualization* is genuinely novel (then see the comparison pattern in [references/data-loading.md](references/data-loading.md)). Same for grouped/stacked category comparison — `BarChartGroupedPro`/`BarChartStackedPro` already exist.
+2. **Is it a *tweak* to an existing Pro component** (custom sort, a threshold annotation, an extra input, a small UI addition around it)? → **Pattern B (extend)**. See [references/extending-pro.md](references/extending-pro.md).
+3. **Is it a new *visualization*, but `remarkable-ui` has the primitive** (`LineChart`, `BarChart`, `KpiChart`, `Markdown`, table primitives…)? → **Pattern A**, composing the primitive + Pro built-ins + `ChartCard`. Model on `examples/timeseries-chart/` (with `useFillGaps`) or `examples/kpi-tile/`.
+4. **Is it an interactive control/filter** (dropdown, picker, button bar) that should drive other widgets? → **Pattern A**, emphasis on **events + variables**; wrap in `EditorCard`. Model on `examples/control-with-variable/`. Read [references/events-and-state.md](references/events-and-state.md).
+5. **Is it presentational/content** (text, callout, layout) with little or no data? → **Pattern A**, minimal — often `props: (inputs) => ({ ...inputs })`, no `loadData`. Model on `examples/presentational-callout/`.
+If nothing in `remarkable-ui` fits and the visualization is genuinely novel, you may pull in a charting/UI library — but still wrap it in `ChartCard` and wire the Pro built-ins.
+## Workflow
+1. **Clarify intent.** Establish: what it renders, what data (which cube/dataset, dimensions vs measures), and — critically — **what other parts of the dashboard should react to it** (this decides events vs internal state, step 6). Don't guess the data model; confirm against the cubes.
+2. **Discover what's available.** Don't invent import names. See [references/discovery-and-validation.md](references/discovery-and-validation.md):
+   - Extendable Pro components + their input schemas: read `node_modules/@embeddable.com/remarkable-pro/dist/meta/index.json`, then `<Name>.meta.json` for the one you're extending.
+   - Importable utilities/types/components: the public surface is `node_modules/@embeddable.com/remarkable-pro/dist/index.d.ts` and `@embeddable.com/remarkable-ui`'s types. Everything in [references/pro-builtins.md](references/pro-builtins.md) imports from `@embeddable.com/remarkable-pro`.
+   - **If a `dist/meta` or `dist/index.d.ts` read fails, stop and tell the user which package needs installing/updating — never guess at exported names.**
+3. **Run the decision tree** and pick Pattern A or B.
+4. **Read the data model.** Inspect the relevant `src/embeddable.com/models/cubes/*.cube.yml` to confirm dimension/measure names, types, and that you respect `public: true` / primary-key rules. Only joined cubes can be queried together.
+5. **Generate the files** under `src/embeddable.com/components/<Name>/`. Compose `meta` from shared `inputs`; put `loadData` in the descriptor; keep the React component focused on rendering + the Pro built-ins. Make it **fill and resize** inside the widget (overflow/scroll where content can exceed the area) — see [references/sizing.md](references/sizing.md). Use the matching example as a scaffold.
+6. **Decide internal-state vs. emit for every interaction** using the rule below and [references/events-and-state.md](references/events-and-state.md). This is where most components go wrong.
+7. **Run the generation checklist** below.
+8. **Validate.** Run `npm run embeddable:build` (local-only, safe — never `push`/`dev`). Fix any type/registration errors. If `embeddable:dev` happens to be running, check its events log per [references/discovery-and-validation.md](references/discovery-and-validation.md).
+9. **Bring up the sandbox for verification.** `embeddable:build` green is the structural gate (registration, types, props/events) — that's the agent's responsibility. Visual/UX correctness is the user's to confirm in the live sandbox. See [references/sandbox.md](references/sandbox.md). In brief: if `sandbox/` isn't present yet, scaffold it from the skill template (`cp -r .claude/skills/build-component/sandbox-template sandbox && cd sandbox && npm install`); run `npm run dev` inside `sandbox/` (Vite on `http://localhost:5210`).
+10. **User confirmation.** Tell the user the sandbox is running at `http://localhost:5210`, ask them to open it, select the component, confirm the look, resize behaviour, and inputs, and respond when satisfied. Do not consider the component done until they confirm. The agent never runs `embeddable:push`.
+## The internal-state vs. emit rule
+For **every** user interaction, ask: *does this only change what THIS component shows, or does it express intent that other widgets should react to?*
+- **Only affects this component** (query shape, view, a draft being assembled — e.g. a granularity toggle, a search box that re-queries the component's own options, a table page/sort, half-built filter rows) → **Embeddable State**: the `[state, setState]` tuple in `props`; state changes re-run `props` and trigger new `loadData`. No event.
+- **Other widgets should react** (a selection, a clicked data point, a committed filter) → **event + variable**: the component calls an `onX` callback; `config.events` shapes the payload (`Value.noFilter()` for cleared); `meta.events` declares it; `meta.variables` auto-creates the builder variable it updates.
+Components routinely do **both** at once (e.g. a filter builder holds draft rows in state, then emits `onChange` only when a filter is committed). Full worked pairs in [references/events-and-state.md](references/events-and-state.md).
+## Reference index
+Read on demand:
+- [references/pro-builtins.md](references/pro-builtins.md) — the mandatory reuse layer: `useFillGaps`, `getThemeFormatter`, `i18nSetup`/`i18n`/`resolveI18nProps`, `getDimensionMeasureColor`, `ChartCard`/`EditorCard`, shared `inputs`/`subInputs`, time utilities. Import paths + when-to-use + real call sites.
+- [references/component-anatomy.md](references/component-anatomy.md) — Pattern A vs B file layout, the `meta` shape, the namespaced `definition` object, the `props(inputs, [state,setState], clientContext)` signature ladder, `definePreview`.
+- [references/inputs.md](references/inputs.md) — native input types, the shared `inputs` constants and how to spread/override them, sub-inputs, `config`, and custom types (`.type.emb.ts`, `defineType`/`defineOption`, the native-type rule, beta caveats).
+- [references/events-and-state.md](references/events-and-state.md) — the internal-vs-emit framework in depth, events, variables, `Value.noFilter()`, the "Data Mapping for Interactions" pattern, commit-on-change with dedup.
+- [references/data-loading.md](references/data-loading.md) — `loadData`, dimensions/measures/time dimensions, filters/operators, reactivity via state, multiple loads (pagination/count/download), timezone.
+- [references/extending-pro.md](references/extending-pro.md) — Pattern B in depth: spread `meta`/`config`, call the original `props`, add inputs, wrap with UI.
+- [references/discovery-and-validation.md](references/discovery-and-validation.md) — enumerating components and exports from `node_modules`; validating with the build; the dev events log.
+- [references/theming.md](references/theming.md) — how `theme.styles` overrides work, the real semantic CSS token names (and the common wrong ones), and whether/how to add a custom CSS variable.
+- [references/sizing.md](references/sizing.md) — filling the resizable drag-and-drop widget: Chart.js auto-resizes; hand-rolled/table/SVG components handle their own overflow (scroll); controls fill width sensibly.
+- [references/sandbox.md](references/sandbox.md) — scaffolding and running the local sandbox; the build/types gate (agent) vs. visual verification (user); the user confirmation step before push.
+## Examples
+Worked, illustrative components — one per rung of the complexity ladder. Read on demand when scaffolding:
+- [examples/presentational-callout/](examples/presentational-callout/) — content only; no `loadData`, no events, no state.
+- [examples/kpi-tile/](examples/kpi-tile/) — `loadData`, formatter, `ChartCard`; no interaction.
+- [examples/chart-with-event/](examples/chart-with-event/) — a chart that emits a click event up to Embeddable.
+- [examples/timeseries-chart/](examples/timeseries-chart/) — internal granularity state + emit + `useFillGaps`; the full chart pattern.
+- [examples/control-with-variable/](examples/control-with-variable/) — a dropdown control: reactive search state (internal) + selection event → variable (emit).
+- [examples/extend-pro-component/](examples/extend-pro-component/) — Pattern B: wrap an existing Pro chart and add an input + UI.
+## Generation checklist
+Before declaring a component done, confirm:
+- [ ] Lives in `src/embeddable.com/components/<Name>/`; `meta.name` is unique (cross-checked against `dist/meta/index.json` and other local components) **and exactly matches the `.emb.*` filename**.
+- [ ] `meta` uses `as const satisfies EmbeddedComponentMeta`; `defineComponent(...)` is called **inline** in the `.emb.ts` (never assigned to a variable first — it breaks the build).
+- [ ] `meta` composes shared `inputs`/`subInputs` where they exist, rather than hand-written input objects.
+- [ ] Inputs are ordered **data-first** and use the Pro category strings (`Component Data` → `Component Header` → `Component Settings` → `Axes Settings` → `Pre-configured Variables`); every input you add yourself sets an explicit `category`. See [references/inputs.md](references/inputs.md).
+- [ ] **Value colours** (a dimension value / measure) come from `getChartColors()` + `getDimensionMeasureColor(...)` (theme palette + `backgroundColorMap`) — **never** CSS tokens. See [references/pro-builtins.md](references/pro-builtins.md).
+- [ ] **Chrome colours/spacing** use a self-contained component-token → base-token → literal fallback chain (`var(--em-mycomp-x, var(--em-sem-…, #hex))`) — the skill adds **no** theme-provider or styles-registry wiring to the repo; base-token names verified real (no `--em-sem-border`/`--inverse`/`status-warning`). Overriding is a consumer action via `theme.styles` (base = type-safe; component token = cast). See [references/theming.md](references/theming.md).
+- [ ] **Resizes cleanly** in the widget: fills 100%, looks right narrow↔full-width and short↔tall, and scrolls (`overflow: auto`) where content can exceed the area (tables/SVG grids/long lists); controls fill width rather than stranding content. See [references/sizing.md](references/sizing.md).
+- [ ] **Pro built-ins wired** (charts/controls): `i18nSetup` + `resolveI18nProps`, `getThemeFormatter` for every formatted value, `useFillGaps` if a time dimension, value colours via `getChartColors()`+`getDimensionMeasureColor`, `ChartCard`/`EditorCard` wrapper.
+- [ ] `loadData` is in the descriptor's `props`, not in React; loading/error/empty are handled (mostly by the Card).
+- [ ] Every interaction is correctly classified internal-state vs. event+variable.
+- [ ] Each declared event has a `config.events` transformer using `Value.noFilter()` for the cleared case; each declared variable links its `inputs` default and its updating `events`.
+- [ ] Required inputs and all `defaultValue`s (including sub-input defaults) are sensible.
+- [ ] A `definePreview(...)` using `previewData.*` mocks (`hideMenu: true`) is exported so it renders in the builder.
+- [ ] `npm run embeddable:build` passes.
+- [ ] Sandbox is running (`npm run dev` → `http://localhost:5210`) so the user can verify render, resize, and inputs.
+- [ ] User has confirmed the component looks correct in the sandbox at `http://localhost:5210` before push is considered.
+## Safety rules
+- **`meta.name`** is the workspace component identifier. Renaming or deleting it after push creates a new component and orphans the old one (breaking dashboards that placed it). Treat as effectively immutable once pushed; confirm with the user before changing.
+- **Don't run `embeddable:push` or `embeddable:dev`/`dev`** automatically (root `CLAUDE.md`). `embeddable:build` and `ct` are safe.
+- **`remarkable-ui` is only a transitive dependency** (via `remarkable-pro`). When a component imports primitives directly (`import { LineChart } from '@embeddable.com/remarkable-ui'`), it still resolves, but recommend the user add `@embeddable.com/remarkable-ui` to `package.json` explicitly so it can't disappear on a dependency bump.
+- **Custom types are beta** — TS noise, may need a `dev` restart, not supported in Custom Canvas. Use only when an input genuinely needs a fixed named option set; otherwise prefer native types. See [references/inputs.md](references/inputs.md).
+## Out of scope
+- Dashboards / `*.embeddable.yml` (layout, wiring widgets together, drilldowns) → the `dashboard-as-code` skill.
+- Cube data models (`*.cube.yml`), theme customization (`embeddable.theme.ts`), presets — separate concerns; this skill only reads the cubes to validate member names.

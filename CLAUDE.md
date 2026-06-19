@@ -86,3 +86,4 @@ Everything else (`embeddable:build`, `embedding-preview`, `ct`) is local-only an
 Repo-specific Claude Code skills live under `.claude/skills/`. Each provides progressive-disclosure guidance for one area; consult the relevant one before generating or editing files it covers.
 
 - `.claude/skills/dashboard-as-code/` — for any work on `*.embeddable.yml` files (creating, scaffolding, editing dashboards, custom canvas templates, starter canvas, dataset filters, variables, events).
+- `.claude/skills/build-component/` — for building custom Embeddable components (a React `index.tsx` + `*.emb.ts` descriptor) under `src/embeddable.com/components/`: extending/wrapping a Remarkable Pro component, a new chart from `remarkable-ui` primitives, an interactive control/filter, or a presentational component.
