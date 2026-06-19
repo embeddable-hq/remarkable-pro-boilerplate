@@ -49,6 +49,15 @@ function itemName(item: SelectItem): string {
   return (item as any).name;
 }
 
+// Distinct-value sets keyed by mock dimension name — drive the filter builder's value dropdowns.
+const DEFAULT_VALUE_SET = ['United States', 'Germany', 'United Kingdom', 'France', 'Spain', 'Italy'];
+const MOCK_VALUE_SETS: Record<string, string[]> = {
+  'mock.country': DEFAULT_VALUE_SET,
+  'mock.genre': ['Pop', 'Rock', 'Hip-Hop', 'Jazz', 'Classical', 'Electronic'],
+  'mock.age_group': ['18-24', '25-34', '35-44', '45-54', '55+'],
+  'mock.is_active': ['true', 'false'],
+};
+
 export function mockDataResponse(requestParams: any): DataResponse {
   // Collect select items — support both select[] and dimensions/measures arrays
   let selectItems: SelectItem[] = [];
@@ -96,20 +105,39 @@ export function mockDataResponse(requestParams: any): DataResponse {
       rows.push(row);
     }
   } else if (catDims.length > 0) {
-    // Category rows: ~6
-    const countries = ['United States', 'Germany', 'United Kingdom', 'France', 'Spain', 'Italy'];
-    const count = limit ? Math.min(limit, countries.length) : countries.length;
-    rows = [];
-    for (let i = 0; i < count; i++) {
-      const row: Record<string, unknown> = {};
-      catDims.forEach((c, ci) => {
-        row[itemName(c)] = countries[(i + ci) % countries.length];
-      });
-      const baseValues = [120, 100, 80, 70, 55, 40];
-      measures.forEach((m, mi) => {
-        row[itemName(m)] = String(Math.max(5, (baseValues[i] ?? 30) - mi * 10));
-      });
-      rows.push(row);
+    const valuesFor = (name: string): string[] => MOCK_VALUE_SETS[name] ?? DEFAULT_VALUE_SET;
+    if (measures.length === 0) {
+      // Pure value list (e.g. a filter control loading a dimension's distinct values):
+      // return exactly the distinct set so "is one of" dropdowns show real options.
+      const maxLen = Math.max(1, ...catDims.map((c) => valuesFor(itemName(c)).length));
+      const count = limit ? Math.min(limit, maxLen) : maxLen;
+      rows = [];
+      for (let i = 0; i < count; i++) {
+        const row: Record<string, unknown> = {};
+        catDims.forEach((c) => {
+          const vs = valuesFor(itemName(c));
+          row[itemName(c)] = vs[i % vs.length];
+        });
+        rows.push(row);
+      }
+    } else {
+      // Dimensions + measures (a table or category chart): generate plenty of rows so the
+      // component has real data to lay out and scroll. Repeats are suffixed so rows stay
+      // distinct even when a value set is smaller than the row count.
+      const count = limit ? Math.min(limit, 60) : 30;
+      rows = [];
+      for (let i = 0; i < count; i++) {
+        const row: Record<string, unknown> = {};
+        catDims.forEach((c) => {
+          const vs = valuesFor(itemName(c));
+          const label = vs[i % vs.length];
+          row[itemName(c)] = i >= vs.length ? `${label} ${Math.floor(i / vs.length) + 1}` : label;
+        });
+        measures.forEach((m, mi) => {
+          row[itemName(m)] = String(Math.max(3, Math.round((1000 - i * 17) / (mi + 1) + 40 * Math.sin(i / 5 + mi))));
+        });
+        rows.push(row);
+      }
     }
   } else {
     // Measures only: single row
@@ -188,6 +216,26 @@ function mockTimeDimensionValue(name = 'mock.day') {
   };
 }
 
+function mockField(
+  name: string,
+  title: string,
+  nativeType: 'string' | 'number' | 'boolean',
+  type: 'dimension' | 'measure',
+) {
+  return { name, nativeType, __type__: type, inputs: {}, title, modelTitle: title, description: '' };
+}
+
+/** Varied member set for filter builders / dimensionOrMeasure pickers. */
+function mockFilterFields() {
+  return [
+    mockField('mock.country', 'Country', 'string', 'dimension'),
+    mockField('mock.genre', 'Genre', 'string', 'dimension'),
+    mockField('mock.age_group', 'Age group', 'string', 'dimension'),
+    mockField('mock.is_active', 'Is active', 'boolean', 'dimension'),
+    mockField('mock.plays', 'Plays', 'number', 'measure'),
+  ];
+}
+
 function mockCategoryDimensionValue(name = 'mock.category') {
   return {
     name,
@@ -250,8 +298,11 @@ export function buildInputs(
         mock = mockDatasetValue();
       } else if (typeStr === 'measure' || typeStr === 'xMeasure' || typeStr === 'yMeasure') {
         mock = mockMeasureValue(`mock.${name}`);
-      } else if (typeStr === 'measures' || typeStr === 'dimensionsAndMeasures') {
+      } else if (typeStr === 'measures') {
         mock = [mockMeasureValue(`mock.${name}`)];
+      } else if (typeStr === 'dimensionsAndMeasures') {
+        // A realistic mix of fields so filter/picker components have something to choose from.
+        mock = mockFilterFields();
       } else if (typeStr === 'dimension' || typeStr === 'dimensionSimple' || typeStr === 'dimensionWithDateBounds') {
         if (isTimeDimension({ name, type: typeStr, config: input.config, inputs: input.inputs })) {
           mock = mockTimeDimensionValue(`mock.${name}`);
@@ -264,7 +315,9 @@ export function buildInputs(
         // This is the time-dimension type used by granularity selectors
         mock = mockTimeDimensionValue(`mock.${name}`);
       } else if (typeStr === 'dimensionOrMeasure') {
-        mock = mockMeasureValue(`mock.${name}`);
+        // An array dimensionOrMeasure (e.g. a filter builder's members) gets a realistic mix
+        // of dimensions + measures; a single one stays a lone measure.
+        mock = input.array ? mockFilterFields() : mockMeasureValue(`mock.${name}`);
       } else if (typeStr === 'dimensions') {
         if (isTimeDimension({ name, type: typeStr, config: input.config, inputs: input.inputs })) {
           mock = [mockTimeDimensionValue(`mock.${name}`)];
