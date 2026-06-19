@@ -1,6 +1,12 @@
 # Sizing & resize inside the widget
 Every component renders inside a drag-and-drop widget the user can resize to almost any width/height. The component must **fill** the widget and look right across that whole range — this is one of the most common ways custom components break, so design for it from the start.
 
+## The core constraint: a fixed box that never grows to fit content
+The widget is a **fixed-height box**. The canvas gives a component a width and height — its `defaultWidth`/`defaultHeight`, then whatever the builder drags it to — and it **does not auto-extend downward to fit its content**. There is no "grow taller to show more rows." Content that exceeds the box must **scroll inside it**; otherwise it's clipped and the overflow is simply unreachable. Concretely:
+- **Never assume the box will grow** to fit a long list, a tall table, or a big SVG — it won't. Height is fixed until the builder manually drags it.
+- **Fill 100% of the given height** and put any overflowing content in a scroll container (`overflow: auto`), so the component degrades to scrolling rather than clipping.
+- **Set a sensible `defaultHeight`** in `meta` — that's the initial box the builder sees, and a too-short default makes the component look broken before anyone resizes it.
+
 ## Rules
 - **Fill the area.** The outermost element is `width: 100%; height: 100%`. `ChartCard`/`EditorCard` already fill the widget; your content fills the card.
 - **Chart.js primitives auto-resize.** `BarChart`, `LineChart`, `PieChart`, `KpiChart`, table primitives, etc. resize themselves within their area — don't wrap them in fixed dimensions or extra scroll; just let them fill.
