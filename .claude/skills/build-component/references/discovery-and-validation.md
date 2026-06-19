@@ -15,6 +15,15 @@ The handbook and the remarkable-pro source in this workspace may be **ahead of t
 - **`asChartCardHeaderProps` was not exported** — `ChartCardHeaderProps` is `{ title?, description?, tooltip?, hideMenu? }`, so pass those to `ChartCard` **directly** (`title={title} description={description} tooltip={tooltip} hideMenu={hideMenu}`) rather than relying on the helper. The examples in this skill do exactly that.
 
 When the build reports `has no exported member` or `Property '<x>' does not exist`, it's almost always this version skew — adapt to the installed surface rather than forcing the symbol.
+## See what a Pro component is built from (for faithful rebuilds)
+When the decision tree lands you on Pattern A *because* a Pro component nearly fits but can't be extended, mirror it instead of starting blank (principle in [SKILL.md](../SKILL.md)). Two reads make that concrete:
+- **The primitive catalogue** — `node_modules/@embeddable.com/remarkable-ui/dist/index.d.ts` lists every primitive you can build on (`LineChart`, `BarChart`, `KpiChart`, table primitives, `Card`, control fields, …). Pick the one matching your need.
+- **Which primitives the closest Pro component uses** — grep its compiled module for `remarkable-ui` imports:
+  ```bash
+  grep -oE "import\{[^}]+\}from[\"']@embeddable.com/remarkable-ui[\"']" \
+    node_modules/@embeddable.com/remarkable-pro/dist/<Name>.js
+  ```
+  The JS is minified and local names are aliased (`LineChart as e`), but the imported primitive names are intact. If a component pulls primitives in via a shared chunk, follow the chunk it imports. Reuse those same primitives and their tokens instead of hand-rolling equivalents.
 ## Validate
 Run after generating (both are local-only and safe — never `embeddable:push` or `embeddable:dev`/`dev`, per root `CLAUDE.md`):
 - `npm run embeddable:build` — compiles the component libraries plus every local `*.emb.ts` under `src/embeddable.com/`. This is the real check that the component registers and type-checks end to end. Fix every error it reports.
