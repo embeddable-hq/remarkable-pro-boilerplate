@@ -49,6 +49,85 @@ function itemName(item: SelectItem): string {
   return (item as any).name;
 }
 
+// ── Granularity-aware time buckets, anchored to the present ─────────────────────
+// The mock time series ENDS at the current period so the latest bucket is in progress
+// (lets the "incomplete period" line chart show its dotted current segment).
+function granularityOf(item: SelectItem): string {
+  if ('dimension' in item && !('__type__' in item)) return (item as any).granularity ?? 'day';
+  return (item as any).inputs?.granularity ?? 'day';
+}
+
+function startOfPeriod(now: Date, g: string): Date {
+  const y = now.getUTCFullYear();
+  const mo = now.getUTCMonth();
+  const day = new Date(Date.UTC(y, mo, now.getUTCDate()));
+  switch (g) {
+    case 'year':
+      return new Date(Date.UTC(y, 0, 1));
+    case 'quarter':
+      return new Date(Date.UTC(y, Math.floor(mo / 3) * 3, 1));
+    case 'month':
+      return new Date(Date.UTC(y, mo, 1));
+    case 'week': {
+      const monOffset = (day.getUTCDay() + 6) % 7; // ISO week starts Monday
+      const s = new Date(day);
+      s.setUTCDate(day.getUTCDate() - monOffset);
+      return s;
+    }
+    case 'hour':
+      return new Date(Date.UTC(y, mo, now.getUTCDate(), now.getUTCHours()));
+    case 'day':
+    default:
+      return day;
+  }
+}
+
+function stepBack(date: Date, g: string, n: number): Date {
+  const e = new Date(date);
+  switch (g) {
+    case 'year':
+      e.setUTCFullYear(e.getUTCFullYear() - n);
+      break;
+    case 'quarter':
+      e.setUTCMonth(e.getUTCMonth() - 3 * n);
+      break;
+    case 'month':
+      e.setUTCMonth(e.getUTCMonth() - n);
+      break;
+    case 'week':
+      e.setUTCDate(e.getUTCDate() - 7 * n);
+      break;
+    case 'hour':
+      e.setUTCHours(e.getUTCHours() - n);
+      break;
+    case 'day':
+    default:
+      e.setUTCDate(e.getUTCDate() - n);
+  }
+  return e;
+}
+
+const GRANULARITY_DEFAULT_COUNT: Record<string, number> = {
+  hour: 48,
+  day: 90,
+  week: 26,
+  month: 18,
+  quarter: 8,
+  year: 6,
+};
+const GRANULARITY_CAP: Record<string, number> = {
+  hour: 168,
+  day: 180,
+  week: 52,
+  month: 36,
+  quarter: 16,
+  year: 12,
+};
+const formatBucket = (date: Date, g: string): string =>
+  g === 'hour' || g === 'minute' || g === 'second'
+    ? date.toISOString()
+    : date.toISOString().slice(0, 10);
+
 // Distinct-value sets keyed by mock dimension name — drive the filter builder's value dropdowns.
 const DEFAULT_VALUE_SET = ['United States', 'Germany', 'United Kingdom', 'France', 'Spain', 'Italy'];
 const MOCK_VALUE_SETS: Record<string, string[]> = {
@@ -81,21 +160,26 @@ export function mockDataResponse(requestParams: any): DataResponse {
   let rows: Record<string, unknown>[];
 
   if (timeDims.length > 0) {
-    // Time series: ~70 daily rows
+    // Time series anchored to the PRESENT and granularity-aware: the newest bucket is the
+    // current (in-progress) period and we step back from there, so charts always show recent
+    // dates. Count scales with granularity (90 days, 26 weeks, 18 months, …), capped sensibly.
     const timeKey = itemName(timeDims[0]);
-    const count = limit ? Math.min(limit, 70) : 70;
-    const start = new Date('2024-01-01T00:00:00Z');
+    const g = granularityOf(timeDims[0]);
+    const count = Math.min(limit ?? (GRANULARITY_DEFAULT_COUNT[g] ?? 90), GRANULARITY_CAP[g] ?? 180);
+    const end = startOfPeriod(new Date(), g);
     const catLabels = ['Alpha', 'Beta', 'Gamma'];
 
     rows = [];
-    for (let i = 0; i < count; i++) {
-      const d = new Date(start.getTime() + i * 86_400_000);
+    // Oldest → newest so the series reads left to right; the last row is the current period.
+    for (let i = count - 1; i >= 0; i--) {
+      const d = stepBack(end, g, i);
+      const phase = count - 1 - i;
       const row: Record<string, unknown> = {
-        [timeKey]: d.toISOString().slice(0, 10),
+        [timeKey]: formatBucket(d, g),
       };
       measures.forEach((m, mi) => {
         const v = Math.max(0, Math.round(
-          (mi + 1) * 20 + 8 * Math.sin(i / 7 + mi) + 5 * Math.sin(i / 3.3) + 3 * Math.cos(i / 14)
+          (mi + 1) * 20 + 8 * Math.sin(phase / 7 + mi) + 5 * Math.sin(phase / 3.3) + 3 * Math.cos(phase / 14)
         ));
         row[itemName(m)] = String(v);
       });

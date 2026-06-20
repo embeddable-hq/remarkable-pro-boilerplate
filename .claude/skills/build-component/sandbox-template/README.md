@@ -23,7 +23,7 @@ Then:
 
 ## What it reproduces faithfully
 - The real `config.props()` mapping, including internal `[state, setState]` reactivity.
-- `loadData()` calls (replaced with typed mock rows — time-series or category).
+- `loadData()` calls (replaced with typed mock rows — present-anchored, granularity-aware time series, or category rows).
 - The real theme pipeline (`themeProvider` → `EmbeddableThemeContext`), with light/dark and English/German toggles. German uses Pro's shipped `de` translations, so i18n-wired strings (`resolveI18nProps`, `i18n.t`) actually translate — a string that *doesn't* change is either hardcoded (a bug) or custom copy with no translation yet.
 - Auto-discovery: drop a new `*.emb.ts` + `index.tsx` under
   `src/embeddable.com/components/<Name>/` and it appears automatically — the sandbox
