@@ -24,7 +24,7 @@ Many `remarkable-ui` primitives **already bind** a click/keyboard interaction on
 | `Dropdown` | `DropdownMenu.Trigger asChild` merges its handlers onto your node | `triggerComponent: ReactNode` | pass a **plain** trigger (no own `onClick`); let the primitive open/close it |
 | `HeatMap` | cell `onClick` → `onCellClick` | the cell | use `onCellClick`; no nested control in the cell |
 
-**General rule:** any slot typed `React.ReactNode` or `(…) => ReactNode` that renders *within* an element carrying `onClick`/`onKeyDown`/`role="button"`/`asChild` is a trap slot. When in doubt, read the primitive's source (it's not minified) — commands in [discovery-and-validation.md](discovery-and-validation.md). The `examples/` table (and `TableWithBars`) get this right: custom JSX lives in `accessor`, `title` stays a plain string, and behaviour goes through the primitive's own callback.
+**General rule:** any slot typed `React.ReactNode` or `(…) => ReactNode` that renders *within* an element carrying `onClick`/`onKeyDown`/`role="button"`/`asChild` is a trap slot. When in doubt, read the primitive's source (it's not minified) — commands in [discovery-and-validation.md](discovery-and-validation.md). The right pattern for a table: custom JSX lives in the column `accessor` (cell content), `title` stays a **plain string**, and sort/row behaviour goes through the primitive's own callback (`onSortChange` / `onRowIndexClick`) — never an interactive element inside `title`.
 ## Internal state
 `props(inputs, [state, setState], clientContext)`. Read state, wire setters, and make `loadData` depend on state:
 ```ts
