@@ -101,3 +101,4 @@ Before declaring a component done, confirm:
 ## Out of scope
 - Dashboards / `*.embeddable.yml` (layout, wiring widgets together, drilldowns) → the `dashboard-as-code` skill.
 - Cube data models (`*.cube.yml`), theme customization (`embeddable.theme.ts`), presets — separate concerns; this skill only reads the cubes to validate member names.
+- **Fixing bugs in `@embeddable.com/remarkable-pro` / `@embeddable.com/remarkable-ui`** (a Pro component or `remarkable-ui` primitive that renders or behaves incorrectly) → fix it **centrally** in those repos so every customer gets the fix. Don't clone-and-patch the component here as a workaround: a local copy fragments the fix, never reaches other consumers, and drifts from the library. This skill is for building genuinely new or customized components — not for papering over a library defect. (Legitimately *extending* Pro for new behaviour — Pattern B — is still in scope; the line is "new capability" vs "patch a defect".)
