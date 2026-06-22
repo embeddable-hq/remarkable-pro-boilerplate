@@ -128,14 +128,98 @@ const formatBucket = (date: Date, g: string): string =>
     ? date.toISOString()
     : date.toISOString().slice(0, 10);
 
-// Distinct-value sets keyed by mock dimension name — drive the filter builder's value dropdowns.
-const DEFAULT_VALUE_SET = ['United States', 'Germany', 'United Kingdom', 'France', 'Spain', 'Italy'];
-const MOCK_VALUE_SETS: Record<string, string[]> = {
-  'mock.country': DEFAULT_VALUE_SET,
-  'mock.genre': ['Pop', 'Rock', 'Hip-Hop', 'Jazz', 'Classical', 'Electronic'],
-  'mock.age_group': ['18-24', '25-34', '35-44', '45-54', '55+'],
-  'mock.is_active': ['true', 'false'],
+// ── Realistic value pools (sampled, never cycled or suffixed) ───────────────────
+// Drive both filter-dropdown distinct values and category-chart / table rows. A pool
+// is chosen per requested member: by keyword on its name, else by position from a
+// rotation so even generically-named mock dimensions get varied, real-looking values.
+// We emit at most one row per distinct value — so we never fabricate "Germany 2".
+const POOLS: Record<string, string[]> = {
+  // High-cardinality "entity" pools — natural as a table/list primary column.
+  artist: [
+    'Taylor Swift', 'Drake', 'The Weeknd', 'Billie Eilish', 'Bad Bunny', 'Dua Lipa',
+    'Kendrick Lamar', 'Adele', 'Ed Sheeran', 'Ariana Grande', 'Post Malone', 'SZA',
+    'Harry Styles', 'Olivia Rodrigo', 'Travis Scott', 'Doja Cat', 'Coldplay', 'Beyoncé',
+    'Bruno Mars', 'Lana Del Rey', 'Frank Ocean', 'Tame Impala', 'Khalid', 'Lorde',
+  ],
+  track: [
+    'Anti-Hero', "God's Plan", 'Blinding Lights', 'bad guy', 'Tití Me Preguntó', 'Levitating',
+    'HUMBLE.', 'Easy On Me', 'Shape of You', '7 rings', 'Circles', 'Kill Bill', 'As It Was',
+    'good 4 u', 'SICKO MODE', 'Yellow', 'CUFF IT', 'Uptown Funk', 'Pink + White', 'EARFQUAKE',
+    'About Damn Time', 'Holocene', 'Location', 'Royals',
+  ],
+  album: [
+    'Midnights', 'Scorpion', 'After Hours', 'Happier Than Ever', 'Un Verano Sin Ti',
+    'Future Nostalgia', 'DAMN.', '30', '÷ (Divide)', 'thank u, next', "Hollywood's Bleeding",
+    'SOS', "Harry's House", 'SOUR', 'Astroworld', 'Planet Her', 'RENAISSANCE', '24K Magic',
+    'Born to Die', 'Blonde', 'IGOR', 'MOTOMAMI', 'Currents', 'Pure Heroine',
+  ],
+  customer: [
+    'Olivia Bennett', 'Liam Carter', 'Emma Walsh', 'Noah Foster', 'Ava Mitchell', 'Ethan Brooks',
+    'Sophia Reed', 'Mason Hughes', 'Isabella Price', 'Lucas Ward', 'Mia Coleman', 'Logan Hayes',
+    'Charlotte Ross', 'Jackson Lee', 'Amelia Cox', 'Aiden Gray', 'Harper Bell', 'Elijah Wood',
+    'Evelyn Shaw', 'James Hunt', 'Abigail Cole', 'Benjamin Fox', 'Emily Stone', 'Henry Wells',
+  ],
+  city: [
+    'New York', 'London', 'Tokyo', 'Paris', 'Berlin', 'Sydney', 'Toronto', 'São Paulo',
+    'Mumbai', 'Singapore', 'Amsterdam', 'Dubai', 'Barcelona', 'Seoul', 'Mexico City',
+    'Stockholm', 'Chicago', 'Madrid', 'Rome', 'Cape Town', 'Bangkok', 'Vienna', 'Lisbon', 'Dublin',
+  ],
+  country: [
+    'United States', 'Germany', 'United Kingdom', 'France', 'Spain', 'Italy', 'Japan', 'Brazil',
+    'Canada', 'Australia', 'Netherlands', 'Sweden', 'Mexico', 'India', 'South Korea', 'Poland',
+    'Norway', 'Denmark', 'Ireland', 'Portugal', 'Austria', 'Belgium', 'Switzerland', 'Finland',
+  ],
+  // Lower-cardinality "category" pools — natural as a chart axis (bar / pie / funnel stages).
+  genre: ['Pop', 'Hip-Hop', 'Rock', 'R&B', 'Electronic', 'Latin', 'Jazz', 'Classical', 'Country', 'Metal'],
+  channel: ['Organic Search', 'Paid Search', 'Social', 'Email', 'Referral', 'Direct'],
+  device: ['Desktop', 'Mobile', 'Tablet'],
+  plan: ['Free', 'Premium', 'Family', 'Student'],
+  status: ['Active', 'Trialing', 'Past Due', 'Cancelled'],
+  segment: ['Enterprise', 'Mid-Market', 'SMB', 'Startup'],
+  age_group: ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
+  boolean: ['true', 'false'],
 };
+
+// When a member name gives no hint, draw from one of these by position so multiple
+// generic dimensions still differ. Entities → many rows (tables); categories → few stages.
+const ENTITY_ROTATION = ['track', 'customer', 'city', 'country', 'artist', 'album'];
+const CATEGORY_ROTATION = ['genre', 'channel', 'segment', 'plan', 'status', 'device'];
+
+// Matched against whole field tokens (see poolForMember) so substrings never mislead —
+// "stage" must not hit the age rule, "tracks.genre" must pick genre not track. Specific
+// entities come before the generic person/name pool.
+const POOL_KEYWORDS: [RegExp, string][] = [
+  [/^artists?$/i, 'artist'],
+  [/^albums?$/i, 'album'],
+  [/^tracks?$|^songs?$|^titles?$/i, 'track'],
+  [/^genres?$/i, 'genre'],
+  [/^countr(y|ies)$|^nation$/i, 'country'],
+  [/^cit(y|ies)$|^town$|^metro$/i, 'city'],
+  [/^channels?$|^source$|^medium$|^utm$/i, 'channel'],
+  [/^devices?$|^platform$|^browser$/i, 'device'],
+  [/^age$/i, 'age_group'],
+  [/^plan$|^tier$|^subscription$/i, 'plan'],
+  [/^status$|^state$|^stage$/i, 'status'],
+  [/^segments?$|^categor(y|ies)$|^type$|^group$|^cohort$/i, 'segment'],
+  [/^customers?$|^users?$|^names?$|^person$|^member$|^account$/i, 'customer'],
+];
+
+// Pick the value pool for a requested category member.
+function poolForMember(name: string, nativeType: string | undefined, index: number, manyRows: boolean): string[] {
+  if (nativeType === 'boolean') return POOLS.boolean;
+  // Match the field part only (drop any "cube." prefix), token by token, so a cube name
+  // or an embedded substring can't hijack the choice.
+  const field = name.includes('.') ? name.slice(name.lastIndexOf('.') + 1) : name;
+  const tokens = field.split(/[^a-z0-9]+/i).filter(Boolean);
+  for (const [re, key] of POOL_KEYWORDS) {
+    if (tokens.some((t) => re.test(t))) return POOLS[key];
+  }
+  const rotation = manyRows ? ENTITY_ROTATION : CATEGORY_ROTATION;
+  return POOLS[rotation[index % rotation.length]];
+}
+
+// A single category chart (bar/pie/funnel) with no explicit limit shows this many stages.
+const TOP_N_CATEGORIES = 8;
 
 export function mockDataResponse(requestParams: any): DataResponse {
   // Collect select items — support both select[] and dimensions/measures arrays
@@ -167,7 +251,6 @@ export function mockDataResponse(requestParams: any): DataResponse {
     const g = granularityOf(timeDims[0]);
     const count = Math.min(limit ?? (GRANULARITY_DEFAULT_COUNT[g] ?? 90), GRANULARITY_CAP[g] ?? 180);
     const end = startOfPeriod(new Date(), g);
-    const catLabels = ['Alpha', 'Beta', 'Gamma'];
 
     rows = [];
     // Oldest → newest so the series reads left to right; the last row is the current period.
@@ -184,41 +267,54 @@ export function mockDataResponse(requestParams: any): DataResponse {
         row[itemName(m)] = String(v);
       });
       catDims.forEach((c, ci) => {
-        row[itemName(c)] = catLabels[ci % catLabels.length];
+        const vs = poolForMember(itemName(c), (c as any).nativeType, ci, false);
+        row[itemName(c)] = vs[ci % vs.length];
       });
       rows.push(row);
     }
   } else if (catDims.length > 0) {
-    const valuesFor = (name: string): string[] => MOCK_VALUE_SETS[name] ?? DEFAULT_VALUE_SET;
+    // A limit, or more than one category dimension, signals a table/list that wants many
+    // rows; a single category dimension is a chart axis (bar/pie/funnel) that wants a few
+    // distinct stages. Either way we SAMPLE distinct values from a realistic pool — we
+    // never cycle a short list back round with a "Germany 2" suffix.
+    const manyRows = limit != null || catDims.length > 1;
+    const dimPools = catDims.map((c, i) =>
+      poolForMember(itemName(c), (c as any).nativeType, i, manyRows),
+    );
+
     if (measures.length === 0) {
-      // Pure value list (e.g. a filter control loading a dimension's distinct values):
-      // return exactly the distinct set so "is one of" dropdowns show real options.
-      const maxLen = Math.max(1, ...catDims.map((c) => valuesFor(itemName(c)).length));
-      const count = limit ? Math.min(limit, maxLen) : maxLen;
+      // Pure value list (a filter control loading a dimension's distinct values): return
+      // exactly the distinct set so "is one of" dropdowns show real options.
+      const count = Math.min(limit ?? dimPools[0].length, dimPools[0].length);
       rows = [];
       for (let i = 0; i < count; i++) {
         const row: Record<string, unknown> = {};
-        catDims.forEach((c) => {
-          const vs = valuesFor(itemName(c));
-          row[itemName(c)] = vs[i % vs.length];
-        });
+        catDims.forEach((c, di) => { row[itemName(c)] = dimPools[di][i % dimPools[di].length]; });
         rows.push(row);
       }
     } else {
-      // Dimensions + measures (a table or category chart): generate plenty of rows so the
-      // component has real data to lay out and scroll. Repeats are suffixed so rows stay
-      // distinct even when a value set is smaller than the row count.
-      const count = limit ? Math.min(limit, 60) : 30;
+      // Table or category chart. The largest pool is the "primary" key: it walks its values
+      // in order (one distinct row each) and bounds the row count, so rows never repeat or
+      // get suffixed. Secondary dimensions vary independently — repeats across rows are fine
+      // and realistic (many tracks share a genre); we just never invent new labels.
+      const primaryIdx = dimPools.reduce((b, p, i) => (p.length > dimPools[b].length ? i : b), 0);
+      const primaryLen = dimPools[primaryIdx].length;
+      const target = limit ?? (manyRows ? 30 : Math.min(primaryLen, TOP_N_CATEGORIES));
+      const count = Math.min(target, primaryLen);
       rows = [];
       for (let i = 0; i < count; i++) {
         const row: Record<string, unknown> = {};
-        catDims.forEach((c) => {
-          const vs = valuesFor(itemName(c));
-          const label = vs[i % vs.length];
-          row[itemName(c)] = i >= vs.length ? `${label} ${Math.floor(i / vs.length) + 1}` : label;
+        catDims.forEach((c, di) => {
+          const vs = dimPools[di];
+          const vi = di === primaryIdx ? i : (i * (di + 2) + di) % vs.length;
+          row[itemName(c)] = vs[vi];
         });
         measures.forEach((m, mi) => {
-          row[itemName(m)] = String(Math.max(3, Math.round((1000 - i * 17) / (mi + 1) + 40 * Math.sin(i / 5 + mi))));
+          // Clearly descending so funnels/bars step down, with mild per-measure variation.
+          const falloff = 1 - 0.6 * (i / Math.max(1, count - 1));
+          row[itemName(m)] = String(
+            Math.max(3, Math.round((1000 / (mi + 1)) * falloff + 30 * Math.sin(i / 4 + mi))),
+          );
         });
         rows.push(row);
       }
