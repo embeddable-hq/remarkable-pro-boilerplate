@@ -25,6 +25,18 @@ Many `remarkable-ui` primitives **already bind** a click/keyboard interaction on
 | `HeatMap` | cell `onClick` → `onCellClick` | the cell | use `onCellClick`; no nested control in the cell |
 
 **General rule:** any slot typed `React.ReactNode` or `(…) => ReactNode` that renders *within* an element carrying `onClick`/`onKeyDown`/`role="button"`/`asChild` is a trap slot. When in doubt, read the primitive's source (it's not minified) — commands in [discovery-and-validation.md](discovery-and-validation.md). The right pattern for a table: custom JSX lives in the column `accessor` (cell content), `title` stays a **plain string**, and sort/row behaviour goes through the primitive's own callback (`onSortChange` / `onRowIndexClick`) — never an interactive element inside `title`.
+## Wire the interactions a primitive forces on you
+The flip side of trap slots: some primitive interactions are **always-on** and can't be turned off, so you don't get to *choose* whether they exist — only whether they work. The clearest case: on the table primitives every column header is a sort `<button>` with a caret, rendered **unconditionally** (there is no `sortable: false`). The primitive cycles the caret and **reports** the new sort via `onSortChange`, but it does **not** reorder the rows — `TableBody` renders `rows` exactly as you pass them. So if you don't wire it, clicking a header moves the caret and nothing happens: a **dead control on every column**.
+Wire it the same way you wire any state-driven query (the `TableChartPaginated` row in the matched pairs above) — keep the sort in Embeddable **state** and feed it back into `loadData`:
+```ts
+// state: { sort?: TableSort }      onSortChange: (sort) => setState({ sort })
+// in the descriptor's loadData args:
+orderBy: state?.sort
+  ? [{ property: memberFor(state.sort.id), direction: state.sort.direction }]
+  : undefined,
+```
+The re-query then returns reordered rows. (The sandbox's mock honours `orderBy`, so a correctly-wired sort visibly reorders there — and a dead one visibly doesn't, which is your signal during the step-10 self-verify.) Sorting `rows` locally in React is the wrong shortcut: with a `limit` you'd only sort the fetched page, not the dataset.
+**General rule:** if a primitive surfaces (or won't let you hide) an interaction, you **own making it work** — reporting it into state and stopping there ships a control that does nothing.
 ## Internal state
 `props(inputs, [state, setState], clientContext)`. Read state, wire setters, and make `loadData` depend on state:
 ```ts
