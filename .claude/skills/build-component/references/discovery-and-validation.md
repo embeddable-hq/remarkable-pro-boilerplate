@@ -24,6 +24,16 @@ When the decision tree lands you on Pattern A *because* a Pro component nearly f
     node_modules/@embeddable.com/remarkable-pro/dist/<Name>.js
   ```
   The JS is minified and local names are aliased (`LineChart as e`), but the imported primitive names are intact. If a component pulls primitives in via a shared chunk, follow the chunk it imports. Reuse those same primitives and their tokens instead of hand-rolling equivalents.
+### Audit a primitive's interactions before overlaying your own
+Types tell you a slot accepts `ReactNode`; they do **not** tell you the slot renders *inside* a `<button>`. Before attaching a click/keyboard handler to, or injecting interactive JSX into, any primitive surface (a column `title`/`accessor`, a dropdown `triggerComponent`, a cell, a row), read the **implementation** for handlers bound near that slot. Unlike the Pro modules above, `remarkable-ui`'s `dist/index.js` ships **readable** (non-minified) JSX, so grep it directly:
+```bash
+UI=node_modules/@embeddable.com/remarkable-ui/dist/index.js
+# 1. What does the primitive bind?  (and where is your slot rendered?)
+grep -nE 'onClick|onKeyDown|role: ?"button"|asChild|onSortChange|onRowIndexClick|onCellClick' "$UI" | grep -iC2 <Primitive>
+# 2. Does your target slot sit inside an interactive element?
+grep -nE 'header\.title|accessor|triggerComponent|"button"|"th"' "$UI" | grep -iC3 <Primitive>
+```
+If your slot renders inside an element carrying any of those handlers, it's a **trap slot** (catalogue in [events-and-state.md](events-and-state.md) → "Interactive surfaces a primitive owns"): render a non-interactive affordance there, move your control to a free element, or use the primitive's own callback. Real case: the table header `<th>` is a sort `<button>` and `header.title` is its child — so an interactive element in `title` nests buttons and breaks sorting.
 ## Validate
 Run after generating (both are local-only and safe — never `embeddable:push` or `embeddable:dev`/`dev`, per root `CLAUDE.md`):
 - `npm run embeddable:build` — compiles the component libraries plus every local `*.emb.ts` under `src/embeddable.com/`. This is the real check that the component registers and type-checks end to end. Fix every error it reports.

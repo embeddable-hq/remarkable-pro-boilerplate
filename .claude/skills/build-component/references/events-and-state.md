@@ -12,6 +12,19 @@ A component often does **both**. The matched pairs below come from real Pro comp
 | `SingleSelectFieldPro` | search box → `setSearchValue` re-queries its own options | value picked → `onChange` → `single-select value` variable |
 | `FilterBuilderPro` | selecting dims/operators, typing, add/delete rows → `setEmbeddableState` | committed clause → `onChange` (emitted once, deduped) |
 | `TableChartPaginated` | page / sort / pageSize → `setState` → new `loadData(offset, limit, orderBy)` | row click → `onRowClicked`, only if `clickDimension` configured |
+## Interactive surfaces a primitive owns (trap slots)
+Many `remarkable-ui` primitives **already bind** a click/keyboard interaction on a surface that *also* accepts your content. A `ReactNode` (or render-fn) slot rendered **inside** an element that has `onClick`/`onKeyDown`/`role="button"`/Radix `asChild` is a **trap slot**: put an interactive element (`<button>`, link, input, anything focusable) there and you nest interactive controls — invalid HTML, so the browser splits the DOM and the primitive's own interaction (e.g. sorting) silently breaks. This is the single most common way a custom component breaks a primitive. **Audit before you fill** — see [discovery-and-validation.md](discovery-and-validation.md) → "Audit a primitive's interactions".
+
+| Primitive | Surface it owns | Trap slot (renders *inside* it) | Do instead |
+|---|---|---|---|
+| `TableScrollable` / `TablePaginated` / `TableHeader` | each `<th>` **is** a sort `<button>` (sort cycles in internal state; `onSortChange` only *reports* it) | `header.title: ReactNode` (sits next to the sort caret) | keep `title` a **plain string**; put rich content in `accessor`; wire `onSortChange` to report |
+| table body cell (`TableBodyCellWithCopy`) | `<td>` holds a copy `<button>` (ActionIcon) | `header.accessor: (row) => ReactNode` (sibling of the copy button) | put **non-interactive** JSX (bars, badges, text) in `accessor`; for a per-row action use `onRowIndexClick` / a `clickDimension`-style emit |
+| table body row | `<tr onClick>` → `onRowIndexClick` | the whole row | use `onRowIndexClick`; don't add a competing row-level click |
+| `PivotTable` (expandable) | row-header cell gets `onClick`+`onKeyDown`+`role="button"` when `expandableRows` | the expandable row header | drive expand via the primitive; don't overlay a control there |
+| `Dropdown` | `DropdownMenu.Trigger asChild` merges its handlers onto your node | `triggerComponent: ReactNode` | pass a **plain** trigger (no own `onClick`); let the primitive open/close it |
+| `HeatMap` | cell `onClick` → `onCellClick` | the cell | use `onCellClick`; no nested control in the cell |
+
+**General rule:** any slot typed `React.ReactNode` or `(…) => ReactNode` that renders *within* an element carrying `onClick`/`onKeyDown`/`role="button"`/`asChild` is a trap slot. When in doubt, read the primitive's source (it's not minified) — commands in [discovery-and-validation.md](discovery-and-validation.md). The `examples/` table (and `TableWithBars`) get this right: custom JSX lives in `accessor`, `title` stays a plain string, and behaviour goes through the primitive's own callback.
 ## Internal state
 `props(inputs, [state, setState], clientContext)`. Read state, wire setters, and make `loadData` depend on state:
 ```ts

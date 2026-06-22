@@ -64,11 +64,16 @@ Wait for explicit confirmation before considering the component done. The agent 
 
 ## Fidelity notes
 The sandbox calls the real `config.props()` and the real theme pipeline. Key gaps (full detail in `sandbox/README.md`):
-- `loadData()` returns static mock data — loading states never appear; values don't come from a real database
+- `loadData()` returns generated mock data, not a real database — loading states never appear and values aren't real (but the mock **does** respond to the request shape; see below)
 - `useEmbeddableState` cross-component variable sharing returns `{}` — cross-widget events are logged but don't propagate
 - Event callbacks log to the event log panel rather than updating real Embeddable variables
 
 These gaps don't affect typical build-and-review workflows.
+
+### What the mock honors
+The generator applies the request **in memory** so state-driven behaviour renders correctly: it respects `orderBy` (sort), the common `filters` operators (`equals`/`notEquals`, `contains`/`startsWith`/`endsWith`, `gt`/`gte`/`lt`/`lte`, `set`/`notSet` — incl. the `notNull`/`isNull` spellings — and `inDateRange`), and `limit`/`offset` (pagination), applied **filter → sort → page**. So a sort toggle reorders, a committed filter narrows the rows, and page 2 shows different rows — i.e. any functionality whose state drives `loadData` (sorting, filtering, pagination, drill-downs, search-re-query, dynamic measures, granularity changes) can be verified, not just rendered.
+
+It does **not** compute real aggregates, joins, or `GROUP BY`, and its value pools are cardinality-bounded (≈24 entities / ~30 table rows), so measure magnitudes aren't grounded and deep pagination / high-cardinality filters run out. A filter on a member that isn't in the `select` is skipped (the mock only holds selected columns). This verifies your component's **wiring** — does state drive the query and re-render correctly — not data **correctness**; for that, run `embeddable:dev` against real cubes.
 
 ## Adding new components
 Drop a `*.emb.ts` + `index.tsx` into `src/embeddable.com/components/<Name>/`. The sandbox auto-discovers it via `import.meta.glob` — no edits to `registry.ts` required. A small Vite plugin (`sandbox-watch-components` in `vite.config.ts`) watches the components directory and reloads the page when a `.emb.ts` is added or removed, so new components appear on their own without a restart.

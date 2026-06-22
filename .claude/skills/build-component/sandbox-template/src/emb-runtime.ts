@@ -221,6 +221,106 @@ function poolForMember(name: string, nativeType: string | undefined, index: numb
 // A single category chart (bar/pie/funnel) with no explicit limit shows this many stages.
 const TOP_N_CATEGORIES = 8;
 
+// ── Honor the request: filter → sort → page (mirrors SQL WHERE → ORDER BY → LIMIT/OFFSET) ──
+// The rows generated below are realistic but unordered/unfiltered. A component whose state drives
+// loadData(orderBy/filters/offset) only renders correctly if the mock applies those, so a sort
+// toggle reorders, a committed filter narrows, and page 2 shows different rows. Deterministic and
+// synchronous; NOT real aggregation/joins/GROUP-BY (use embeddable:dev for data correctness).
+
+function memberName(property: unknown): string | undefined {
+  if (property == null) return undefined;
+  if (typeof property === 'string') return property;
+  const p = property as any;
+  if ('dimension' in p && !('__type__' in p)) return p.dimension?.name ?? p.dimension;
+  return p.name;
+}
+
+// Numeric when the member says so, or when every provided sample parses as a finite number
+// (measure values come through as strings, e.g. "120").
+function isNumericProp(property: unknown, ...samples: unknown[]): boolean {
+  if ((property as any)?.nativeType === 'number') return true;
+  return samples.length > 0 && samples.every((s) => s !== '' && s != null && Number.isFinite(Number(s)));
+}
+
+function applyFilters(rows: Record<string, unknown>[], filters: any[]): Record<string, unknown>[] {
+  if (!Array.isArray(filters) || filters.length === 0) return rows;
+  return rows.filter((row) =>
+    filters.every((f) => {
+      const key = memberName(f?.property);
+      // Can't resolve the member, or it isn't one of the selected columns → can't evaluate it
+      // here; pass rather than wrongly empty the result (the mock only holds selected members).
+      if (!key || !(key in row)) return true;
+      const cell = row[key];
+      const sCell = cell == null ? '' : String(cell);
+      const has = cell != null && sCell !== '';
+      const raw = f?.value;
+      const values = Array.isArray(raw) ? raw : raw === undefined ? [] : [raw];
+      const sVals = values.map((v) => String(v));
+      const numeric = isNumericProp(f?.property, cell, values[0]);
+      switch (f?.operator) {
+        case 'equals':
+          return numeric ? values.some((v) => Number(cell) === Number(v)) : sVals.includes(sCell);
+        case 'notEquals':
+          return numeric ? values.every((v) => Number(cell) !== Number(v)) : !sVals.includes(sCell);
+        case 'contains':
+          return sVals.some((v) => sCell.toLowerCase().includes(v.toLowerCase()));
+        case 'notContains':
+          return !sVals.some((v) => sCell.toLowerCase().includes(v.toLowerCase()));
+        case 'startsWith':
+          return sVals.some((v) => sCell.toLowerCase().startsWith(v.toLowerCase()));
+        case 'endsWith':
+          return sVals.some((v) => sCell.toLowerCase().endsWith(v.toLowerCase()));
+        case 'gt': return Number(cell) > Number(values[0]);
+        case 'gte': return Number(cell) >= Number(values[0]);
+        case 'lt': return Number(cell) < Number(values[0]);
+        case 'lte': return Number(cell) <= Number(values[0]);
+        case 'set':
+        case 'notNull':
+          return has;
+        case 'notSet':
+        case 'isNull':
+          return !has;
+        case 'inDateRange': {
+          const from = Array.isArray(raw) ? raw[0] : raw?.from;
+          const to = Array.isArray(raw) ? raw[1] : raw?.to;
+          if (!from || !to || !has) return true; // relative/partial ranges → skip, don't drop
+          return sCell >= String(from) && sCell <= String(to);
+        }
+        default:
+          return true; // unknown operator → pass, never empty the result
+      }
+    }),
+  );
+}
+
+function applySort(rows: Record<string, unknown>[], orderBy: any[]): Record<string, unknown>[] {
+  if (!Array.isArray(orderBy) || orderBy.length === 0) return rows;
+  const keys = orderBy
+    .map((o) => ({ key: memberName(o?.property), dir: o?.direction === 'desc' ? -1 : 1, property: o?.property }))
+    .filter((k): k is { key: string; dir: number; property: unknown } => !!k.key);
+  if (keys.length === 0) return rows;
+  return [...rows].sort((a, b) => {
+    for (const { key, dir, property } of keys) {
+      const av = a[key];
+      const bv = b[key];
+      const cmp = isNumericProp(property, av, bv)
+        ? Number(av) - Number(bv)
+        : String(av ?? '').localeCompare(String(bv ?? ''));
+      if (cmp !== 0) return cmp * dir;
+    }
+    return 0;
+  });
+}
+
+function applyPaging(
+  rows: Record<string, unknown>[],
+  offset: number,
+  limit: number | undefined,
+): Record<string, unknown>[] {
+  if (!offset && limit == null) return rows;
+  return rows.slice(offset, limit != null ? offset + limit : undefined);
+}
+
 export function mockDataResponse(requestParams: any): DataResponse {
   // Collect select items — support both select[] and dimensions/measures arrays
   let selectItems: SelectItem[] = [];
@@ -240,6 +340,14 @@ export function mockDataResponse(requestParams: any): DataResponse {
   const limit = typeof requestParams.limit === 'number' && requestParams.limit > 0
     ? requestParams.limit
     : undefined;
+  const orderBy = Array.isArray(requestParams.orderBy) ? requestParams.orderBy : [];
+  const filters = Array.isArray(requestParams.filters) ? requestParams.filters : [];
+  const offset =
+    typeof requestParams.offset === 'number' && requestParams.offset > 0 ? requestParams.offset : 0;
+  // When the request shapes the result (sort/filter/paging), generate the full set up to the pool
+  // cap and let the post-stage below slice it — otherwise page 2 would re-slice the same rows.
+  const shapingActive = offset > 0 || orderBy.length > 0 || filters.length > 0;
+  const genLimit = shapingActive ? undefined : limit;
 
   let rows: Record<string, unknown>[];
 
@@ -249,7 +357,7 @@ export function mockDataResponse(requestParams: any): DataResponse {
     // dates. Count scales with granularity (90 days, 26 weeks, 18 months, …), capped sensibly.
     const timeKey = itemName(timeDims[0]);
     const g = granularityOf(timeDims[0]);
-    const count = Math.min(limit ?? (GRANULARITY_DEFAULT_COUNT[g] ?? 90), GRANULARITY_CAP[g] ?? 180);
+    const count = Math.min(genLimit ?? (GRANULARITY_DEFAULT_COUNT[g] ?? 90), GRANULARITY_CAP[g] ?? 180);
     const end = startOfPeriod(new Date(), g);
 
     rows = [];
@@ -285,7 +393,7 @@ export function mockDataResponse(requestParams: any): DataResponse {
     if (measures.length === 0) {
       // Pure value list (a filter control loading a dimension's distinct values): return
       // exactly the distinct set so "is one of" dropdowns show real options.
-      const count = Math.min(limit ?? dimPools[0].length, dimPools[0].length);
+      const count = Math.min(genLimit ?? dimPools[0].length, dimPools[0].length);
       rows = [];
       for (let i = 0; i < count; i++) {
         const row: Record<string, unknown> = {};
@@ -299,7 +407,7 @@ export function mockDataResponse(requestParams: any): DataResponse {
       // and realistic (many tracks share a genre); we just never invent new labels.
       const primaryIdx = dimPools.reduce((b, p, i) => (p.length > dimPools[b].length ? i : b), 0);
       const primaryLen = dimPools[primaryIdx].length;
-      const target = limit ?? (manyRows ? 30 : Math.min(primaryLen, TOP_N_CATEGORIES));
+      const target = genLimit ?? (manyRows ? 30 : Math.min(primaryLen, TOP_N_CATEGORIES));
       const count = Math.min(target, primaryLen);
       rows = [];
       for (let i = 0; i < count; i++) {
@@ -324,8 +432,11 @@ export function mockDataResponse(requestParams: any): DataResponse {
     const row: Record<string, unknown> = {};
     measures.forEach((m) => { row[itemName(m)] = '78'; });
     rows = [row];
-    if (limit) rows = rows.slice(0, limit);
   }
+
+  // Honor the request shape: filter → sort → page (see helpers above). A no-op when there are no
+  // filters/orderBy/offset and the limit was already applied during generation.
+  rows = applyPaging(applySort(applyFilters(rows, filters), orderBy), offset, limit);
 
   return { isLoading: false, error: undefined, data: rows };
 }
