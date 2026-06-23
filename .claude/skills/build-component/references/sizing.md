@@ -1,5 +1,5 @@
-# Sizing & resize inside the widget
-Every component renders inside a drag-and-drop widget the user can resize to almost any width/height. The component must **fill** the widget and look right across that whole range — this is one of the most common ways custom components break, so design for it from the start.
+# Sizing, resize & legibility inside the widget
+Every component renders inside a drag-and-drop widget the user can resize to almost any width/height. The component must **fill** the widget and look right across that whole range — this is one of the most common ways custom components break, so design for it from the start. Filling the box is necessary but not sufficient: the data inside also has to be **readable** (see "Legibility" below).
 
 ## The core constraint: a fixed box that never grows to fit content
 The widget is a **fixed-height box**. The canvas gives a component a width and height — its `defaultWidth`/`defaultHeight`, then whatever the builder drags it to — and it **does not auto-extend downward to fit its content**. There is no "grow taller to show more rows." Content that exceeds the box must **scroll inside it**; otherwise it's clipped and the overflow is simply unreachable. Concretely:
@@ -32,6 +32,20 @@ The widget is a **fixed-height box**. The canvas gives a component a width and h
   ```
 - **Controls must fill width sensibly.** A control dragged to full width must not strand its content against a full-width border. Either stretch its parts to fill (segmented control: `display: flex; width: 100%` with each segment `flex: 1`) or keep it genuinely compact (`alignSelf: 'flex-start'`). Never a full-width border with left-packed content. Note that `display: inline-flex` does **not** stay compact inside a card — the card's column stretches it, so the border goes full width while content stays left; use one of the two explicit options instead.
 - **Check both extremes mentally:** very wide + short, and very narrow + tall. If either clips, overflows the widget, or leaves large dead space, add fill/overflow handling.
+
+## Legibility: every value readable, no labels overlapping
+A component can fill its box perfectly and still be unreadable. Two failures recur on any data-viz, and the right fix **depends on the medium** — a library chart, a table, or a hand-rolled custom viz each behave differently. Apply the principle, not a fixed recipe.
+
+- **Every value must be readable — choose the mechanism for the medium; don't reach for a hover tooltip reflexively.**
+  - *A library chart that already provides tooltips* — the Chart.js primitives (`BarChart`/`LineChart`/`PieChart`/`DonutChart`/`ScatterChart`/`BubbleChart`) draw a hover tooltip **for free**, on by default and gated by `showTooltips`. Use it: wire `inputs.showTooltips` and pass it through (the chart examples do); don't switch it off without a reason.
+  - *A table shows its values in the cells, not on hover — don't add hover tooltips to it.* The table primitives display numbers in place; if a value isn't visible, turn it on rather than bolting a tooltip onto cells. (Concrete instance: a heatmap is a pivot-style coloured table — `remarkable-ui`'s `HeatMap` renders a `<table>` and its `showValues` defaults to `false`, so a bare one is colour-only; set `showValues: true`.)
+  - *A hand-rolled / custom viz where a mark is too small or too dense to print its own value* must give the viewer some other way to read it — usually a tooltip, because nothing provides one for you. Cheapest and safe everywhere: a native `title` (an HTML attribute on the element, or a `<title>` child inside an SVG `<g>`/`<rect>`) — no library, can't nest interactive elements. For a styled one, the `Tooltip` primitive from `remarkable-ui` (`trigger` = your mark, `children` = the content; Radix `asChild`, so no `<button>` is injected around a clickable mark). A custom viz that encodes a value only as position or colour, with no way to read the number, is the canonical miss.
+
+- **Labels must not overlap.** Dense or long category / axis / row / column labels collide into an unreadable smear — usually the *first* thing that makes a component look broken. Little self-manages it. Don't ship the collision — mitigate, by medium:
+  - *Hand-rolled axes/grids*: **thin** (render every Nth label), **rotate** (~45°), or **truncate** with an ellipsis (+ a `title` carrying the full text) so labels stop touching, or auto-hide. 
+  - *Library charts*: Chart.js rotates/skips axis ticks to a point and also auto-hides — still verify at the **Narrow** preset, since categorical axes collide when crowded.
+
+  (Distinct from the SVG-edge *clipping* rules above: that's content cut off by a boundary; this is labels colliding with each other because there are too many or too long.)
 
 ## In the examples
 - `funnel-chart` / `calendar-heatmap`-style components wrap their content in `overflow: auto` (and the calendar's fixed-size SVG grid scrolls horizontally).
