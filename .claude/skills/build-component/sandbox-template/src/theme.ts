@@ -18,11 +18,17 @@ export { remarkableTheme };
 
 export function buildTheme(clientContext: Record<string, unknown>): Theme {
   const theme = themeProvider(clientContext, remarkableTheme) as Theme;
-  // i18nSetup(theme) reads theme.language to choose the i18next language. The boilerplate
-  // themeProvider doesn't propagate clientContext.language, so apply it here — the real
-  // Embeddable runtime sets theme.language from clientContext too.
+  // The boilerplate themeProvider only branches on clientContext.theme (dark mode); it does NOT
+  // propagate language/locale. The real Embeddable runtime injects both from clientContext, so do
+  // the same here — writing the ACTUAL Theme fields:
+  //   - theme.i18n.language    → drives i18nSetup(theme) / i18n string lookup (Pro's en/de catalogue)
+  //   - theme.formatter.locale → drives getThemeFormatter number/date formatting (e.g. de-DE → 1.234,5)
+  // (Data values and a component's own hardcoded strings are never translated — that's expected.)
   if (typeof clientContext.language === 'string') {
-    (theme as unknown as { language: string }).language = clientContext.language;
+    theme.i18n.language = clientContext.language;
+  }
+  if (typeof clientContext.locale === 'string') {
+    theme.formatter.locale = clientContext.locale;
   }
   return theme;
 }

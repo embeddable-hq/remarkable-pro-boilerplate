@@ -154,7 +154,7 @@ function App() {
   const theme = buildTheme(clientContext);
   const c = makeColors(darkMode);
 
-  // Switch language. i18nSetup(theme) reads theme.language but initialises i18next only once,
+  // Switch language. i18nSetup(theme) reads theme.i18n.language but initialises i18next only once,
   // so we also call changeLanguage directly and remount the component (via the key below) so it
   // re-runs i18n.t / resolveI18nProps in the chosen language. Pro ships real en/de strings, so
   // chrome (empty/error/menu text, etc.) translates; a string that does NOT change is either
