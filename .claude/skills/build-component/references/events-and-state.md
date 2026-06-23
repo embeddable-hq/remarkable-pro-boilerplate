@@ -3,10 +3,10 @@ The defining skill of an Embeddable component: deciding, for **each** interactio
 ## The rule
 > Does this interaction only change what THIS component shows, or does it express intent other widgets should react to?
 - **Only this component** → **Embeddable State** (the `[state, setState]` tuple in `props`). State changes re-run `props` and trigger new `loadData`. No event, no variable.
-- **Other widgets react** → **event + variable**. React calls `onX(...)`; `config.events.onX` shapes the payload; `meta.events` declares it; `meta.variables` auto-creates the builder variable it updates.
-A component often does **both**. The matched pairs below come from real Pro components.
+- **Other widgets react** → **emit an event**. React calls `onX(...)`; `config.events.onX` shapes the payload; `meta.events` declares it. Declare a pre-configured `meta.variables` **only if the component is a control** whose purpose is to produce a reusable value (dropdown/picker/slider/filter); a **chart/data-viz emits the event and declares no variable** — the dashboard author wires the click. See "Variables are for controls, not charts" below.
+A component often does **both** — but "both" is for *different* concerns (a draft in state, emitted on commit), **not the same selection held twice.** One owner per selection: if an interaction emits up, don't *also* filter this component's own query with it — let the dashboard feed the emitted variable back into one of its inputs and re-query from there (detail: [SKILL.md](../SKILL.md) → "One owner per selection"). The matched pairs below come from real Pro components.
 ## Matched pairs (proof from real code)
-| Component | Stays INTERNAL (state) | EMITS (event + variable) |
+| Component | Stays INTERNAL (state) | EMITS UP (event — + variable only for controls) |
 |---|---|---|
 | `LineChartDefaultPro` | granularity toggle → `setGranularity` re-buckets its own data | line click → `onLineClicked` (`axisDimensionValue`, `axisDimensionTimeRange`) |
 | `SingleSelectFieldPro` | search box → `setSearchValue` re-queries its own options | value picked → `onChange` → `single-select value` variable |
@@ -64,7 +64,12 @@ Pick the payload from what the dashboard actually needs from the interaction —
 - **The requirement is to layer several selections into one compound filter** (click a value in one column, then another column, then another, building `country IN (…) AND genre = …`) → hold the selections in state and emit a **`filters`** clause (a `FilterBuilderClause`), exactly as `FilterBuilderPro` does. This is a legitimate, first-class design — not over-engineering.
 
 You render the cell yourself, so you can make it clickable with whatever pattern the requirement calls for — the Pro conventions above are references for the *shape* of each payload, **not a cap on what you build**. Don't force a single-value emit when the user wants layered filters, and don't emit a whole filter when a value is all that's needed. Decide from the user's stated needs.
-## Variables (auto-created in the builder)
+## Variables are for controls, not charts
+A pre-configured variable (`meta.variables`) makes the builder auto-create a bound variable, seeded by an input and updated by an event. Declare one **only for an interactive control** whose reason to exist is producing a reusable value — a dropdown, picker, slider, or filter. The pre-wired variable is the whole point of a control.
+
+**A chart / data-viz never declares `meta.variables`.** When a user clicks a bar, segment, sankey node, or table row, emit the click as an **event** and stop — the dashboard author decides whether to route it into a variable, a drilldown, or a cross-filter. Pre-baking a variable forces a wiring they didn't ask for. (Pro confirms this: `BarChartDefaultPro`/`LineChartDefaultPro`/`TableChartPaginated` emit click events with no `variables`; only editors like `SingleSelectFieldPro` declare them.)
+
+A control's variable looks like:
 ```ts
 variables: [{
   name: 'single-select value',
@@ -74,9 +79,9 @@ variables: [{
   events: [{ name: 'onChange', property: 'value' }], // event that updates it
 }],
 ```
-Pre-defining the variable in code (vs. making the user create it) is the better UX. The seeding input typically sits in category `'Pre-configured Variables'`.
+The seeding input typically sits in category `'Pre-configured Variables'`.
 ## Multi-property events & multiple variables
-An event can carry several properties, and each becomes its own variable. Declare every property in `meta.events[].properties`, shape them all in one `config.events` transformer, and declare **one variable per property** — each linking the input that seeds it and the event property that updates it. Example — a numeric range control emitting `{ min, max }`:
+An event can carry several properties, and on a control each becomes its own variable. Declare every property in `meta.events[].properties`, shape them all in one `config.events` transformer, and (for a control) declare **one variable per property** — each linking the input that seeds it and the event property that updates it. Example — a numeric range control emitting `{ min, max }`:
 ```ts
 // meta
 events: [{ name: 'onChange', label: 'Range changed', properties: [
@@ -132,18 +137,9 @@ inputs: [
     config: { dataset: 'dataset' },
   },
   // … title, settings …
-  { name: 'defaultClickValue', type: 'string', label: 'Default selected value',
-    defaultValue: undefined, category: 'Pre-configured Variables' },
 ],
 events: [{ name: 'onRowClicked', label: 'Row clicked',
   properties: [{ name: 'value', label: 'Clicked value', type: 'string' }] }],
-variables: [{
-  name: 'selected row value',
-  type: 'string',
-  defaultValue: Value.noFilter(),
-  inputs: ['defaultClickValue'],
-  events: [{ name: 'onRowClicked', property: 'value' }],
-}],
 ```
 
 ```ts
@@ -169,3 +165,4 @@ Key points:
 - `inputs.clickDimension` falls back to `inputs.rowDimension` when unset — emit behaviour degrades gracefully.
 - Put the `clickDimension` input in `'Data Mapping for Interactions'` (not `'Component Data'`), so the builder groups it separately from query-shaping inputs.
 - `Value.noFilter()` for the case where the cell value is null/undefined.
+- **No `meta.variables`** — this is a table (a chart), so it emits the click and lets the dashboard author wire it; only a control would declare a bound variable. See "Variables are for controls, not charts".

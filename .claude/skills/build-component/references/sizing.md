@@ -9,7 +9,14 @@ The widget is a **fixed-height box**. The canvas gives a component a width and h
 
 ## Rules
 - **Fill the area.** The outermost element is `width: 100%; height: 100%`. `ChartCard`/`EditorCard` already fill the widget; your content fills the card.
-- **Chart.js primitives auto-resize.** `BarChart`, `LineChart`, `PieChart`, `KpiChart`, table primitives, etc. resize themselves within their area — don't wrap them in fixed dimensions or extra scroll; just let them fill.
+- **Chart.js primitives auto-resize — *if you don't break their flex chain*.** `BarChart`, `LineChart`, `PieChart`, `KpiChart`, table primitives, etc. resize themselves within their area — don't wrap them in fixed dimensions or extra scroll; just let them fill. But "fill" here means **`flex-grow`, not `height: 100%`**: the primitive's own wrapper (`.chartContainer`) is a flex item with `flex-grow: 1` inside `ChartCard`'s flex-column body (`.cardContent` is `display: flex; flex-direction: column`). As the card's **direct** child it fills perfectly — but slip any element between the card and the primitive and you must continue that flex chain (next bullet).
+- **Wrapping a primitive (drag overlay, annotations, any positioning context) — keep the flex chain unbroken.** If you put a `<div>` between `ChartCard` and a chart primitive — e.g. a `position: relative` container for a drag-to-zoom band, a reset button, or custom overlays — a plain `height: 100%` block **breaks sizing twice**: it doesn't grow in the card's flex column (no `flex-grow`), *and* it gives the primitive's `flex-grow: 1` no flex context to act in — so the primitive collapses to ~0 height (an invisible chart that ignores resize). Make the wrapper *both* a growing flex item *and* a flex column:
+  ```tsx
+  <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
+    <LineChart … />   {/* .chartContainer now fills exactly as it did bare */}
+  </div>
+  ```
+  Rule of thumb: a wrapper around a self-sizing primitive must **pass the fill through** — grow within its parent (`flex: 1 1 auto`, not `height: 100%`) *and* be a flex column for the child. Don't assume `height: 100%` fills; check how the primitive actually sizes itself before wrapping it.
 - **Hand-rolled SVG/HTML and tables must handle their own overflow.** Anything whose natural size can exceed the widget — tables, long lists, a funnel/heatmap with many rows or columns, wide grids — must live in a container with `overflow: auto` (or `overflowX`/`overflowY`) so it **scrolls** instead of clipping or stretching the layout. Mark fixed-height rows `flexShrink: 0` so they scroll rather than squash.
 - **SVG: scale or scroll, pick one.**
   - *Scale to fit:* give `<svg>` a `viewBox` and a fluid size (`width: 100%; height: 100%`) — good for a single shape like a gauge, radar, or bullet.

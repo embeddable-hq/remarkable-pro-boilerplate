@@ -1,4 +1,4 @@
-import { Dimension, Granularity, LoadDataRequest, Value, loadData } from '@embeddable.com/core';
+import { DataResponse, Dimension, Granularity, LoadDataRequest, Value, loadData } from '@embeddable.com/core';
 import { EmbeddedComponentMeta, defineComponent, Inputs, definePreview } from '@embeddable.com/react';
 import {
   inputs,
@@ -53,10 +53,26 @@ const loadDataArgs = (
   timezone: clientContext?.timezone,
 });
 
+// `previewData` ships only a *categorical* dimension, but this is a TIME-SERIES chart — so build a
+// time-typed preview: a dimension with `nativeType: 'time'` + a `granularity`, and dated result rows
+// keyed by the dimension/measure names. Without this, `useFillGaps` no-ops and the builder preview
+// (and the sandbox, which seeds inputs from this preview) render categorical, non-date data.
+const previewXAxis = {
+  ...previewData.dimension,
+  nativeType: 'time',
+  inputs: { ...(previewData.dimension as { inputs?: Record<string, unknown> }).inputs, granularity: 'month' },
+} as Dimension;
+const previewResults: DataResponse = {
+  ...previewData.results1Measure1Dimension,
+  data: ['2024-01-01', '2024-02-01', '2024-03-01', '2024-04-01', '2024-05-01', '2024-06-01'].map(
+    (date, i) => ({ [previewXAxis.name]: date, [previewData.measure.name]: 80 + i * 20 }),
+  ) as DataResponse['data'],
+};
+
 export const preview = definePreview(Component, {
-  xAxis: previewData.dimension,
+  xAxis: previewXAxis,
   measures: [previewData.measure],
-  results: previewData.results1Measure1Dimension,
+  results: previewResults,
   hideMenu: true,
 });
 

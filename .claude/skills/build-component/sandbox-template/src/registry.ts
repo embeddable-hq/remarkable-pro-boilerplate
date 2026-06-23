@@ -44,6 +44,8 @@ export type RegistryEntry = {
     events?: Record<string, (raw: any) => any>;
   };
   events: Array<{ name: string; label?: string }>;
+  // The component's definePreview config props, if it exported one — used to seed data inputs.
+  previewProps?: Record<string, unknown>;
 };
 
 export const registry: RegistryEntry[] = Object.values(captured).map((c: any) => ({
@@ -53,6 +55,7 @@ export const registry: RegistryEntry[] = Object.values(captured).map((c: any) =>
   meta: c.meta,
   config: c.config ?? {},
   events: (c.meta.events ?? []) as Array<{ name: string; label?: string }>,
+  previewProps: c.previewProps as Record<string, unknown> | undefined,
 }));
 
 export const componentNames = registry.map((e) => e.name);

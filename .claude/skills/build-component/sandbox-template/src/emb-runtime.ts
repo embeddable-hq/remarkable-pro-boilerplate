@@ -32,8 +32,12 @@ type SelectItem =
 
 function classifyItem(item: SelectItem): 'measure' | 'time' | 'category' {
   if (!item) return 'category';
-  // Time wrapper: has .dimension but no __type__ directly
-  if ('dimension' in item && !('__type__' in item)) return 'time';
+  // Granularity-wrapped dimension ({ dimension, granularity }): classify by the INNER
+  // dimension's nativeType. getDimensionWithGranularity wraps category dimensions too, so
+  // the wrapper shape alone doesn't mean time — only a nativeType:'time' inner dim does.
+  if ('dimension' in item && !('__type__' in item)) {
+    return (item as any).dimension?.nativeType === 'time' ? 'time' : 'category';
+  }
   if ('__type__' in item) {
     if ((item as any).__type__ === 'measure') return 'measure';
     if ((item as any).nativeType === 'time') return 'time';
@@ -569,12 +573,15 @@ type InputDef = {
 /**
  * Build the inputs object to pass as the first arg to config.props().
  *
- * - Data inputs (dataset/dimension/measure/…) → auto-mocked objects
+ * - Data inputs (dataset/dimension/measure/…) → the component's definePreview value if it provides
+ *   one (carries the author's members + per-member sub-inputs like a link column's `linkUrl`),
+ *   otherwise an auto-mocked object.
  * - Non-data inputs → controlValues[name] ?? defaultValue ?? (array ? [] : null)
  */
 export function buildInputs(
   meta: { inputs: readonly InputDef[] },
   controlValues: Record<string, unknown>,
+  previewProps?: Record<string, unknown>,
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
 
@@ -583,6 +590,13 @@ export function buildInputs(
     const name = input.name;
 
     if (isDataInputType(typeStr)) {
+      // Prefer the author's definePreview value for this data input — it carries their configured
+      // members AND per-member sub-inputs (e.g. a link column's `linkUrl`) that the generic mock
+      // below can't know. Fall back to the auto-mock for any data input the preview omits.
+      if (previewProps && previewProps[name] !== undefined) {
+        out[name] = previewProps[name];
+        continue;
+      }
       // Auto-mock
       let mock: unknown;
       if (typeStr === 'dataset') {

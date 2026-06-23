@@ -34,6 +34,22 @@ grep -nE 'onClick|onKeyDown|role: ?"button"|asChild|onSortChange|onRowIndexClick
 grep -nE 'header\.title|accessor|triggerComponent|"button"|"th"' "$UI" | grep -iC3 <Primitive>
 ```
 If your slot renders inside an element carrying any of those handlers, it's a **trap slot** (catalogue in [events-and-state.md](events-and-state.md) → "Interactive surfaces a primitive owns"): render a non-interactive affordance there, move your control to a free element, or use the primitive's own callback. Real case: the table header `<th>` is a sort `<button>` and `header.title` is its child — so an interactive element in `title` nests buttons and breaks sorting.
+### Audit what the library registers globally (Chart.js plugins)
+The same "find out what the library already did before you build on top" rule applies to **global side-effects**, not just primitive slots. The `remarkable-ui` chart primitives call `ChartJS.register(…, ChartDataLabels, AnnotationPlugin)` (see `BarChart`/`PieChart`/`DonutChart`/`LineChart`), and Chart.js plugins register on the **shared `ChartJS` singleton** — so the moment Pro is imported, **every** Chart.js chart in the bundle inherits those plugins, including a raw one you hand-roll for a novel type (e.g. a sankey on `chartjs-chart-sankey`).
+
+Pro's data builders (`getBarChartProData`, …) configure datalabels for *their* charts; a hand-rolled chart does not, so datalabels paints each raw datum on top of whatever your chart draws (a sankey draws its own node labels via its `labels` map → the two collide into overlapping text). **Opt out explicitly** in your chart options:
+```ts
+options: {
+  // datalabels is globally on (Pro registered it); a hand-rolled chart must turn it off.
+  // Cast to ChartOptions<'sankey'> if the plugin's option keys aren't typed for your controller.
+  plugins: { datalabels: { display: false } },
+}
+```
+Confirm what's registered before assuming — grep the readable UI dist:
+```bash
+grep -nE 'register\(|ChartDataLabels|AnnotationPlugin' node_modules/@embeddable.com/remarkable-ui/dist/index.js
+```
+**General rule:** a chart built on the shared Chart.js singleton inherits whatever Pro registered globally — audit it and disable the plugins you don't want, rather than discovering them painted over your chart.
 ## Validate
 Run after generating (both are local-only and safe — never `embeddable:push` or `embeddable:dev`/`dev`, per root `CLAUDE.md`):
 - `npm run embeddable:build` — compiles the component libraries plus every local `*.emb.ts` under `src/embeddable.com/`. This is the real check that the component registers and type-checks end to end. Fix every error it reports.

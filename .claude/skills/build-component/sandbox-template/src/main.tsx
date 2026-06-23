@@ -136,6 +136,53 @@ function makeColors(dark: boolean): Colors {
   };
 }
 
+/**
+ * Dismissible notice: the sandbox is a high-fidelity *visual/structural* check, not a full
+ * runtime. Cross-widget events, variable feedback, real data, and drag/zoom that re-queries
+ * only work in `embeddable:dev`. Dismissal persists in localStorage.
+ */
+function DisclaimerBanner({ c }: { c: Colors }) {
+  const KEY = 'sandbox-disclaimer-dismissed';
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
+  });
+  if (dismissed) return null;
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 9,
+      padding: '8px 20px',
+      background: c.activeBg,
+      borderBottom: `1px solid ${c.headerBorder}`,
+      color: c.text, fontSize: 12, fontFamily: SYSTEM_FONT,
+      flexShrink: 0, zIndex: 19,
+    }}>
+      <span style={{ flexShrink: 0, width: 7, height: 7, borderRadius: '50%', background: c.activeBorder }} />
+      <span style={{ flex: 1, lineHeight: 1.45 }}>
+        The sandbox verifies <strong>visuals &amp; structure</strong>. Full behaviour — cross-widget
+        events, variable feedback, real data, and drag/zoom that re-queries — only runs in{' '}
+        <code style={{
+          fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 11,
+          background: c.preBg, color: c.preText, padding: '1px 5px', borderRadius: 4,
+        }}>embeddable:dev</code>.
+      </span>
+      <button
+        onClick={() => {
+          try { localStorage.setItem(KEY, '1'); } catch { /* ignored */ }
+          setDismissed(true);
+        }}
+        title="Dismiss"
+        aria-label="Dismiss"
+        style={{
+          flexShrink: 0, border: 'none', background: 'transparent', cursor: 'pointer',
+          color: c.textMuted, fontSize: 17, lineHeight: 1, padding: '0 2px', fontFamily: SYSTEM_FONT,
+        }}
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
 function App() {
   const [selectedName, setSelectedName] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -277,6 +324,8 @@ function App() {
           </label>
         </div>
       </header>
+
+      <DisclaimerBanner c={c} />
 
       {/* ── Body: sidebar + content ──────────────────────────────────────────── */}
       <div style={{

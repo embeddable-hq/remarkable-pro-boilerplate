@@ -20,13 +20,27 @@ g.__EMB_CAPTURED__ ??= {};
 
 export const useTheme = real.useTheme;
 export const EmbeddableThemeContext = real.EmbeddableThemeContext;
-export const definePreview = real.definePreview;
 export const defineEditor = real.defineEditor;
 export const useEmbeddableState = real.useEmbeddableState;
 
+// Capture each component's definePreview config (keyed by the Component it wraps) so the sandbox
+// can seed its data inputs from the author's preview — that's where per-column sub-inputs like a
+// link column's `linkUrl` live. The standard .emb.ts defines `preview` before the default
+// defineComponent, so this runs first and the value is ready when defineComponent fires.
+const previewByComponent = new WeakMap<any, any>();
+export const definePreview = ((Component: any, config: any) => {
+  try { previewByComponent.set(Component, config); } catch { /* non-object Component — skip */ }
+  return real.definePreview(Component, config);
+}) as typeof real.definePreview;
+
 export const defineComponent = ((Component: any, meta: any, config: any) => {
   if (meta?.name) {
-    g.__EMB_CAPTURED__[meta.name] = { Component, meta, config };
+    g.__EMB_CAPTURED__[meta.name] = {
+      Component,
+      meta,
+      config,
+      previewProps: previewByComponent.get(Component),
+    };
   }
   return real.defineComponent(Component, meta, config);
 }) as typeof real.defineComponent;

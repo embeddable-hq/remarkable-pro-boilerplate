@@ -94,7 +94,7 @@ type ComponentViewProps = {
 };
 
 export function ComponentView({ entry, theme, darkMode, colors: c }: ComponentViewProps) {
-  const { Component: Comp, meta, config, events } = entry;
+  const { Component: Comp, meta, config, events, previewProps } = entry;
 
   // Non-data input values (user-editable via ControlsPanel)
   const [controlValues, setControlValues] = useState<Record<string, unknown>>(
@@ -122,7 +122,7 @@ export function ComponentView({ entry, theme, darkMode, colors: c }: ComponentVi
   const componentProps = useMemo(() => {
     setPropsError(null);
     try {
-      const inputs = buildInputs(meta, controlValues);
+      const inputs = buildInputs(meta, controlValues, previewProps);
 
       let mapped: Record<string, unknown>;
       if (config.props) {
@@ -168,7 +168,7 @@ export function ComponentView({ entry, theme, darkMode, colors: c }: ComponentVi
       return {} as Record<string, unknown>;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controlValues, embState, config, meta, events]);
+  }, [controlValues, embState, config, meta, events, previewProps]);
 
   const defaultWidth = (meta as any).defaultWidth ?? 600;
   const defaultHeight = (meta as any).defaultHeight ?? 400;
