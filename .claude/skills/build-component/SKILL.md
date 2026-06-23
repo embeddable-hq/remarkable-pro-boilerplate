@@ -14,6 +14,8 @@ Almost every customer runs on `@embeddable.com/remarkable-pro`, and that library
 - `ChartCard` (charts) / `EditorCard` (controls) as the outer wrapper
 - the shared `inputs` / `subInputs` constants to compose `meta`, instead of writing input objects by hand
 The single biggest failure mode for this skill is generating a "plain React" component that ignores this layer. Don't.
+
+**Reuse is about the foundation, not a cap on behaviour.** "Build ON Pro" means always inheriting this plumbing (i18n, formatting, colours, chrome, primitives) and matching the library's look, so the component never feels foreign. It does **not** mean limiting what the component *does* — its behaviour, interactions, and emitted payloads follow the **user's actual requirement**. When that requirement is genuinely new, build it: reuse the building blocks, let the Pro conventions inform the *shape* of what you build, and don't force a real need into an ill-fitting existing pattern. The two failure modes are equal and opposite — reinventing the plumbing, and refusing to build what the user actually asked for.
 ## File location
 New components live in `src/embeddable.com/components/<ComponentName>/`. **The `.emb.*` file's basename must exactly match `meta.name`** — the build enforces this (e.g. `KpiTile.emb.ts` ↔ `name: 'KpiTile'`). `meta.name` is also the workspace identifier — see [Safety](#safety-rules). One component per directory.
 ## The two authoring patterns
@@ -29,12 +31,12 @@ Work top to bottom; stop at the first match. This is the heart of the skill.
 3. **Is it a new *visualization*, but `remarkable-ui` has the primitive** (`LineChart`, `BarChart`, `KpiChart`, `Markdown`, table primitives…)? → **Pattern A**, composing the primitive + Pro built-ins + `ChartCard`. Model on `examples/timeseries-chart/` (with `useFillGaps`) or `examples/kpi-tile/`.
 4. **Is it an interactive control/filter** (dropdown, picker, button bar) that should drive other widgets? → **Pattern A**, emphasis on **events + variables**; wrap in `EditorCard`. Model on `examples/control-with-variable/`. Read [references/events-and-state.md](references/events-and-state.md).
 5. **Is it presentational/content** (text, callout, layout) with little or no data? → **Pattern A**, minimal — often `props: (inputs) => ({ ...inputs })`, no `loadData`. Model on `examples/presentational-callout/`.
-If nothing in `remarkable-ui` fits and the visualization is genuinely novel, you may pull in a charting/UI library — but still wrap it in `ChartCard` and wire the Pro built-ins.
+This tree exists to stop you **reinventing what already exists** — not to talk a genuine requirement out of being built. If nothing above fits, a custom Pattern A component **is** the right answer; build it well. (And if even `remarkable-ui` lacks the primitive and the visualization is genuinely novel, you may pull in a charting/UI library.) Either way, still wrap it in `ChartCard` and wire the Pro built-ins so it belongs.
 ## Rebuilding ≠ starting from a blank canvas
 Sometimes the tree lands on Pattern A *because* an existing Pro component almost fits but can't be extended to do what you need. Don't hand-roll from scratch — that's how a custom component ends up looking foreign next to the rest of the dashboard. **Mirror the original:**
 - **Reuse the same `remarkable-ui` primitives it's built from.** Pro components are mostly thin compositions of `remarkable-ui` primitives. Find which the closest one uses (grep its `dist/<Name>.js` for `@embeddable.com/remarkable-ui` imports — see [references/discovery-and-validation.md](references/discovery-and-validation.md)) and build on those, not bespoke HTML.
 - **Match its styling** — the same CSS-variable tokens, spacing, and structure ([references/theming.md](references/theming.md)) — so it lines up with the library.
-- **Hand-roll only the genuinely new part** (the bit you couldn't get any other way). Everything around it should look like stock Remarkable.
+- **Hand-roll the genuinely new part** (the bit you couldn't get any other way) — and build it as fully as the requirement needs. Everything *around* it should look like stock Remarkable: mirroring sets the foundation and the look, it doesn't shrink the feature.
 ## Don't fight a primitive's built-in interactions
 Mirroring a primitive means inheriting its **behaviour**, not just its markup. A `remarkable-ui` primitive often binds its own click/keyboard handlers on the very surfaces you'll want to fill — a table header **is** a sort `<button>`, a body cell carries a copy `<button>`, a row has its own click. Overlay your own interaction there and you either **nest interactive elements** (invalid HTML → the DOM splits → the primitive's sort/click silently breaks) or collide two click meanings on one element. This is the single most common way a custom component breaks a primitive.
 **Before** attaching a handler to, or injecting interactive JSX into, **any** primitive surface (header / cell / row / trigger):
@@ -100,6 +102,7 @@ Before declaring a component done, confirm:
 - [ ] `loadData` is in the descriptor's `props`, not in React; loading/error/empty are handled (mostly by the Card).
 - [ ] Every interaction is correctly classified internal-state vs. event+variable.
 - [ ] Each declared event has a `config.events` transformer using `Value.noFilter()` for the cleared case; each declared variable links its `inputs` default and its updating `events`.
+- [ ] **Emission shape fits the requirement.** Emit a **value** (`string`/`number`/`timeRange`) when the dashboard needs the single selected dimension/measure value; emit a **`filters`** clause when the component layers several selections into one compound filter (like FilterBuilder). Driven by the user's needs — not by defaulting to either. See [references/events-and-state.md](references/events-and-state.md) → "Emit what the requirement needs".
 - [ ] Required inputs and all `defaultValue`s (including sub-input defaults) are sensible.
 - [ ] A `definePreview(...)` using `previewData.*` mocks (`hideMenu: true`) is exported so it renders in the builder.
 - [ ] `npm run embeddable:build` passes.

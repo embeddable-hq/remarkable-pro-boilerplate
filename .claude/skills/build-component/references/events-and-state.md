@@ -58,6 +58,12 @@ events: [{ name: 'onChange', label: 'Selected value updated',
 events: { onChange: (v: string | null) => ({ value: v ?? Value.noFilter() }) },
 ```
 Property `type` values: `string`, `number`, `boolean`, `time`, `timeRange`, `filters`, `dimension`, `measure`. For a clicked time bucket, build a `timeRange` with `getTimeRangeFromDimensionValue({ value, dimension })` so drilldowns filter the correct range.
+## Emit what the requirement needs — a value or a filter
+Pick the payload from what the dashboard actually needs from the interaction — **both shapes are first-class**, the choice is requirement-driven (clarify it in step 1), not a matter of copying one component.
+- **The requirement is a single selected value** (click a cell/bar/row; other widgets react to that one value) → emit the **value** — the dimension/measure value (`type: 'string'` / `'number'` / `'timeRange'`). This is the lightweight path, and it's how Pro's own clicks emit: `TableScrollable`/`TableChartPaginated` `onRowClicked → rowDimensionValue`; charts → `…DimensionValue`; `HeatMapPro.onCellClicked → rowDimensionValue + columnDimensionValue`; controls → `value`. For a clicked **cell**, emit two properties — the value **and which dimension/column** it came from (cf. HeatMap's row + column) — so the consumer can tell `country = Germany` from `genre = Germany`. The dashboard maps that variable into a dataset filter if it wants filtering.
+- **The requirement is to layer several selections into one compound filter** (click a value in one column, then another column, then another, building `country IN (…) AND genre = …`) → hold the selections in state and emit a **`filters`** clause (a `FilterBuilderClause`), exactly as `FilterBuilderPro` does. This is a legitimate, first-class design — not over-engineering.
+
+You render the cell yourself, so you can make it clickable with whatever pattern the requirement calls for — the Pro conventions above are references for the *shape* of each payload, **not a cap on what you build**. Don't force a single-value emit when the user wants layered filters, and don't emit a whole filter when a value is all that's needed. Decide from the user's stated needs.
 ## Variables (auto-created in the builder)
 ```ts
 variables: [{
