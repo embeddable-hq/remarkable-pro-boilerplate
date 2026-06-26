@@ -49,8 +49,3 @@ A component can fill its box perfectly and still be unreadable. Two failures rec
   - *Library charts*: Chart.js rotates/skips axis ticks to a point and also auto-hides — still verify at the **Narrow** preset, since categorical axes collide when crowded.
 
   (Distinct from the SVG-edge *clipping* rules above: that's content cut off by a boundary; this is labels colliding with each other because there are too many or too long.)
-
-## In the examples
-- `funnel-chart` / `calendar-heatmap`-style components wrap their content in `overflow: auto` (and the calendar's fixed-size SVG grid scrolls horizontally).
-- The segmented control fills the width with `flex: 1` segments.
-- KPI/pie/line examples lean on the Chart.js primitive + `ChartCard` and need no extra handling.

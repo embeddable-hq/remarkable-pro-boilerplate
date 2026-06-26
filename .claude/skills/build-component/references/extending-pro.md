@@ -14,7 +14,7 @@ const meta = {
   ...barChartDefaultPro.meta,
   name: 'BarChartSortedDesc',          // NEW unique name
   label: 'Bar Chart (Sorted Descending)',
-} as const;
+};                                     // NO `as const` on an extended meta — see Rules below
 const props = (
   inputs: Inputs<typeof meta>,
   stateTuple: Parameters<typeof barChartDefaultPro.config.props>[1],
@@ -59,7 +59,7 @@ const meta = {
     { ...inputs.boolean, name: 'showLowStockWarning', label: 'Show low stock warning', defaultValue: true },
     { ...inputs.number, name: 'lowStockThreshold', label: 'Low stock threshold', defaultValue: 10 },
   ],
-} as const;
+};                                     // NO `as const` on an extended meta — see Rules below
 const props = (
   inputs: Inputs<typeof meta>,
   stateTuple: Parameters<typeof barChartDefaultPro.config.props>[1],

@@ -18,6 +18,9 @@ type StylesPanelProps = {
   componentName: string;
   darkMode: boolean;
   colors: Colors;
+  /** Called after an override is applied/reset so the parent can re-render the live component
+   *  (JS-resolved colours like Chart.js don't react to a bare CSS-var change). */
+  onStyleChange?: () => void;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -181,7 +184,7 @@ function TokenSection({ label, tokens, colors: c, overrides, onOverride, default
 
 // ── Main panel ────────────────────────────────────────────────────────────────
 
-export function StylesPanel({ componentName, darkMode, colors: c }: StylesPanelProps) {
+export function StylesPanel({ componentName, darkMode, colors: c, onStyleChange }: StylesPanelProps) {
   const tokens = tokensForComponent(componentName);
 
   // Track overrides: token → value the user set
@@ -201,7 +204,8 @@ export function StylesPanel({ componentName, darkMode, colors: c }: StylesPanelP
     // Clear the sessionStorage colour cache so palette re-resolves on next render.
     try { sessionStorage.removeItem('embeddable'); } catch { /* ignored */ }
     setOverrides((prev) => ({ ...prev, [token]: value }));
-  }, []);
+    onStyleChange?.();  // re-render the live component so JS-resolved colours (Chart.js) refresh
+  }, [onStyleChange]);
 
   const handleReset = useCallback(() => {
     for (const token of Object.keys(overrides)) {
@@ -210,7 +214,8 @@ export function StylesPanel({ componentName, darkMode, colors: c }: StylesPanelP
     try { sessionStorage.removeItem('embeddable'); } catch { /* ignored */ }
     setOverrides({});
     setTick((t) => t + 1);
-  }, [overrides]);
+    onStyleChange?.();  // re-render the live component so it drops the cleared overrides too
+  }, [overrides, onStyleChange]);
 
   const componentTokens = tokens.filter((t) => classify(t) === 'component');
   const semanticTokens  = tokens.filter((t) => classify(t) === 'semantic');

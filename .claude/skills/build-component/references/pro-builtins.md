@@ -15,7 +15,7 @@ const f = getThemeFormatter(theme);          // formatter for all values
 | `getThemeFormatter` | `{ getThemeFormatter }` | `.data(dimOrMeasure, value)`, `.number`, `.dateTime`, `.dimensionOrMeasureTitle` — never hand-format |
 | `useFillGaps` | `{ useFillGaps }` | Fill missing time buckets before rendering any time-series chart |
 | `getDimensionMeasureColor` | `{ getDimensionMeasureColor }` | Stable per-value / per-measure chart colors honoring theme maps |
-| `ChartCard`, `asChartCardHeaderProps` | `{ ChartCard, asChartCardHeaderProps }` | Outer wrapper for charts: header, loading, error, empty, export menu |
+| `ChartCard` | `{ ChartCard }` | Outer wrapper for charts: header, loading, error, empty, export menu. Pass `title`/`description`/`tooltip`/`hideMenu` directly — the `asChartCardHeaderProps` helper isn't exported in the installed version (see below / [discovery-and-validation.md](discovery-and-validation.md)) |
 | `EditorCard` | `{ EditorCard }` | Outer wrapper for controls/editors |
 | `inputs`, `subInputs` | `{ inputs }` / `{ subInputs }` | Compose `meta.inputs` by spreading shared definitions |
 | time utils | `{ getDimensionWithGranularity, getTimeRangeFromDimensionValue, getClientContextTimezone }` | Apply granularity, build event time ranges, resolve timezone |

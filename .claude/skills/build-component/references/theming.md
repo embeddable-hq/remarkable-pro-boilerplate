@@ -45,8 +45,12 @@ A real component uses the three-token chain for every chrome colour. Here is the
 ```tsx
 // In the React component's render (inline style or style object):
 
-// Bar fill — data value colour (NOT a chrome token; use getDimensionMeasureColor instead):
-const barColor = getDimensionMeasureColor(measure, theme, backgroundColorMap);
+// Bar fill — data value colour (NOT a chrome token; use getDimensionMeasureColor instead).
+// Single object arg, all fields required; keep the palette fallback (see pro-builtins.md):
+const chartColors = getChartColors();
+const barColor =
+  getDimensionMeasureColor({ dimensionOrMeasure: measure, theme, color: 'background',
+    value: `${measure.name}`, index, chartColors }) || chartColors[index % chartColors.length];
 
 // Label text — three-level chrome token chain:
 const labelColor = 'var(--em-rankedbar-label-color, var(--em-sem-text--muted, #6b7280))';

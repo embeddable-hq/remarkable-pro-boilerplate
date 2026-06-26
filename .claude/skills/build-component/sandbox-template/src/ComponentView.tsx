@@ -116,6 +116,16 @@ export function ComponentView({ entry, theme, darkMode, colors: c }: ComponentVi
     setControlValues((prev) => ({ ...prev, [name]: value }));
   }, []);
 
+  // Bump to force the rendered component to re-read CSS tokens after a live style override.
+  // Editing a CSS var on :root does NOT trigger a React render, so JS-resolved colours
+  // (Chart.js, getDimensionMeasureColor — read off the DOM during render) stay stale until the
+  // component re-renders. Remounting it on each override guarantees a fresh token read, the same
+  // way a theme change does in production. (Without this you only see the change after a tab
+  // switch, which happens to trigger a render.) The token <input> is in a sibling subtree, so it
+  // keeps focus across the remount.
+  const [styleVersion, setStyleVersion] = useState(0);
+  const handleStyleChange = useCallback(() => setStyleVersion((v) => v + 1), []);
+
   // ── Build componentProps through the real config.props descriptor ─────────
   const [propsError, setPropsError] = useState<Error | null>(null);
 
@@ -248,9 +258,9 @@ export function ComponentView({ entry, theme, darkMode, colors: c }: ComponentVi
             darkMode={darkMode}
             colors={c}
           >
-            <ErrorBoundary resetKey={`${entry.name}-${embState}`}>
+            <ErrorBoundary resetKey={`${entry.name}-${embState}-${styleVersion}`}>
               <EmbeddableThemeContext.Provider value={theme}>
-                <Comp {...componentProps} />
+                <Comp key={styleVersion} {...componentProps} />
               </EmbeddableThemeContext.Provider>
             </ErrorBoundary>
           </ResizableFrame>
@@ -327,6 +337,7 @@ export function ComponentView({ entry, theme, darkMode, colors: c }: ComponentVi
             componentName={entry.name}
             darkMode={darkMode}
             colors={c}
+            onStyleChange={handleStyleChange}
           />
         </div>
 
