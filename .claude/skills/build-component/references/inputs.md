@@ -1,5 +1,5 @@
 # Inputs — native types, shared constants, sub-inputs, custom types
-`meta.inputs` declares what the no-code builder exposes. Each becomes a prop on the React component (via `props`). **Compose from the shared `inputs`/`subInputs` constants** (`@embeddable.com/remarkable-pro`) instead of hand-writing objects — they carry the right labels, categories, and the sub-inputs that drive formatting.
+`meta.inputs` declares what the no-code builder exposes. Each becomes a prop on the React component (via `props`). A `dataset`/`dimension`/`measure` input is a **typed slot the dashboard author binds** to a concrete cube member at config time — it accepts *any* member of the right type (narrow with `config.supportedTypes`), so the component stays generic. **Never hardcode a specific member, or ask the user which one to use** — that's a dashboard-wiring decision; concrete members appear only in the `previewData` mock. **Compose from the shared `inputs`/`subInputs` constants** (`@embeddable.com/remarkable-pro`) instead of hand-writing objects — they carry the right labels, categories, and the sub-inputs that drive formatting.
 ## Native input types
 | `type` | Builder control | Value shape passed to `props` |
 |---|---|---|

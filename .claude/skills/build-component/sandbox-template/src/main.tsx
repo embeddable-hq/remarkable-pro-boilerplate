@@ -22,7 +22,7 @@
 
 import '@embeddable.com/remarkable-pro/dist/remarkable-pro.css';
 import { i18n } from '@embeddable.com/remarkable-pro';
-import { StrictMode, useState, useEffect } from 'react';
+import { StrictMode, useState, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registry, componentNames, mockClientContext } from './registry.ts';
 import { buildTheme, injectThemeStyles } from './theme.ts';
@@ -211,7 +211,13 @@ function App() {
     setLanguage(code);
   };
 
-  useEffect(() => {
+  // Inject theme vars SYNCHRONOUSLY during render (not in a post-paint effect): child charts read
+  // these vars off :root via getComputedStyle DURING their own render (remarkable-ui's getStyle),
+  // so the vars must be on :root BEFORE the children render. A useEffect runs after paint, so the
+  // chart painted one render stale — light vars in dark mode. useMemo runs in the render phase,
+  // before the returned JSX renders, and only when the theme actually changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useMemo(() => {
     injectThemeStyles(theme);
     injectFontOverride();
     // Clear color cache so getDimensionMeasureColor re-picks colors with new theme vars
