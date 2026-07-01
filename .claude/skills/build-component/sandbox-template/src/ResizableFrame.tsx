@@ -10,8 +10,6 @@ import type { Colors } from './main.tsx';
 import { SYSTEM_FONT } from './main.tsx';
 
 const PRESETS = [
-  { label: '320×120', width: 320, height: 120, title: 'small control' },
-  { label: '1280×120', width: 1280, height: 120, title: 'full-width control' },
   { label: '600×400', width: 600, height: 400, title: 'default chart' },
   { label: '280×560', width: 280, height: 560, title: 'narrow/tall' },
   { label: '1400×260', width: 1400, height: 260, title: 'wide/short' },
