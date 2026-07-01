@@ -1,6 +1,5 @@
 /**
  * ResizableFrame — a box with:
- * - Preset size buttons (5 presets from spec)
  * - Drag-to-resize handle (bottom-right corner)
  * - Dimensions display
  */
@@ -8,12 +7,6 @@
 import { useState, useRef, useCallback } from 'react';
 import type { Colors } from './main.tsx';
 import { SYSTEM_FONT } from './main.tsx';
-
-const PRESETS = [
-  { label: '600×400', width: 600, height: 400, title: 'default chart' },
-  { label: '280×560', width: 280, height: 560, title: 'narrow/tall' },
-  { label: '1400×260', width: 1400, height: 260, title: 'wide/short' },
-];
 
 type ResizableFrameProps = {
   initialWidth: number;
@@ -52,39 +45,17 @@ export function ResizableFrame({ initialWidth, initialHeight, children, darkMode
 
   return (
     <div>
-      {/* Preset buttons */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12, alignItems: 'center' }}>
-        {PRESETS.map((p) => {
-          const active = size.width === p.width && size.height === p.height;
-          return (
-            <button
-              key={p.label}
-              title={p.title}
-              onClick={() => setSize({ width: p.width, height: p.height })}
-              style={{
-                padding: '3px 9px',
-                fontSize: 11,
-                borderRadius: 5,
-                border: `1px solid ${active ? c.activeBorder : c.frameOutline}`,
-                background: active ? c.activeBg : 'transparent',
-                color: active ? c.activeText : c.textMuted,
-                cursor: 'pointer',
-                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                fontWeight: active ? 700 : 400,
-                transition: 'border-color 0.1s, background 0.1s',
-              }}
-            >
-              {p.label}
-            </button>
-          );
-        })}
+      {/* Dimensions readout — drag the bottom-right handle to resize */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
         <span style={{
-          alignSelf: 'center', fontSize: 11,
+          fontSize: 11,
           color: c.textFaint,
           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-          marginLeft: 4,
         }}>
           {size.width}×{size.height}
+        </span>
+        <span style={{ fontSize: 11, color: c.textFaint, fontFamily: SYSTEM_FONT }}>
+          — drag the corner to resize
         </span>
       </div>
 
@@ -132,5 +103,3 @@ export function ResizableFrame({ initialWidth, initialHeight, children, darkMode
     </div>
   );
 }
-
-export { PRESETS };
