@@ -35,6 +35,7 @@ embeddables:
 3. **Read the data models.** Inspect relevant `src/embeddable.com/models/cubes/*.cube.yml` to confirm cube/dimension/measure names exist and are typed correctly. Only join-related cubes can be referenced together inside one widget. **Ground strictly in the existing models — never invent data.** Reference only cubes/dimensions/measures that already exist; never create or edit a `*.cube.yml` (model generation is out of scope — see the "Out of scope" section at the end of this file). If the request needs data that isn't in the current models and can't be derived from them via joins, **stop and tell the user exactly which cube/measure/dimension is missing** and ask them to add it to the data model first — do not scaffold a placeholder cube, table, or members to satisfy the request.
 4. **Generate or edit the YAML** under `src/embeddable.com/embeddables/`. Use the references for any non-trivial section.
 5. **Check validation feedback** if `embeddable:dev` is running — see "Dev events log" below.
+6. **Always offer a visual self-check.** After you create or edit any `*.embeddable.yml`, end your turn by offering — in one line — to open it in the user's browser and see how it renders (e.g. *"Want me to open it in your browser and check how it renders?"*). Make this offer **every time you touch a dashboard**, not only when conditions look right — it's a routine closing step, not an optional extra you can silently skip. Only **after the user says yes** do you check that `embeddable:dev` is running and Playwright is set up (suggest `npm run playwright:setup` if not), then follow [references/visual-preview.md](references/visual-preview.md). Never drive the browser without an explicit yes.
 
 ## Reference index
 
@@ -43,6 +44,7 @@ embeddables:
 - [references/widgets.md](references/widgets.md) — widget anatomy, the 12-column grid, inputs, sub-inputs, events, `SET_VARIABLE`.
 - [references/custom-canvas.md](references/custom-canvas.md) — `customCanvas`, templates with `key` lifecycle, icon catalog, `starterCanvas`.
 - [references/component-discovery.md](references/component-discovery.md) — enumerating `componentLibraries` and reading their meta.
+- [references/visual-preview.md](references/visual-preview.md) — optional: open the generated dashboard in the user's browser via Playwright, look at it, and fix render/data errors.
 
 ## Examples
 
@@ -64,6 +66,8 @@ When the user is running `embeddable:dev`, the build can emit NDJSON events to a
 If the flag is absent, the log is not configured for this project — tell the user how to enable it (add the flag) rather than guessing a path.
 
 The format is NDJSON; each line is either a `marker` (build cycle progress) or an `issue` (validation problem). Key event names: `validate_start`, `validate_end`, `validation_error`, `change_detected`. Read the log on user request ("check for errors") or right after Claude itself edits a `*.embeddable.yml`. Surface the latest error(s); on widget overlap errors, propose new coordinates that fit the grid.
+
+This log is the **build/validation** channel. It won't tell you whether the dashboard actually *renders* — blank widgets, failed data queries, broken layout, or console errors only show up on the page. For that (once validation is clean), see the optional visual self-check in [references/visual-preview.md](references/visual-preview.md).
 
 ## Safety rules
 
