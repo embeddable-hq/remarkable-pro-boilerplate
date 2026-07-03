@@ -39,6 +39,7 @@ Auth for `embeddable:push` is either `-k <api_key>` (per-workspace API key) or a
 - `npm run embedding-preview` — serves `src/embeddable.com/scripts/embedding-preview.html` on `localhost:8080` for testing iframe embeds.
 - `npm run reinstall` — nukes `node_modules` and `package-lock.json`, reinstalls from scratch (use this if deps get into a weird state).
 - `npm run ct` — typecheck (`tsc --noEmit`).
+- `npm run playwright:setup` — one-time: installs the `playwright-cli` agent skills (`.claude/skills/playwright-cli/`, gitignored) used by the dashboard-as-code visual preview. No browser download — the visual preview attaches to the developer's own browser (Extension mode).
 
 There is no test suite or lint script. Prettier config lives in `.prettierrc.json`.
 
@@ -54,6 +55,8 @@ Don't run these automatically — ask the developer to run them themselves:
 
 - `npm run embeddable:login` — opens a browser auth flow with a verification code; launching it unprompted is jarring and security-sensitive.
 - `npm run dev` — long-running watcher / dev server; if Claude starts it, the process can be left holding the port after the conversation ends.
+
+The dashboard-as-code visual preview drives the developer's browser via Playwright to look at a generated dashboard. It's optional and only runs with the developer's explicit go-ahead each time — see `.claude/skills/dashboard-as-code/references/visual-preview.md`. Its one-time `npm run playwright:setup` just writes skill files (no browser download) and is safe to run.
 
 Everything else (`embeddable:build`, `embedding-preview`, `ct`) is local-only and safe to run without confirmation.
 
@@ -85,5 +88,6 @@ Everything else (`embeddable:build`, `embedding-preview`, `ct`) is local-only an
 
 Repo-specific Claude Code skills live under `.claude/skills/`. Each provides progressive-disclosure guidance for one area; consult the relevant one before generating or editing files it covers.
 
-- `.claude/skills/dashboard-as-code/` — for any work on `*.embeddable.yml` files (creating, scaffolding, editing dashboards, custom canvas templates, starter canvas, dataset filters, variables, events).
+- `.claude/skills/dashboard-as-code/` — for any work on `*.embeddable.yml` files (creating, scaffolding, editing dashboards, custom canvas templates, starter canvas, dataset filters, variables, events). Includes an optional Playwright-based visual preview of the generated dashboard (`references/visual-preview.md`).
+- `.claude/skills/playwright-cli/` — *generated, gitignored*. Installed by `npm run playwright:setup`; documents the `playwright-cli` browser-automation commands the visual preview relies on. Absent until setup is run.
 - `.claude/skills/build-component/` — for building custom Embeddable components (a React `index.tsx` + `*.emb.ts` descriptor) under `src/embeddable.com/components/`: extending/wrapping a Remarkable Pro component, a new chart from `remarkable-ui` primitives, an interactive control/filter, or a presentational component.

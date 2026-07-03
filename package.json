@@ -9,14 +9,15 @@
   },
   "scripts": {
     "ct": "tsconfig --noEmit",
-    "dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev",
+    "dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev --events-file=.embeddable-dev-logs/dev.events.ndjson --log-file .embeddable-dev-logs/dev.log",
     "embeddable:build": "embeddable build",
-    "embeddable:dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev --events-file=.embeddable-dev-logs/dev.events.ndjson",
+    "embeddable:dev": "cross-env NODE_OPTIONS='--max-old-space-size=4096' embeddable dev --events-file=.embeddable-dev-logs/dev.events.ndjson --log-file .embeddable-dev-logs/dev.log",
     "embeddable:login": "embeddable login",
     "embeddable:push": "embeddable push",
     "embeddable:upgrade": "npx npm-check-updates -u \"/embeddable/\"",
     "reinstall": "rm -rf node_modules package-lock.json && npm install",
-    "embedding-preview": "node src/embeddable.com/scripts/embedding-preview.cjs"
+    "embedding-preview": "node src/embeddable.com/scripts/embedding-preview.cjs",
+    "playwright:setup": "playwright-cli install --skills"
   },
   "dependencies": {
     "@embeddable.com/remarkable-pro": "^0.3.13"
@@ -24,8 +25,9 @@
   "devDependencies": {
     "@embeddable.com/core": "^2.13.8",
     "@embeddable.com/react": "^2.13.8",
-    "@embeddable.com/sdk-core": "^4.8.0",
-    "@embeddable.com/sdk-react": "^4.3.13",
+    "@embeddable.com/sdk-core": "^4.9.0",
+    "@embeddable.com/sdk-react": "^4.3.14",
+    "@playwright/cli": "^0.1.15",
     "@swc/core": "1.13.5",
     "@types/react": "^19.1.13",
     "cross-env": "^7.0.3",
