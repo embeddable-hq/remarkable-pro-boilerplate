@@ -2,26 +2,23 @@
  * cube-explore-query.cjs
  *
  * Runs a query against a named database connection through the Embeddable
- * cube-explore endpoint. Requires an existing Cube model to be defined for
+ * playground/explore endpoint. Requires an existing Cube model to be defined for
  * the connection (use after generating *.cube.yml files).
  *
  * Authentication:
  *   - Reads the embeddable:login JWT from ~/.embeddable/credentials
- *   - Uses the JWT directly for /workspace/{id}/cube-explore (no API key needed)
+ *   - Uses the JWT directly for /workspace/{id}/playground/explore (no API key needed)
  *
  * Usage:
  *   node src/embeddable.com/scripts/cube-explore-query.cjs \
- *     --connection my-db \
- *     --cube orders \
+ *     --cube orders.cube.yml \
  *     --query '{"measures":["orders.count"],"limit":1}'
  *
  *   node src/embeddable.com/scripts/cube-explore-query.cjs \
- *     --connection my-db \
- *     --cube orders \
+ *     --cube orders.cube.yml \
  *     --query '{"dimensions":["orders.status"],"measures":["orders.count"],"limit":20}'
  *
- * --connection  Required. Name of the database connection (from cube-schema-fetch).
- * --cube        Required. The Cube model name to query against (e.g. "orders").
+ * --cube        Required. Path to a *.cube.yml file to send inline with the query.
  * --query       Required. JSON string in Cube.js query format (the cubeQuery object).
  * --workspace   Optional. Override workspace ID (skips the API lookup).
  *
@@ -44,6 +41,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const yaml = require('js-yaml')
 
 // ─── Config ────────────────────────────────────────────────────────────────
 
@@ -134,7 +132,6 @@ async function getWorkspace(baseUrl, jwt, explicitId) {
 async function run() {
   const baseUrl       = getBaseUrl();
   const jwt           = readJwt();
-  const connectionArg = getArg('--connection');
   const cubeArg       = getArg('--cube');
   const queryArg      = getArg('--query');
   const workspaceArg  = getArg('--workspace');
@@ -145,19 +142,25 @@ async function run() {
     process.exit(1);
   }
 
-  const missing = ['--connection', '--cube', '--query'].filter((f) => !getArg(f));
+  const missing = ['--cube', '--query'].filter((f) => !getArg(f));
   if (missing.length) {
     process.stderr.write(
       `[cube-explore-query] Missing required flags: ${missing.join(', ')}\n` +
       `Example:\n` +
       `  node src/embeddable.com/scripts/cube-explore-query.cjs \\\n` +
-      `    --connection my-db \\\n` +
-      `    --cube orders \\\n` +
+      `    --cube orders.cube.yml \\\n` +
       `    --query '{"measures":["orders.count"],"limit":1}'\n`,
     );
     process.exit(1);
   }
 
+  let parsedModel;
+  try {
+    parsedModel = yaml.load(fs.readFileSync(cubeArg), 'utf8')
+  } catch(e) {
+    process.stderr.write(`[cube-explore-query] Invalid model in --cube: ${e.message}\n`);
+    process.exit(1);
+  }
   let cubeQuery;
   try {
     cubeQuery = JSON.parse(queryArg);
@@ -180,7 +183,7 @@ async function run() {
   }
 
   const { workspaceId } = workspace;
-  const queryUrl = `${baseUrl}/workspace/${workspaceId}/cube-explore/${connectionArg}/query`;
+  const queryUrl = `${baseUrl}/workspace/${workspaceId}/playground/explore`;
 
   // ── Execute query ────────────────────────────────────────────────────────
   let result;
@@ -188,8 +191,8 @@ async function run() {
     result = await apiFetch(queryUrl, jwt, {
       method: 'POST',
       body: {
-        cubeModel: cubeArg,
-        cubeQuery,
+        cubeModel: yaml.dump(parsedModel),
+        cubeQuery: cubeQuery,
       },
     });
   } catch (err) {
@@ -202,7 +205,7 @@ async function run() {
   }
 
   process.stdout.write(
-    JSON.stringify({ workspaceId, connection: connectionArg, cubeModel: cubeArg, cubeQuery, result }, null, 2) + '\n',
+    JSON.stringify({ workspaceId, cubeModel: cubeArg, cubeQuery, result }, null, 2) + '\n',
   );
 }
 
