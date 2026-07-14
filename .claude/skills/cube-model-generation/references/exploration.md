@@ -74,36 +74,33 @@ Use this **after the user picks a connection** to get the full list of tables an
 
 ## cube-explore-query.cjs
 
-Runs a query against an **existing** Cube model. Requires `--connection`, `--cube`, and `--query`.
+Runs a query against an **existing** Cube model. Requires `--cube` and `--query`.
 
 Use this **after** generating and verifying `*.cube.yml` files — as a sanity check, not for schema discovery.
 
 ```bash
 # Row count sanity check
 node src/embeddable.com/scripts/cube-explore-query.cjs \
-  --connection my-db \
-  --cube orders \
+  --cube src/embeddable.com/models/cubes/orders.cube.yml \
   --query '{"measures":["orders.count"],"limit":1}'
 
 # Check distinct values of an encoded column
 node src/embeddable.com/scripts/cube-explore-query.cjs \
-  --connection my-db \
-  --cube orders \
+  --cube src/embeddable.com/models/cubes/orders.cube.yml \
   --query '{"dimensions":["orders.status"],"measures":["orders.count"],"limit":20,"order":[["orders.count","desc"]]}'
 
 # Verify a calculated measure returns a plausible number
 node src/embeddable.com/scripts/cube-explore-query.cjs \
-  --connection my-db \
-  --cube orders \
+  --cube src/embeddable.com/models/cubes/orders.cube.yml \
   --query '{"measures":["orders.total_revenue","orders.count"],"limit":1}'
 
 # Override workspace
 node src/embeddable.com/scripts/cube-explore-query.cjs \
-  --connection my-db --cube orders --workspace <id> \
+  --cube src/embeddable.com/models/cubes/orders.cube.yml --workspace <id> \
   --query '{"measures":["orders.count"]}'
 ```
 
-**`--cube`** is the Cube model name (the `name` field from your `*.cube.yml`, e.g. `orders`). This is the starting cube for the query.
+**`--cube`** is the path to a `*.cube.yml` file (e.g. `src/embeddable.com/models/cubes/orders.cube.yml`). The file is read and sent inline with the query.
 
 **`--query`** is the `cubeQuery` object (Cube.js query format):
 
@@ -122,8 +119,7 @@ Output:
 ```json
 {
   "workspaceId": "abc123",
-  "connection": "my-db",
-  "cubeModel": "orders",
+  "cubeModel": "src/embeddable.com/models/cubes/orders.cube.yml",
   "cubeQuery": { ... },
   "result": {
     "data": [{ "orders.status": "complete", "orders.count": "1234" }],
@@ -173,7 +169,7 @@ Use `cube-explore-query.cjs` to verify the models work before handing off:
 ```bash
 # Quick row-count check
 node src/embeddable.com/scripts/cube-explore-query.cjs \
-  --connection <name> --cube <cube_name> \
+  --cube src/embeddable.com/models/cubes/<cube_name>.cube.yml \
   --query '{"measures":["<cube_name>.count"],"limit":1}'
 ```
 

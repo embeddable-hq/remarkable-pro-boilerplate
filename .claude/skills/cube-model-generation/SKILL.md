@@ -128,12 +128,12 @@ After schema fetch and the interview, there may still be questions the available
 ```bash
 # Distinct values of an encoded column
 node src/embeddable.com/scripts/cube-explore-query.cjs \
-  --connection <name> --cube <cube_name> \
+  --cube src/embeddable.com/models/cubes/<cube_name>.cube.yml \
   --query '{"dimensions":["<cube>.status"],"measures":["<cube>.count"],"limit":20}'
 
 # Row-count sanity check
 node src/embeddable.com/scripts/cube-explore-query.cjs \
-  --connection <name> --cube <cube_name> \
+  --cube src/embeddable.com/models/cubes/<cube_name>.cube.yml \
   --query '{"measures":["<cube>.count"],"limit":1}'
 ```
 
