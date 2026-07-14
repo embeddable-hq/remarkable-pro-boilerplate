@@ -19,18 +19,16 @@ Interview the user to understand their database schema, generate `*.cube.yml` cu
 
 The `notes` directory is gitignored — write freely without committing.
 
-## Two operating modes
+## Auth check
 
-**Check auth first.** Run the schema fetch script at the start of every session:
+Run the schema fetch script at the start of every session:
 
 ```bash
 node src/embeddable.com/scripts/cube-schema-fetch.cjs
 ```
 
-| Outcome | Mode |
-|---------|------|
-| Success (prints connection list) | **Interview + schema** — list connections, ask user to pick one, then fetch the DB schema for that connection to inform generation |
-| Exit 1 (`No login token` or `Token expired`) | **Interview-only** — inform the user once: *"I can't reach the live schema — run `npm run embeddable:login` to enable it. I'll continue from your answers."* Then proceed without scripts. |
+- **Success** — fetch the live schema to inform generation (connection list → pick one → fetch tables and columns).
+- **Exit 1** (`No login token` / `Token expired`) — inform the user once: *"I can't reach the live schema — run `npm run embeddable:login` to enable it. I'll continue from your answers."* Then proceed from the interview alone.
 
 Never repeat the auth warning after the first mention.
 
