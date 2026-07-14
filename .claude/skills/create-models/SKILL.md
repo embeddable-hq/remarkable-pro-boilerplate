@@ -1,5 +1,5 @@
 ---
-name: cube-model-generation
+name: create-models
 description: Use when the user wants to generate, scaffold, or edit Cube data models — `*.cube.yml` files and starter views under `src/embeddable.com/models/`. Triggers on phrases like "generate a cube model", "model my database", "create a cube for", "add a data model", "write cube YAML", "introspect my schema", or any direct work on `*.cube.yml` files.
 ---
 
