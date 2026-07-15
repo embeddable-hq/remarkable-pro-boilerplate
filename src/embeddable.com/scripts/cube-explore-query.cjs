@@ -14,11 +14,10 @@
  *     --cube orders.cube.yml \
  *     --query '{"measures":["orders.count"],"limit":1}'
  *
- *   node src/embeddable.com/scripts/cube-explore-query.cjs \
- *     --cube orders.cube.yml \
+ *   cat orders.cube.yml | node src/embeddable.com/scripts/cube-explore-query.cjs \
  *     --query '{"dimensions":["orders.status"],"measures":["orders.count"],"limit":20}'
  *
- * --cube        Required. Path to a *.cube.yml file to send inline with the query.
+ * --cube        Optional. Path to a *.cube.yml file. If omitted, YAML is read from stdin.
  * --query       Required. JSON string in Cube.js query format (the cubeQuery object).
  * --workspace   Optional. Override workspace ID (skips the API lookup).
  *
@@ -142,10 +141,9 @@ async function run() {
     process.exit(1);
   }
 
-  const missing = ['--cube', '--query'].filter((f) => !getArg(f));
-  if (missing.length) {
+  if (!queryArg) {
     process.stderr.write(
-      `[cube-explore-query] Missing required flags: ${missing.join(', ')}\n` +
+      `[cube-explore-query] Missing required flag: --query\n` +
       `Example:\n` +
       `  node src/embeddable.com/scripts/cube-explore-query.cjs \\\n` +
       `    --cube orders.cube.yml \\\n` +
@@ -155,11 +153,21 @@ async function run() {
   }
 
   let parsedModel;
-  try {
-    parsedModel = yaml.load(fs.readFileSync(cubeArg), 'utf8')
-  } catch(e) {
-    process.stderr.write(`[cube-explore-query] Invalid model in --cube: ${e.message}\n`);
-    process.exit(1);
+  if (cubeArg) {
+    try {
+      parsedModel = yaml.load(fs.readFileSync(cubeArg, 'utf8'));
+    } catch(e) {
+      process.stderr.write(`[cube-explore-query] Invalid model in --cube: ${e.message}\n`);
+      process.exit(1);
+    }
+  } else {
+    try {
+      const stdin = fs.readFileSync(0, 'utf8');
+      parsedModel = yaml.load(stdin);
+    } catch(e) {
+      process.stderr.write(`[cube-explore-query] Failed to read model from stdin: ${e.message}\n`);
+      process.exit(1);
+    }
   }
   let cubeQuery;
   try {
@@ -187,11 +195,12 @@ async function run() {
 
   // ── Execute query ────────────────────────────────────────────────────────
   let result;
+  let cubeModelYaml = yaml.dump(parsedModel)
   try {
     result = await apiFetch(queryUrl, jwt, {
       method: 'POST',
       body: {
-        cubeModel: yaml.dump(parsedModel),
+        cubeModel: cubeModelYaml,
         cubeQuery: cubeQuery,
       },
     });
@@ -205,7 +214,7 @@ async function run() {
   }
 
   process.stdout.write(
-    JSON.stringify({ workspaceId, cubeModel: cubeArg, cubeQuery, result }, null, 2) + '\n',
+    JSON.stringify({ workspaceId, cubeModel: cubeModelYaml, cubeQuery, result }, null, 2) + '\n',
   );
 }
 
