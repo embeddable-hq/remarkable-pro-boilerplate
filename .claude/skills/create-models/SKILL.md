@@ -64,9 +64,15 @@ The interview then focuses on **business context** that the schema can't provide
 - What should be hidden from dashboard authors?
 - What business names should cryptic columns get?
 
-**When the user expresses uncertainty** ("I don't know", "check yourself", "I have no idea"), don't just proceed with inference — proactively offer to query the live data: *"I can look at the actual data to figure that out — want me to check sample values / distinct values for [column]?"* Then use `cube-explore-query.cjs` to answer the question directly. This is the right moment for exploration, not a last resort.
+**Before asking the user a clarification question that data can answer, offer to run an exploratory query instead.** Examples:
 
-In interview-only mode, ask the full question set from the guide.
+- About to ask "what values does `status` take?" → instead offer: *"I can check the distinct values of `status` directly — want me to run that query?"*
+- About to ask "does `orders.customer_id` actually link to `customers.id`?" → instead offer: *"I can verify that FK relationship against live data — want me to check?"*
+- About to ask "what does a typical `amount` look like?" → instead offer: *"I can pull a sample aggregate — want me to run a quick row-count and sum?"*
+
+**Always ask for permission before running any exploratory query.** Never run `cube-explore-query.cjs` without explicit user approval for that specific query. One question, one permission check — do not batch permissions.
+
+In interview-only mode (auth failed), ask the full question set from the guide.
 
 ### 4. Generate
 
@@ -114,30 +120,35 @@ Once verified, come back and we can model the next domain or add presets / dashb
 
 **Do not run `embeddable:push` or `embeddable:dev`.** Both are the user's call (see root CLAUDE.md).
 
-## Exploration — last resort only
+## Exploration — proactive, not last resort
 
-After schema fetch and the interview, there may still be questions the available information can't answer. At that point — and only then — use `cube-explore-query.cjs` to run a targeted query against the live data.
+Use `cube-explore-query.cjs` during the interview to answer questions from data instead of asking the user. This reduces guesswork and keeps the interview focused on business context that only the user can provide.
 
-**Trigger conditions (examples):**
-- Column values are encoded and the user doesn't know the codes → run a distinct-values query
-- A FK relationship looks plausible from column names but isn't confirmed → run a join count to check for nulls
-- A generated measure looks off and you want to sanity-check the number → run a single-row aggregate
+**When to offer an exploratory query (before asking the user):**
+- A column's values are opaque (`status`, `type`, `code`, numeric flags) → offer a distinct-values query
+- A FK relationship is inferred from column names but not confirmed → offer a join-null check
+- A measure's source column is ambiguous (e.g. two `amount` columns) → offer a sample aggregate
+- The user says "I don't know", "check yourself", or "I have no idea" → immediately offer to look it up
+
+**Permission rule: always ask before running.** Describe the query in plain English, then ask: *"Want me to run that?"* Do not batch — one approval per query.
+
+For pre-existing cubes, pass `--cube`:
 
 ```bash
 # Distinct values of an encoded column
 node src/embeddable.com/scripts/cube-explore-query.cjs \
   --cube src/embeddable.com/models/cubes/<cube_name>.cube.yml \
   --query '{"dimensions":["<cube>.status"],"measures":["<cube>.count"],"limit":20}'
+```
 
-# Row-count sanity check
-node src/embeddable.com/scripts/cube-explore-query.cjs \
-  --cube src/embeddable.com/models/cubes/<cube_name>.cube.yml \
-  --query '{"measures":["<cube>.count"],"limit":1}'
+For columns on tables not yet modeled, generate a minimal in-memory cube and pipe it via stdin:
+
+```bash
+echo '<MINIMAL_CUBE_YAML>' | node src/embeddable.com/scripts/cube-explore-query.cjs \
+  --query '{"dimensions":["<cube>.status"],"measures":["<cube>.count"],"limit":20}'
 ```
 
 See [references/exploration.md](references/exploration.md) for the full query format and more examples.
-
-**This step is not routine.** Most sessions will not need it. Schema + interview is sufficient for the vast majority of models.
 
 ## Partial edits
 

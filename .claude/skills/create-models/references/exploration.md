@@ -74,9 +74,7 @@ Use this **after the user picks a connection** to get the full list of tables an
 
 ## cube-explore-query.cjs
 
-Runs a query against an **existing** Cube model. Requires `--cube` and `--query`.
-
-Use this **after** generating and verifying `*.cube.yml` files — as a sanity check, not for schema discovery.
+Runs a query against an existing Cube model when `--cube` is provided. When `--cube` is not provided, then Cube model is read from stdin. Use input from stdin for exploratory queries for non-existent cube models.  `--query` is always required.
 
 ```bash
 # Row count sanity check
@@ -98,9 +96,13 @@ node src/embeddable.com/scripts/cube-explore-query.cjs \
 node src/embeddable.com/scripts/cube-explore-query.cjs \
   --cube src/embeddable.com/models/cubes/orders.cube.yml --workspace <id> \
   --query '{"measures":["orders.count"]}'
+
+# Row-count sanity using model generated in memory
+echo <GENERATED_MODEL> | node src/embeddable.com/scripts/cube-explore-query.cjs \
+  --query '{"measures":["<cube>.count"],"limit":1}'  
 ```
 
-**`--cube`** is the path to a `*.cube.yml` file (e.g. `src/embeddable.com/models/cubes/orders.cube.yml`). The file is read and sent inline with the query.
+**`--cube`** is the path to a `*.cube.yml` file (e.g. `src/embeddable.com/models/cubes/orders.cube.yml`). The file is read and sent inline with the query. If not provided, model file is read from stdin.
 
 **`--query`** is the `cubeQuery` object (Cube.js query format):
 

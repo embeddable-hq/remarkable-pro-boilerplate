@@ -2,6 +2,8 @@
 
 Ask questions in the order below. Don't dump the full list at once — group by topic, wait for answers, and follow up before moving on. If the user has already answered a question (e.g. from a previous session's notes), skip it.
 
+**Prefer data over questions.** Before asking the user something the database can answer, offer to run an exploratory query instead. Generate a minimal in-memory cube model and pipe it to `cube-explore-query.cjs` via stdin — no file needs to exist yet. Always ask for permission first: describe what you want to check in plain English and ask *"Want me to run that?"* One permission per query, never batched.
+
 ---
 
 ## Group 1: Domain scope
@@ -53,7 +55,7 @@ Ask questions in the order below. Don't dump the full list at once — group by 
 
 ## Group 4: Measures (what to aggregate)
 
-> Focus on the numbers the business actually cares about.
+> Focus on the numbers the business actually cares about. Before asking the user which columns drive a measure, offer to pull a sample aggregate or column list from the database. Always ask permission before running any query.
 
 10. **What are the key metrics for this domain?**
     - Examples: count of orders, total revenue, average session duration, unique users
