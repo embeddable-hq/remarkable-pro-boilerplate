@@ -2,7 +2,7 @@
 
 Two helper scripts wrap the builder API. The skill invokes them via `Bash`; never make raw HTTP calls directly.
 
-Both scripts read the `embeddable:login` JWT from `~/.embeddable/credentials` and auto-detect the region from `embeddable.config.ts`.
+Both scripts read the `embeddable:login` JWT from `~/.embeddable/credentials` and auto-detect the region from the active (uncommented) `region` field in `embeddable.config.ts`. Ignore any commented-out `region` lines.
 
 ---
 
