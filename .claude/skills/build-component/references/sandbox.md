@@ -50,17 +50,15 @@ npm run dev          # Vite on :5210
 
 **If a new component doesn't appear:** the sandbox watches `src/embeddable.com/components/` and auto-reloads when a `.emb.ts` is added, so it normally shows up on its own. If it doesn't (rare), restart `npm run dev`.
 
-## User confirmation step (before push)
-Once the build is green and the sandbox is running, tell the user:
+## Handing off (before push)
+Once the build is green and the step-10 self-verify has passed, hand off **short and outcome-first** as **plain text** (do not use the AskUserQuestion tool). Lead with what you verified — **no build narrative** (foundation choice, built-ins, decisions all wait until the user asks):
 
-> The sandbox is running at `http://localhost:5210`. Please open it, select **[ComponentName]** from the sidebar, and confirm:
-> - It renders with correct layout, data, and theme
-> - It resizes gracefully (try the **Narrow** and **Wide** presets)
-> - The input controls on the right match the expected meta inputs
+> **MapChart is ready!** I've verified it in the sandbox — both sizes render, tooltips work, the click event fires, dark mode is clean. You can:
 >
-> Let me know when you're satisfied and I'll mark the component complete.
+> 1. **Check it yourself** — it's running at `http://localhost:5210`: select **MapChart** in the sidebar, resize the frame, toggle **Dark**.
+> 2. **Inspect the code or ask me about it** — it lives in `src/embeddable.com/components/MapChart/` (use the repo's real path).
 
-Wait for explicit confirmation before considering the component done. The agent does **not** run `embeddable:push`; the user does.
+If the self-verify found and fixed issues, one line on what was fixed is fine; anything longer waits to be asked. Wait for explicit confirmation of the **look, theming, and feel** before considering the component done. The agent does **not** run `embeddable:push`; the user does.
 
 ## Fidelity notes
 The sandbox calls the real `config.props()` and the real theme pipeline. Key gaps (full detail in `sandbox/README.md`):
