@@ -1,0 +1,56 @@
+# Starter denormalized view — orders domain example
+#
+# Views join multiple cubes into a single surface that dashboard authors
+# can use without needing to understand cube relationships. Generate at
+# least one view per domain.
+#
+# IMPORTANT: Despite living in the views/ folder, this file MUST use the
+# .cube.yml extension (not .view.yml). The SDK only scans *.cube.yml files
+# for data models; .view.yml files are ignored. The sdk-react validator also
+# rejects `cubes:` in any non-.cube.yml file.
+#
+# File lives at: src/embeddable.com/models/views/<name>.cube.yml
+
+views:
+  - name: orders_view
+    title: Orders (Full)
+    # description is not stored server-side; use it for repo docs only.
+    description: >
+      Denormalized view of orders joined with customers and order items.
+      Use this as the default dataset for order-related dashboards.
+
+    cubes:
+      # ── Starting cube (the fact table) ────────────────────────────────────
+      - join_path: orders
+        includes:
+          - created_at    # main time dimension
+          - status
+          - channel
+          - count
+          - total_revenue
+          - avg_order_value
+
+      # ── Traversing a join: orders → customers ──────────────────────────────
+      # join_path uses dot-notation to traverse the join declared in the
+      # fact cube. You cannot reference a cube here that isn't reachable
+      # via the fact cube's joins.
+      - join_path: orders.customers
+        includes:
+          - country
+          - tier
+          # Rename a member using the object form
+          - name: name
+            alias: customer_name
+
+      # ── Traversing a second join: orders → order_items ────────────────────
+      - join_path: orders.order_items
+        includes:
+          - category
+          - total_quantity
+          - total_item_revenue
+
+      # ── Include everything from a cube (use sparingly) ────────────────────
+      # - join_path: orders
+      #   includes: "*"
+      #   excludes:
+      #     - internal_id    # hide internal fields even when using "*"

@@ -1,0 +1,178 @@
+---
+name: create-models
+description: Use when the user wants to generate, scaffold, or edit Cube data models — `*.cube.yml` files and starter views under `src/embeddable.com/models/`. Triggers on phrases like "generate a cube model", "model my database", "create a cube for", "add a data model", "write cube YAML", "introspect my schema", or any direct work on `*.cube.yml` files.
+---
+
+# Cube model generation
+
+Interview the user to understand their database schema, generate `*.cube.yml` cubes and at least one starter view per domain, and persist business context for future sessions.
+
+**Scope one domain at a time.** A domain is a logical cluster of related tables (e.g. "orders + order_items + customers", or "analytics events"). Stop after each domain and instruct the user to verify in `embeddable:dev` before continuing.
+
+## File locations
+
+| File type | Path |
+|-----------|------|
+| Cubes | `src/embeddable.com/models/cubes/<name>.cube.yml` |
+| Views | `src/embeddable.com/models/views/<name>.cube.yml` (must be `.cube.yml`, not `.view.yml`) |
+| Business context notes | `.claude/notes/cube-models/<domain>.md` (gitignored) |
+
+The `notes` directory is gitignored — write freely without committing.
+
+## Auth check
+
+Run the schema fetch script at the start of every session:
+
+```bash
+node src/embeddable.com/scripts/cube-schema-fetch.cjs
+```
+
+- **Success** — fetch the live schema to inform generation (connection list → pick one → fetch tables and columns).
+- **Exit 1** (`No login token` / `Token expired`) — inform the user once: *"I can't reach the live schema — run `npm run embeddable:login` to enable it. I'll continue from your answers."* Then proceed from the interview alone.
+
+Never repeat the auth warning after the first mention.
+
+## Workflow
+
+### 1. Load existing context
+- Read any matching note from `.claude/notes/cube-models/` for the domain if it exists.
+- Run `cube-schema-fetch.cjs` (no flags) to check auth.
+  - If the response contains `action: "choose_workspace"`: **stop and ask the user which workspace to use** — never pick one automatically. Show the full list. Then re-run with `--workspace <id>` once they've chosen.
+  - If the response contains a `connections` list: show it and ask which connection to use, then run `cube-schema-fetch.cjs --connection <name> --workspace <id>` to get tables and columns.
+  - On exit 1: switch to interview-only mode (warn once).
+- Pass `--workspace <id>` on every subsequent script call in the session once a workspace is chosen.
+- Read all existing `*.cube.yml` files in `src/embeddable.com/models/cubes/` — don't regenerate what's already there.
+
+### 2. Choose domain
+Ask: *"Which domain or set of tables would you like to model?"*
+
+When schema is available, propose tables that aren't yet modeled and let the user confirm the scope. If the user isn't sure, suggest grouping by entity (e.g. "the orders cluster" or "the user events tables").
+
+### 3. Interview
+
+Work through the questions in [references/interview-guide.md](references/interview-guide.md). Don't dump all questions at once — group by topic and wait for answers.
+
+When schema is available, many structural questions answer themselves from the column list:
+- Table names, column names, SQL types → already known
+- PK candidates (`*_id`, `id` columns) → suggest, user confirms
+- FK candidates (matching column names across tables) → suggest, user confirms
+
+The interview then focuses on **business context** that the schema can't provide:
+- What does each entity mean to the business?
+- Which measures matter? (counts, sums, calculated fields)
+- Are any column values encoded? (e.g. `status = 1/2/3`, `gender = 'm'/'f'`)
+- What should be hidden from dashboard authors?
+- What business names should cryptic columns get?
+
+**Before asking the user a clarification question that data can answer, offer to run an exploratory query instead.** Examples:
+
+- About to ask "what values does `status` take?" → instead offer: *"I can check the distinct values of `status` directly — want me to run that query?"*
+- About to ask "does `orders.customer_id` actually link to `customers.id`?" → instead offer: *"I can verify that FK relationship against live data — want me to check?"*
+- About to ask "what does a typical `amount` look like?" → instead offer: *"I can pull a sample aggregate — want me to run a quick row-count and sum?"*
+
+**Always ask for permission before running any exploratory query.** Never run `cube-explore-query.cjs` without explicit user approval for that specific query. One question, one permission check — do not batch permissions.
+
+In interview-only mode (auth failed), ask the full question set from the guide.
+
+### 4. Generate
+
+Produce files in this order:
+1. One `*.cube.yml` per table in the domain
+2. One `*.cube.yml` starter view (in `models/views/`) that joins all tables in the domain into a single denormalized surface
+
+Use [references/cube-yml-schema.md](references/cube-yml-schema.md) for the YAML syntax.
+Use the examples in [examples/](examples/) as scaffolding.
+
+**Generation rules:**
+- Every cube needs a `primary_key: true` dimension.
+- `public: false` on primary keys hides them from the no-code builder but keeps them usable for joins.
+- Joins are declared on the **fact** side (many-to-one goes in the fact cube).
+- Denormalized views use `includes` to pull from multiple cubes — don't re-specify dimensions manually.
+- Don't invent column names. If a column name isn't confirmed by the schema fetch or the user, ask.
+
+### 5. Persist context
+
+Write (or update) `.claude/notes/cube-models/<domain>.md` with:
+- Table names and their business purpose
+- Modeling decisions made and why
+- Any open questions or known limitations
+- Connection name used
+
+See note format at [references/interview-guide.md#notes-format](references/interview-guide.md#notes-format).
+
+### 6. Stop and hand off
+
+After writing files, output:
+
+```
+Generated:
+  src/embeddable.com/models/cubes/<cube>.cube.yml  (× N)
+  src/embeddable.com/models/views/<view>.cube.yml
+
+Next step: verify in embeddable:dev
+  1. Start the dev server: npm run dev
+  2. Open the no-code builder and navigate to Data Models
+  3. Confirm dimensions and measures appear correctly
+  4. Run a test query from the builder to check row counts / values
+
+Once verified, come back and we can model the next domain or add presets / dashboards.
+```
+
+**Do not run `embeddable:push` or `embeddable:dev`.** Both are the user's call (see root CLAUDE.md).
+
+## Exploration — proactive, not last resort
+
+Use `cube-explore-query.cjs` during the interview to answer questions from data instead of asking the user. This reduces guesswork and keeps the interview focused on business context that only the user can provide.
+
+**When to offer an exploratory query (before asking the user):**
+- A column's values are opaque (`status`, `type`, `code`, numeric flags) → offer a distinct-values query
+- A FK relationship is inferred from column names but not confirmed → offer a join-null check
+- A measure's source column is ambiguous (e.g. two `amount` columns) → offer a sample aggregate
+- The user says "I don't know", "check yourself", or "I have no idea" → immediately offer to look it up
+
+**Permission rule: always ask before running.** Describe the query in plain English, then ask: *"Want me to run that?"* Do not batch — one approval per query.
+
+For pre-existing cubes, pass `--cube`:
+
+```bash
+# Distinct values of an encoded column
+node src/embeddable.com/scripts/cube-explore-query.cjs \
+  --cube src/embeddable.com/models/cubes/<cube_name>.cube.yml \
+  --query '{"dimensions":["<cube>.status"],"measures":["<cube>.count"],"limit":20}'
+```
+
+For columns on tables not yet modeled, generate a minimal in-memory cube and pipe it via stdin:
+
+```bash
+echo '<MINIMAL_CUBE_YAML>' | node src/embeddable.com/scripts/cube-explore-query.cjs \
+  --query '{"dimensions":["<cube>.status"],"measures":["<cube>.count"],"limit":20}'
+```
+
+See [references/exploration.md](references/exploration.md) for the full query format and more examples.
+
+## Partial edits
+
+When the user asks to modify an existing cube (add a dimension, fix a measure, rename a field):
+1. Read the current file before editing.
+2. Make only the requested change — don't rewrite unrelated cubes.
+3. Update the domain note to record the change.
+4. Remind the user to re-verify in `embeddable:dev`.
+
+## Reference index
+
+- [references/cube-yml-schema.md](references/cube-yml-schema.md) — YAML syntax, all field types, join relationships, meta overrides.
+- [references/interview-guide.md](references/interview-guide.md) — the full question list and note format.
+- [references/exploration.md](references/exploration.md) — how to invoke the helper scripts and interpret results.
+
+## Examples
+
+Read these when scaffolding:
+
+- [examples/single-table.cube.yml](examples/single-table.cube.yml) — minimal cube with no joins.
+- [examples/with-joins.cube.yml](examples/with-joins.cube.yml) — fact + dimension cubes with relationships.
+- [examples/starter-view.cube.yml](examples/starter-view.cube.yml) — denormalized view using `includes`.
+
+## Out of scope
+
+- Custom components, theming, presets, or dashboard layout — separate skills cover those.
+- Cube.js features not supported by Embeddable (pre-aggregations, segments, multi-tenancy beyond `securityContext`).

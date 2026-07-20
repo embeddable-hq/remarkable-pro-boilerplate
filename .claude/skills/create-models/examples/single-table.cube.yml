@@ -1,0 +1,71 @@
+# Single-table cube — minimal example
+#
+# Use this pattern when a domain has only one table, or when you're modeling
+# a standalone dimension table with no outgoing joins.
+
+cubes:
+  - name: events
+    title: Events
+    sql_table: analytics.events
+
+    dimensions:
+      # Primary key — always required; public: false hides it from the builder
+      # but keeps it usable for joins and row-level uniqueness.
+      - name: event_id
+        sql: event_id
+        type: string
+        primary_key: true
+        public: false
+
+      # Main time dimension — used for date range filters and time-series charts.
+      - name: occurred_at
+        title: Date
+        sql: occurred_at
+        type: time
+
+      # Categorical dimensions (used for grouping and filtering)
+      - name: event_type
+        sql: event_type
+        type: string
+
+      - name: country
+        sql: country
+        type: string
+
+      - name: platform
+        sql: platform
+        type: string
+
+      # Encoded values — use CASE to expand abbreviations into readable labels.
+      - name: device_category
+        sql: >
+          CASE
+            WHEN device_type IN ('mobile', 'tablet') THEN 'Mobile'
+            WHEN device_type = 'desktop'             THEN 'Desktop'
+            ELSE 'Other'
+          END
+        type: string
+
+    measures:
+      # Count is the most common measure — no `sql` needed.
+      - name: count
+        type: count
+        title: "# Events"
+
+      # count_distinct requires sql pointing to the column to deduplicate.
+      - name: unique_users
+        sql: user_id
+        type: count_distinct
+        title: Unique Users
+
+      # sum — straightforward column aggregation.
+      - name: total_duration_seconds
+        sql: duration_seconds
+        type: sum
+        title: Total Duration (s)
+
+      # Derived measure — references other measures via {measure_name}.
+      - name: avg_duration_seconds
+        sql: "{total_duration_seconds} / NULLIF({count}, 0)"
+        type: number
+        title: Avg Duration (s)
