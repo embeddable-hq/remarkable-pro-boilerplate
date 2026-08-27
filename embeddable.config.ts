@@ -32,14 +32,13 @@ export default defineConfig({
   // /**
   //  * This gives you some example dashboards to play with
   //  */
-  // starterEmbeddables: {
-  //   'US': [
-  //     'ad3d57d7-2335-4fbd-a3b4-09fa18145f5d',
-  //     'f5a21ac9-d0c4-4318-aac1-a2df49d755ff'
-  //   ],
-  //   'EU': [
-  //     'bf93fb35-c6e1-4d08-9ede-9ac11a72a74d',
-  //     'ad3ca5f1-020a-47f9-8a0f-44edd73207e5'
-  //   ]
-  // }
+  starterEmbeddables: {
+    'US': [
+      'deb9b9d7-c267-449d-bfc6-a079f534a197'
+    ],
+    'EU': [
+      'bf93fb35-c6e1-4d08-9ede-9ac11a72a74d',
+      'ad3ca5f1-020a-47f9-8a0f-44edd73207e5'
+    ]
+  }
 });
