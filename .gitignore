@@ -11,3 +11,4 @@ embeddable-entry-point.jsx
 /.claude/skills/playwright-cli/
 # playwright-cli scratch dir (snapshots/screenshots)
 .playwright-cli
+.idea
