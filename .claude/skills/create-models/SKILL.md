@@ -174,5 +174,5 @@ Read these when scaffolding:
 
 ## Out of scope
 
-- Custom components, theming, presets, or dashboard layout — separate skills cover those.
+- Custom components → the `build-component` skill; styling/theming and `*.cc.yml` presets → the `theming` skill; dashboard layout → `dashboard-as-code`.
 - Cube.js features not supported by Embeddable (pre-aggregations, segments, multi-tenancy beyond `securityContext`).
