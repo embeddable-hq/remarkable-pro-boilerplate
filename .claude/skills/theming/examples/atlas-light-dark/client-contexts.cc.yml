@@ -1,0 +1,28 @@
+# Example: "View as" presets for a branded workspace (install content into
+# src/embeddable.com/presets/client-contexts.cc.yml — APPEND to what's there, keep numbering).
+# canvas.background echoes the theme's PAGE surface (the area behind the cards) — it is a
+# builder-preview setting only; the real page background belongs to the host app's CSS.
+# Curation rule: one preset per theme variant — a dropdown, not a test matrix (~8 entries max).
+- name: 1. Light Theme
+  clientContext:
+    theme: "light"
+  canvas:
+    background: "#fff"
+
+- name: 2. Dark Theme
+  clientContext:
+    theme: "dark"
+  canvas:
+    background: "#000"
+
+- name: 3. Atlas Light
+  clientContext:
+    theme: "atlas"
+  canvas:
+    background: "#f4f6f8"
+
+- name: 4. Atlas Dark
+  clientContext:
+    theme: "atlas-dark"
+  canvas:
+    background: "#101218"
