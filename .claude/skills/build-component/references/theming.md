@@ -1,6 +1,8 @@
 # Theming & CSS variables
 How a custom component stays on-theme and exposes two levels of override, the way the Pro components do.
 
+> This is the **component-author** view (consuming tokens in TSX). To author workspace styling — `embeddable.theme.ts`, `themes/*.theme.ts`, palettes, fonts — use the `theming` skill (`.claude/skills/theming/`).
+
 ## The three-layer model (and why component tokens matter)
 Remarkable uses a three-layer CSS-variable hierarchy:
 1. **Core** — raw primitives (`--em-core-color-gray--0900`, `--em-core-spacing--0300`).

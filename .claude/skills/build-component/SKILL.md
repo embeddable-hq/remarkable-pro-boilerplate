@@ -99,5 +99,6 @@ Worked, illustrative components — one per rung of the complexity ladder. Read 
 - **Custom types are beta** — TS noise, may need a `dev` restart, not supported in Custom Canvas. Use only when an input genuinely needs a fixed named option set; otherwise prefer native types. See [references/inputs.md](references/inputs.md).
 ## Out of scope
 - Dashboards / `*.embeddable.yml` (layout, wiring widgets together, drilldowns) → the `dashboard-as-code` skill.
-- Cube data models (`*.cube.yml`), theme customization (`embeddable.theme.ts`), presets — separate concerns; this skill at most *optionally* skims cubes, never requires them.
+- Cube data models (`*.cube.yml`) → the `create-models` skill.
+- Workspace styling (`embeddable.theme.ts`, `themes/`) → the `theming` skill. 
 - **Fixing bugs in `@embeddable.com/remarkable-pro` / `@embeddable.com/remarkable-ui`** → fix them **centrally** in those repos so every consumer gets the fix; don't clone-and-patch here as a workaround (a local copy fragments the fix and drifts from the library). Legitimately *extending* Pro for new behaviour — Pattern B — is in scope; the line is "new capability" vs "patch a defect". When you spot a library defect, help the user report it upstream with a prefilled GitHub issue link — see [references/reporting-upstream.md](references/reporting-upstream.md).
