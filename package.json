@@ -20,7 +20,7 @@
     "playwright:setup": "playwright-cli install --skills"
   },
   "dependencies": {
-    "@embeddable.com/remarkable-pro": "^0.3.26"
+    "@embeddable.com/remarkable-pro": "^0.4.2"
   },
   "devDependencies": {
     "@embeddable.com/core": "^2.13.8",
