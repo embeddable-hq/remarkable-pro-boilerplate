@@ -80,4 +80,7 @@ This log is the **build/validation** channel. It won't tell you whether the dash
 ## Out of scope
 
 - Custom variable types — only the built-in types listed in `references/variables.md` are covered.
-- Custom components → the `build-component` skill; cube model generation → `create-models`; theme/styling customization and client-context presets (`*.cc.yml`) → `theming`. Security-context presets (`*.sc.yml`) have no skill yet.
+- Custom components → the `build-component` skill.
+- Cube model generation → the `create-models` skill.
+- Workspace styling and client-context presets (`*.cc.yml`) → the `theming` skill.
+- Security-context presets (`*.sc.yml`) — no skill yet.
