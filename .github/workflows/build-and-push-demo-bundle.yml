@@ -20,55 +20,42 @@ on:
           - EU
 
 jobs:
-  plan:
+  dev:
+    if: github.event_name == 'push' || inputs.environment == 'dev'
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.plan.outputs.matrix }}
-    steps:
-      - id: plan
-        run: |
-          all='[
-            {"name":"dev","api_key_secret":"EMBEDDABLE_API_KEY_DEV","use_internal_dev_urls":"true"},
-            {"name":"US","api_key_secret":"EMBEDDABLE_API_KEY_US","region":"US"},
-            {"name":"EU","api_key_secret":"EMBEDDABLE_API_KEY_EU","region":"EU"}
-          ]'
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            selected=$(echo "$all" | jq -c '[.[] | select(.name == "${{ inputs.environment }}")]')
-          else
-            selected=$(echo "$all" | jq -c '.')
-          fi
-          echo "matrix={\"include\":$selected}" >> "$GITHUB_OUTPUT"
-
-  build-and-push:
-    needs: plan
-    name: Build & push (${{ matrix.name }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup NodeJS
-        uses: actions/setup-node@v4
+      - uses: ./.github/actions/build-and-push-demo-bundle
         with:
           node-version: ${{ vars.BUILD_NODE_VERSION }}
-
-      - name: install dependencies
-        run: npm ci
-
-      - name: Point config at ${{ matrix.name }}
-        if: matrix.region || matrix.use_internal_dev_urls
-        run: |
-          if [ -n "${{ matrix.region }}" ]; then
-            sed -i 's/region: "US",/region: "${{ matrix.region }}",/' embeddable.config.ts
-          fi
-          if [ "${{ matrix.use_internal_dev_urls }}" = "true" ]; then
+          api-key: ${{ secrets.EMBEDDABLE_API_KEY_DEV }}
+          email: ${{ vars.EMBEDDABLE_PUSH_EMAIL }}
+          message: Auto-push from ${{ github.sha }}
+          config-patch: |
+            sed -i -E 's#^(\s*)region: "US",#\1// region: "US",#' embeddable.config.ts
             sed -i -E 's#^(\s*)// (previewBaseUrl|pushBaseUrl|audienceUrl|authDomain|authClientId):#\1\2:#' embeddable.config.ts
-          fi
 
-      - name: Build
-        run: npm run embeddable:build
+  US:
+    if: github.event_name == 'push' || inputs.environment == 'US'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-and-push-demo-bundle
+        with:
+          node-version: ${{ vars.BUILD_NODE_VERSION }}
+          api-key: ${{ secrets.EMBEDDABLE_API_KEY_US }}
+          email: ${{ vars.EMBEDDABLE_PUSH_EMAIL }}
+          message: Auto-push from ${{ github.sha }}
 
-      - name: Push to ${{ matrix.name }}
-        run: npm run embeddable:push -- --api-key "${{ secrets[matrix.api_key_secret] }}" --email "${{ vars.EMBEDDABLE_PUSH_EMAIL }}" --message "Auto-push from ${{ github.sha }}"
+  EU:
+    if: github.event_name == 'push' || inputs.environment == 'EU'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build-and-push-demo-bundle
+        with:
+          node-version: ${{ vars.BUILD_NODE_VERSION }}
+          api-key: ${{ secrets.EMBEDDABLE_API_KEY_EU }}
+          email: ${{ vars.EMBEDDABLE_PUSH_EMAIL }}
+          message: Auto-push from ${{ github.sha }}
+          config-patch: sed -i 's/"US"/"EU"/' embeddable.config.ts
