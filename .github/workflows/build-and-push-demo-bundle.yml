@@ -22,40 +22,24 @@ on:
 jobs:
   dev:
     if: github.event_name == 'push' || inputs.environment == 'dev'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-and-push-demo-bundle
-        with:
-          node-version: ${{ vars.BUILD_NODE_VERSION }}
-          api-key: ${{ secrets.EMBEDDABLE_API_KEY_DEV }}
-          email: ${{ vars.EMBEDDABLE_PUSH_EMAIL }}
-          message: Auto-push from ${{ github.sha }}
-          config-patch: |
-            sed -i -E 's#^(\s*)region: "US",#\1// region: "US",#' embeddable.config.ts
-            sed -i -E 's#^(\s*)// (previewBaseUrl|pushBaseUrl|audienceUrl|authDomain|authClientId):#\1\2:#' embeddable.config.ts
+    uses: ./.github/workflows/push-to-workspace.yml
+    with:
+      config-patch: |
+        sed -i -E 's#^(\s*)region: "US",#\1// region: "US",#' embeddable.config.ts
+        sed -i -E 's#^(\s*)// (previewBaseUrl|pushBaseUrl|audienceUrl|authDomain|authClientId):#\1\2:#' embeddable.config.ts
+    secrets:
+      api-key: ${{ secrets.EMBEDDABLE_API_KEY_DEV }}
 
   US:
     if: github.event_name == 'push' || inputs.environment == 'US'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-and-push-demo-bundle
-        with:
-          node-version: ${{ vars.BUILD_NODE_VERSION }}
-          api-key: ${{ secrets.EMBEDDABLE_API_KEY_US }}
-          email: ${{ vars.EMBEDDABLE_PUSH_EMAIL }}
-          message: Auto-push from ${{ github.sha }}
+    uses: ./.github/workflows/push-to-workspace.yml
+    secrets:
+      api-key: ${{ secrets.EMBEDDABLE_API_KEY_US }}
 
   EU:
     if: github.event_name == 'push' || inputs.environment == 'EU'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/build-and-push-demo-bundle
-        with:
-          node-version: ${{ vars.BUILD_NODE_VERSION }}
-          api-key: ${{ secrets.EMBEDDABLE_API_KEY_EU }}
-          email: ${{ vars.EMBEDDABLE_PUSH_EMAIL }}
-          message: Auto-push from ${{ github.sha }}
-          config-patch: sed -i 's/"US"/"EU"/' embeddable.config.ts
+    uses: ./.github/workflows/push-to-workspace.yml
+    with:
+      config-patch: sed -i 's/"US"/"EU"/' embeddable.config.ts
+    secrets:
+      api-key: ${{ secrets.EMBEDDABLE_API_KEY_EU }}

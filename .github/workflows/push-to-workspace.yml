@@ -1,0 +1,36 @@
+name: Build & push demo bundle (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      config-patch:
+        type: string
+        required: false
+        default: ""
+    secrets:
+      api-key:
+        required: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ vars.BUILD_NODE_VERSION }}
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: Point config at this environment
+        if: inputs.config-patch != ''
+        run: ${{ inputs.config-patch }}
+
+      - name: Build
+        run: npm run embeddable:build
+
+      - name: Push
+        run: npm run embeddable:push -- --api-key "${{ secrets.api-key }}" --email "${{ vars.EMBEDDABLE_PUSH_EMAIL }}" --message "Auto-push from ${{ github.sha }}"
