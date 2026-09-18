@@ -20,23 +20,32 @@ on:
           - EU
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - id: plan
+        run: |
+          all='[
+            {"name":"dev","api_key_secret":"EMBEDDABLE_API_KEY_DEV","use_internal_dev_urls":"true"},
+            {"name":"US","api_key_secret":"EMBEDDABLE_API_KEY_US","region":"US"},
+            {"name":"EU","api_key_secret":"EMBEDDABLE_API_KEY_EU","region":"EU"}
+          ]'
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            selected=$(echo "$all" | jq -c '[.[] | select(.name == "${{ inputs.environment }}")]')
+          else
+            selected=$(echo "$all" | jq -c '.')
+          fi
+          echo "matrix={\"include\":$selected}" >> "$GITHUB_OUTPUT"
+
   build-and-push:
+    needs: plan
     name: Build & push (${{ matrix.name }})
-    if: github.event_name == 'push' || matrix.name == github.event.inputs.environment
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - name: dev
-            api_key_secret: EMBEDDABLE_API_KEY_DEV
-            use_internal_dev_urls: true
-          - name: US
-            api_key_secret: EMBEDDABLE_API_KEY_US
-            region: US
-          - name: EU
-            api_key_secret: EMBEDDABLE_API_KEY_EU
-            region: EU
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
 
