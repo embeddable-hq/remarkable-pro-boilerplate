@@ -20,55 +20,26 @@ on:
           - EU
 
 jobs:
-  plan:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.plan.outputs.matrix }}
-    steps:
-      - id: plan
-        run: |
-          all='[
-            {"name":"dev","api_key_secret":"EMBEDDABLE_API_KEY_DEV","use_internal_dev_urls":"true"},
-            {"name":"US","api_key_secret":"EMBEDDABLE_API_KEY_US","region":"US"},
-            {"name":"EU","api_key_secret":"EMBEDDABLE_API_KEY_EU","region":"EU"}
-          ]'
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            selected=$(echo "$all" | jq -c '[.[] | select(.name == "${{ inputs.environment }}")]')
-          else
-            selected=$(echo "$all" | jq -c '.')
-          fi
-          echo "matrix={\"include\":$selected}" >> "$GITHUB_OUTPUT"
+  dev:
+    if: github.event_name == 'push' || inputs.environment == 'dev'
+    uses: ./.github/workflows/push-to-workspace.yml
+    with:
+      config-patch: |
+        sed -i -E 's#^(\s*)region: "US",#\1// region: "US",#' embeddable.config.ts
+        sed -i -E 's#^(\s*)// (previewBaseUrl|pushBaseUrl|audienceUrl|authDomain|authClientId):#\1\2:#' embeddable.config.ts
+    secrets:
+      api-key: ${{ secrets.EMBEDDABLE_API_KEY_DEV }}
 
-  build-and-push:
-    needs: plan
-    name: Build & push (${{ matrix.name }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
-    steps:
-      - uses: actions/checkout@v4
+  US:
+    if: github.event_name == 'push' || inputs.environment == 'US'
+    uses: ./.github/workflows/push-to-workspace.yml
+    secrets:
+      api-key: ${{ secrets.EMBEDDABLE_API_KEY_US }}
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ vars.BUILD_NODE_VERSION }}
-
-      - name: install dependencies
-        run: npm ci
-
-      - name: Point config at ${{ matrix.name }}
-        if: matrix.region || matrix.use_internal_dev_urls
-        run: |
-          if [ -n "${{ matrix.region }}" ]; then
-            sed -i 's/region: "US",/region: "${{ matrix.region }}",/' embeddable.config.ts
-          fi
-          if [ "${{ matrix.use_internal_dev_urls }}" = "true" ]; then
-            sed -i -E 's#^(\s*)// (previewBaseUrl|pushBaseUrl|audienceUrl|authDomain|authClientId):#\1\2:#' embeddable.config.ts
-          fi
-
-      - name: Build
-        run: npm run embeddable:build
-
-      - name: Push to ${{ matrix.name }}
-        run: npm run embeddable:push -- --api-key "${{ secrets[matrix.api_key_secret] }}" --email "${{ vars.EMBEDDABLE_PUSH_EMAIL }}" --message "Auto-push from ${{ github.sha }}"
+  EU:
+    if: github.event_name == 'push' || inputs.environment == 'EU'
+    uses: ./.github/workflows/push-to-workspace.yml
+    with:
+      config-patch: sed -i 's/"US"/"EU"/' embeddable.config.ts
+    secrets:
+      api-key: ${{ secrets.EMBEDDABLE_API_KEY_EU }}
