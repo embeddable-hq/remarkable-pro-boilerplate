@@ -1,0 +1,65 @@
+name: Build & push demo bundle
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to push to
+        type: choice
+        required: true
+        default: dev
+        options:
+          - dev
+          - US
+          - EU
+
+jobs:
+  build-and-push:
+    name: Build & push (${{ matrix.name }})
+    if: github.event_name == 'push' || matrix.name == github.event.inputs.environment
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: dev
+            api_key_secret: EMBEDDABLE_API_KEY_DEV
+            use_internal_dev_urls: true
+          - name: US
+            api_key_secret: EMBEDDABLE_API_KEY_US
+            region: US
+          - name: EU
+            api_key_secret: EMBEDDABLE_API_KEY_EU
+            region: EU
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ vars.BUILD_NODE_VERSION }}
+
+      - name: install dependencies
+        run: npm ci
+
+      - name: Point config at ${{ matrix.name }}
+        if: matrix.region || matrix.use_internal_dev_urls
+        run: |
+          if [ -n "${{ matrix.region }}" ]; then
+            sed -i 's/region: "US",/region: "${{ matrix.region }}",/' embeddable.config.ts
+          fi
+          if [ "${{ matrix.use_internal_dev_urls }}" = "true" ]; then
+            sed -i -E 's#^(\s*)// (previewBaseUrl|pushBaseUrl|audienceUrl|authDomain|authClientId):#\1\2:#' embeddable.config.ts
+          fi
+
+      - name: Build
+        run: npm run embeddable:build
+
+      - name: Push to ${{ matrix.name }}
+        run: npm run embeddable:push -- --api-key "${{ secrets[matrix.api_key_secret] }}" --email "${{ vars.EMBEDDABLE_PUSH_EMAIL }}" --message "Auto-push from ${{ github.sha }}"
