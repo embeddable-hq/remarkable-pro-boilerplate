@@ -1,16 +1,24 @@
-import { defineTheme } from '@embeddable.com/core';
-import { Theme, DeepPartial } from '@embeddable.com/remarkable-pro';
+import { defineTheme, EmbeddableTheme } from '@embeddable.com/core';
+import { Theme } from '@embeddable.com/remarkable-pro';
 import { darkTheme } from './dark-theme';
+import { embeddableTranslations } from './embeddable-translations';
 
-const themeProvider = (clientContext: any, parentTheme: Theme): Theme => {
-  return defineTheme(
-    parentTheme,
-    clientContext.theme === 'dark'
+type AppTheme = Theme & EmbeddableTheme;
+
+const themeProvider = (clientContext: any, parentTheme: Theme): AppTheme => {
+  const language = clientContext.language ?? 'en';
+
+  return defineTheme<AppTheme>(parentTheme, {
+    ...(clientContext.theme === 'dark'
       ? darkTheme
       : {
           // learn more here: https://docs.embeddable.com/component-libraries/remarkable-pro/theming
-        },
-  ) as Theme;
+        }),
+    i18n: { language },
+    embeddableApp: {
+      i18n: { language, translations: embeddableTranslations },
+    },
+  });
 };
 
 export default themeProvider;

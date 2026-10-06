@@ -23,10 +23,10 @@
     "@embeddable.com/remarkable-pro": "^0.7.0"
   },
   "devDependencies": {
-    "@embeddable.com/core": "^2.13.8",
-    "@embeddable.com/react": "^2.13.8",
-    "@embeddable.com/sdk-core": "^4.9.0",
-    "@embeddable.com/sdk-react": "^4.3.14",
+    "@embeddable.com/core": "^2.15.0",
+    "@embeddable.com/react": "^2.13.10",
+    "@embeddable.com/sdk-core": "^4.9.2",
+    "@embeddable.com/sdk-react": "^4.3.16",
     "@playwright/cli": "^0.1.15",
     "@swc/core": "1.13.5",
     "@types/react": "^19.1.13",
