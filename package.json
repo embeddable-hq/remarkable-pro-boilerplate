@@ -20,7 +20,7 @@
     "playwright:setup": "playwright-cli install --skills"
   },
   "dependencies": {
-    "@embeddable.com/remarkable-pro": "^0.7.0"
+    "@embeddable.com/remarkable-pro": "^0.13.1"
   },
   "devDependencies": {
     "@embeddable.com/core": "^2.15.0",
@@ -36,6 +36,7 @@
   },
   "overrides": {
     "glob": "^13.0.0",
-    "axios": "1.13.6"
+    "axios": "^1.21.0",
+    "@happy-dom/global-registrator": "^21.0.4"
   }
 }
